@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 592c46cdc83f8854c8fcfd4a1d12c8e2, type: 3}
+  m_Name: Weapon_Buket
+  m_EditorClassIdentifier: 
+  weaponName: Buket
+  modelPrefab: {fileID: 840819371027446578, guid: 1ec7646a5a0a00440ba5853c885e2350, type: 3}
+  icon: {fileID: 21300000, guid: 0e19bf499acb4fd459b91da1071456d0, type: 3}
+  crackDropPrefab: {fileID: 0}
+  numberOfCracks: 3
+  mainWeaponCombo:
+  - name: BuketAttack01
+    animation: {fileID: 7400000, guid: 4495a43c986886c40af23d3c9ec0d337, type: 2}
+    durabilityCost: 2
+    actionType: 0
+    swingSFX: {fileID: 0}
+  subWeaponAttack: []
+  finisherAttack: []
+  maxDurability: 10
+  attackPower: 3
+  attackRange: 2
+  attackSpeed: 1
+  hitSFX: {fileID: 0}
+  hitVFXPrefab: {fileID: 0}
