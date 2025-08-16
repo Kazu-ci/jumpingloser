@@ -8,6 +8,7 @@ public class NinzinEnemy : Enemy
 {
     EStateMachine<NinzinEnemy> stateMachine;
     [SerializeField] GameObject efe;
+    [SerializeField] Collider attackCollider;
     private enum EnemyState
     {
         Idle,
@@ -38,6 +39,14 @@ public class NinzinEnemy : Enemy
     {
         stateMachine.OnUpdate();
     }
+    public override void OnAttackSet()
+    {
+        attackCollider.enabled = true;
+    }
+    public override void OnAttackEnd()
+    {
+        attackCollider.enabled = false;
+    }
     private class IdleState : EStateMachine<NinzinEnemy>.StateBase
     {
         float cDis;
@@ -49,7 +58,9 @@ public class NinzinEnemy : Enemy
         public override void OnUpdate()
         {
             float playerDis = Owner.GetDistance();
-            if (playerDis <= cDis) { StateMachine.ChangeState((int)EnemyState.Chase); }
+            var playerDir = Owner.playerPos.transform.position - Owner.transform.position;
+            var angle = Vector3.Angle(Owner.transform.forward, playerDir);
+            if (playerDis <= cDis && angle <= Owner.angle) { StateMachine.ChangeState((int)EnemyState.Chase); }
             else { StateMachine.ChangeState((int)EnemyState.Patrol); }
         }
         public override void OnEnd()
@@ -61,20 +72,38 @@ public class NinzinEnemy : Enemy
     {
         NavMeshAgent navMeshAgent;
         float cDis;
+        Vector3 endPos;
+        Vector3 startPos;
+        bool goingToEnd = true;
         public override void OnStart()
         {
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
+            if (startPos == Vector3.zero && endPos == Vector3.zero)
+            {
+                startPos = Owner.transform.position;
+                endPos = new Vector3(
+                    Random.Range(startPos.x - 5, startPos.x + 5),
+                    0,
+                    Random.Range(startPos.z - 5, startPos.z + 5)
+                );
+            }
             cDis = Owner.lookPlayerDir;
             Debug.Log("PatrolÇæÇÊ");
         }
         public override void OnUpdate()
         {
             float playerDis = Owner.GetDistance();
-            if (playerDis <= cDis) { StateMachine.ChangeState((int)EnemyState.Chase); }
-            Vector3 currentPos = Owner.transform.position;
-            Vector3 randomDestination = currentPos + new Vector3(Random.Range(-5f, 5f), 0, Random.Range(-5f, 5f));
-            navMeshAgent.SetDestination(randomDestination);
+            var playerDir = Owner.playerPos.transform.position - Owner.transform.position;
+            var angle = Vector3.Angle(Owner.transform.forward, playerDir);
+            if (playerDis <= cDis&&angle<=Owner.angle) { StateMachine.ChangeState((int)EnemyState.Chase); }
+            Vector3 targetPos = goingToEnd ? endPos : startPos;
+            navMeshAgent.SetDestination(targetPos);
+            if (!navMeshAgent.pathPending && navMeshAgent.remainingDistance <= 0.5f)
+            {
+                goingToEnd = !goingToEnd;
+                StateMachine.ChangeState((int)EnemyState.Idle);
+            }
         }
         public override void OnEnd()
         {
@@ -98,7 +127,6 @@ public class NinzinEnemy : Enemy
             {
                 StateMachine.ChangeState((int)EnemyState.Attack);
                 navMeshAgent.isStopped = true;
-                
             }
             
 
@@ -147,6 +175,32 @@ public class NinzinEnemy : Enemy
             Debug.Log("AttackInterbalÇÕèIÇÌÇË");
         }
     }
-    private class HitState : EStateMachine<NinzinEnemy>.StateBase { }
-    private class DeadState : EStateMachine<NinzinEnemy>.StateBase { }
+    private class HitState : EStateMachine<NinzinEnemy>.StateBase
+    {
+        public override void OnStart()
+        {
+            Debug.Log("HitÇæÇÊ");
+        }
+        public override void OnEnd()
+        {
+            Debug.Log("HitÇÕèIÇÌÇË");
+        }
+    }
+    private class DeadState : EStateMachine<NinzinEnemy>.StateBase
+    {
+        public override void OnStart()
+        {
+            Debug.Log("DeadÇæÇÊ");
+        }
+        public override void OnUpdate()
+        {
+            if (Owner.animationEnd()) {
+                Owner.OnDead(); 
+            }
+        }
+        public override void OnEnd()
+        {
+            Debug.Log("DeadÇÕèIÇÌÇË");
+        }
+    }
 }
