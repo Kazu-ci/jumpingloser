@@ -181,10 +181,6 @@ public class NinzinEnemy : Enemy
         {
             Debug.Log("Hit‚¾‚æ");
         }
-        public override void OnUpdate()
-        {
-            if (Owner.animationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle); }
-        }
         public override void OnEnd()
         {
             Debug.Log("Hit‚ÍI‚í‚è");
