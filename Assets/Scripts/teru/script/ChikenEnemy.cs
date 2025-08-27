@@ -109,6 +109,7 @@ public class ChikenEnemy : Enemy
         {
             Debug.Log("Patrol‚ÍI‚í‚Á‚½");
         }
+
     }
     private class ChaseState : EStateMachine<ChikenEnemy>.StateBase
     {

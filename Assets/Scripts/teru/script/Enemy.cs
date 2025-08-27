@@ -18,6 +18,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float attackDamage;
     [SerializeField] protected float attackRange;
     [SerializeField] protected float lookPlayerDir;
+    [SerializeField] protected float angle;
     [SerializeField] protected GameObject playerPos;
     protected float nowHp;
     protected float nowSpeed;
@@ -39,10 +40,8 @@ public class Enemy : MonoBehaviour
     {
         nowHp-=5;
     }
-    protected virtual void OnAttake()
-    {
-        
-    }
+    public virtual void OnAttackSet(){  }
+    public virtual void OnAttackEnd() { }
     public virtual int TakeDamage(DamageData dmg)
     {
         nowHp -= (int)dmg.damageAmount;
@@ -67,4 +66,9 @@ public class Enemy : MonoBehaviour
         Instantiate(weaponDrops[index], transform.position, Quaternion.identity);
 
     }
+    protected bool animationEnd()
+    {
+        return true;
+    }
+    
 }
