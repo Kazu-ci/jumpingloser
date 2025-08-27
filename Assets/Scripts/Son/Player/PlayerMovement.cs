@@ -202,6 +202,9 @@ public class PlayerMovement : MonoBehaviour
     public AnimationMixerPlayable mixer;
     private AnimationClipPlayable idlePlayable;
     private AnimationClipPlayable movePlayable;
+
+    [Header("サウンド")]    
+    public PlayerAudioManager audioManager;
     
 
     private CharacterController controller;  // CharacterControllerの参照

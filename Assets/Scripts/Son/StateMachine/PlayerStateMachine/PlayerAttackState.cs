@@ -52,7 +52,22 @@ public class PlayerAttackState : IState
 
         attackDuration = action.animation.length;
         elapsedTime = 0.0;
+
+        
         hasCheckedHit = false;
+        if (action.swingSFX != null)
+        {
+            switch (action.actionType)
+            {
+                case ATKActType.BasicCombo:
+                    _player.audioManager.PlayClipOnAudioPart(PlayerAudioPart.RHand, action.swingSFX);
+                    break;
+                case ATKActType.ComboEnd:
+                    _player.audioManager.PlayClipOnAudioPart(PlayerAudioPart.LHand, action.swingSFX);
+                    break;
+            }
+        }
+        
     }
 
     public void OnExit()

@@ -22,7 +22,7 @@ MonoBehaviour:
     animation: {fileID: 3094330708855449807, guid: 48fa84abc2c3a744e8561044d83beb93, type: 3}
     durabilityCost: 1
     actionType: 0
-    swingSFX: {fileID: 0}
+    swingSFX: {fileID: 8300000, guid: 9715264c622e55a41a4b7dcdd0b25d63, type: 3}
   subWeaponAttack: []
   finisherAttack: []
   maxDurability: 5
