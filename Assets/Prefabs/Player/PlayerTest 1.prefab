@@ -329,7 +329,7 @@ GameObject:
   - component: {fileID: 5379002012255520392}
   - component: {fileID: 3407381904622499522}
   m_Layer: 7
-  m_Name: PlayerTest
+  m_Name: PlayerTest 1
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -401,8 +401,8 @@ MonoBehaviour:
   tempUI: {fileID: 0}
   weaponBoxR: {fileID: 4752957709923660645}
   weaponBoxL: {fileID: 789955411114078054}
-  playerModel: {fileID: 3246960420214352888}
-  playerAnimator: {fileID: 8116745695113554744}
+  playerModel: {fileID: 0}
+  playerAnimator: {fileID: 0}
   idleClip: {fileID: 7400000, guid: cce17be549d0ed844b495457cb439221, type: 2}
   moveClip: {fileID: 7400000, guid: 44d560eda2840294c803aa97b0743e75, type: 2}
 --- !u!1001 &2436144609297700521
@@ -633,6 +633,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 565ed270d51acd94fbfac602fb2c8fb1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1239357729542670855, guid: 565ed270d51acd94fbfac602fb2c8fb1, type: 3}
       propertyPath: m_Layer
       value: 7
@@ -791,16 +795,6 @@ Transform:
 --- !u!4 &2757423292755308866 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 565ed270d51acd94fbfac602fb2c8fb1, type: 3}
-  m_PrefabInstance: {fileID: 2436144609297700521}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &3246960420214352888 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 565ed270d51acd94fbfac602fb2c8fb1, type: 3}
-  m_PrefabInstance: {fileID: 2436144609297700521}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &8116745695113554744 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 565ed270d51acd94fbfac602fb2c8fb1, type: 3}
   m_PrefabInstance: {fileID: 2436144609297700521}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &8585285590364521205 stripped

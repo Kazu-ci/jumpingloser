@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 18dc0cd2c080841dea60987a38ce93fa
+guid: c40be3174f62c4acf8c1216858c64956
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000
@@ -11,5 +11,5 @@ AssetOrigin:
   productId: 241832
   packageName: Dissolve & Disintegrate
   packageVersion: 1.0
-  assetPath: Assets/Settings/UniversalRenderPipelineGlobalSettings.asset
+  assetPath: Assets/Settings/URP-HighFidelity-Renderer.asset
   uploadId: 549631
