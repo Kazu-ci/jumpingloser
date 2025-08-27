@@ -1,14 +1,15 @@
 using System.Xml;
 using Unity.IO.LowLevel.Unsafe;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 using static UnityEngine.UI.GridLayoutGroup;
 
-public class NinzinEnemy : Enemy
+public class PanEnemy : Enemy
 {
-    EStateMachine<NinzinEnemy> stateMachine;
+    EStateMachine<PanEnemy> stateMachine;
     [SerializeField] GameObject efe;
-    [SerializeField] Collider attackCollider;
+    [SerializeField] GameObject attackObject;
     private enum EnemyState
     {
         Idle,
@@ -23,7 +24,7 @@ public class NinzinEnemy : Enemy
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         nowHp = maxHp;
-        stateMachine = new EStateMachine<NinzinEnemy>(this);
+        stateMachine = new EStateMachine<PanEnemy>(this);
         stateMachine.Add<IdleState>((int)EnemyState.Idle);
         stateMachine.Add<PatrolState>((int)EnemyState.Patrol);
         stateMachine.Add<ChaseState>((int)EnemyState.Chase);
@@ -41,13 +42,11 @@ public class NinzinEnemy : Enemy
     }
     public override void OnAttackSet()
     {
-        attackCollider.enabled = true;
+        var go=Instantiate(gameObject);
+        go.transform.position=transform.position+ new Vector3(0,4,0);
     }
-    public override void OnAttackEnd()
-    {
-        attackCollider.enabled = false;
-    }
-    private class IdleState : EStateMachine<NinzinEnemy>.StateBase
+    
+    private class IdleState : EStateMachine<PanEnemy>.StateBase
     {
         float cDis;
         public override void OnStart()
@@ -68,7 +67,7 @@ public class NinzinEnemy : Enemy
             Debug.Log("Idleは終わった");
         }
     }
-    private class PatrolState : EStateMachine<NinzinEnemy>.StateBase
+    private class PatrolState : EStateMachine<PanEnemy>.StateBase
     {
         NavMeshAgent navMeshAgent;
         float cDis;
@@ -96,7 +95,7 @@ public class NinzinEnemy : Enemy
             float playerDis = Owner.GetDistance();
             var playerDir = Owner.playerPos.transform.position - Owner.transform.position;
             var angle = Vector3.Angle(Owner.transform.forward, playerDir);
-            if (playerDis <= cDis&&angle<=Owner.angle) { StateMachine.ChangeState((int)EnemyState.Chase); }
+            if (playerDis <= cDis && angle <= Owner.angle) { StateMachine.ChangeState((int)EnemyState.Chase); }
             Vector3 targetPos = goingToEnd ? endPos : startPos;
             navMeshAgent.SetDestination(targetPos);
             if (!navMeshAgent.pathPending && navMeshAgent.remainingDistance <= 0.5f)
@@ -110,7 +109,7 @@ public class NinzinEnemy : Enemy
             Debug.Log("Patrolは終わった");
         }
     }
-    private class ChaseState : EStateMachine<NinzinEnemy>.StateBase
+    private class ChaseState : EStateMachine<PanEnemy>.StateBase
     {
         NavMeshAgent navMeshAgent;
         public override void OnStart()
@@ -128,7 +127,7 @@ public class NinzinEnemy : Enemy
                 StateMachine.ChangeState((int)EnemyState.Attack);
                 navMeshAgent.isStopped = true;
             }
-            
+
 
         }
         public override void OnEnd()
@@ -136,7 +135,7 @@ public class NinzinEnemy : Enemy
             Debug.Log("Chaseは終わった");
         }
     }
-    private class AttackState : EStateMachine<NinzinEnemy>.StateBase
+    private class AttackState : EStateMachine<PanEnemy>.StateBase
     {
         public override void OnStart()
         {
@@ -158,7 +157,7 @@ public class NinzinEnemy : Enemy
             Debug.Log("Attackは終わった");
         }
     }
-    private class AttackInterbalState : EStateMachine<NinzinEnemy>.StateBase
+    private class AttackInterbalState : EStateMachine<PanEnemy>.StateBase
     {
         float time;
         public override void OnStart()
@@ -175,7 +174,7 @@ public class NinzinEnemy : Enemy
             Debug.Log("AttackInterbalは終わり");
         }
     }
-    private class HitState : EStateMachine<NinzinEnemy>.StateBase
+    private class HitState : EStateMachine<PanEnemy>.StateBase
     {
         public override void OnStart()
         {
@@ -190,7 +189,7 @@ public class NinzinEnemy : Enemy
             Debug.Log("Hitは終わり");
         }
     }
-    private class DeadState : EStateMachine<NinzinEnemy>.StateBase
+    private class DeadState : EStateMachine<PanEnemy>.StateBase
     {
         public override void OnStart()
         {
@@ -198,8 +197,9 @@ public class NinzinEnemy : Enemy
         }
         public override void OnUpdate()
         {
-            if (Owner.animationEnd()) {
-                Owner.OnDead(); 
+            if (Owner.animationEnd())
+            {
+                Owner.OnDead();
             }
         }
         public override void OnEnd()
