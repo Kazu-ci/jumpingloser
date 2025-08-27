@@ -25,6 +25,8 @@ public class Enemy : MonoBehaviour
     protected float distance;
     protected NavMeshAgent navMeshAgent;
 
+    private bool _isDead; // 重複死亡防止フラグ
+
     void Start()
     {
     }
@@ -53,6 +55,8 @@ public class Enemy : MonoBehaviour
     }
     protected virtual void OnDead()
     {
+        if (_isDead) return;
+        _isDead = true;
         DropWeapon();
         Destroy(gameObject);
     }
@@ -62,6 +66,8 @@ public class Enemy : MonoBehaviour
     }
     void DropWeapon()
     {
+        // 配列が空ならドロップしない
+        if (weaponDrops == null || weaponDrops.Length == 0) return;
         int index = Random.Range(0, weaponDrops.Length); // ランダム選択
         Instantiate(weaponDrops[index], transform.position, Quaternion.identity);
 
