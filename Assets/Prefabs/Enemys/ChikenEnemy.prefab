@@ -125,15 +125,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponDrops: []
-  maxHp: 0
-  maxSpeed: 0
-  attackSpeed: 0
-  attackDamage: 0
-  attackRange: 0
-  lookPlayerDir: 0
+  maxHp: 10
+  maxSpeed: 1.8
+  attackSpeed: 2.5
+  attackDamage: 1
+  attackRange: 4
+  lookPlayerDir: 6
   playerPos: {fileID: 0}
-  angle: 0
-  efe: {fileID: 0}
+  angle: 120
+  efe: {fileID: 6986804393615109387, guid: 0d88c0975e7668b439a2844f09267bbb, type: 3}
   attackCollider: {fileID: 0}
 --- !u!195 &7382655295408416754
 NavMeshAgent:
@@ -145,7 +145,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5000001
-  m_Speed: 3.5
+  m_Speed: 1.8
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
