@@ -1011,9 +1011,21 @@ PrefabInstance:
       propertyPath: playerPos
       value: 
       objectReference: {fileID: 1866265456}
+    - target: {fileID: 3670577260336825001, guid: babe9a7fd70c3ab4ea76749024a6379e, type: 3}
+      propertyPath: weaponDrops.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3670577260336825001, guid: babe9a7fd70c3ab4ea76749024a6379e, type: 3}
+      propertyPath: 'weaponDrops.Array.data[0]'
+      value: 
+      objectReference: {fileID: 5345727438710721007, guid: ae5dedb4407b9b048a73953b02f6a30b, type: 3}
     - target: {fileID: 5752020580799897232, guid: babe9a7fd70c3ab4ea76749024a6379e, type: 3}
       propertyPath: m_Name
       value: ChikenEnemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 5752020580799897232, guid: babe9a7fd70c3ab4ea76749024a6379e, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
       objectReference: {fileID: 0}
     - target: {fileID: 7902025882041708481, guid: babe9a7fd70c3ab4ea76749024a6379e, type: 3}
       propertyPath: m_LocalScale.x
@@ -1119,6 +1131,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3407381904622499522, guid: e8d23b75fc39f7a4fae1139f40df7efc, type: 3}
+      propertyPath: tempUI
+      value: 
+      objectReference: {fileID: 1485661709}
     - target: {fileID: 7053117810255261270, guid: e8d23b75fc39f7a4fae1139f40df7efc, type: 3}
       propertyPath: m_Name
       value: PlayerTest

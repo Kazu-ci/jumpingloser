@@ -110,9 +110,17 @@ public class PlayerAttackState : IState
                 var enemy = hit.GetComponent<Enemy>();
                 if (enemy != null)
                 {
-                    enemy.TakeDamage(damageData);
+                    try
+                    {
+                        enemy.TakeDamage(damageData);
+                        hitEnemy = true;
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogError($"Enemy.TakeDamage threw: {e.Message}");
+                    }
                 }
-                hitEnemy = true;
+                
             }
         }
 

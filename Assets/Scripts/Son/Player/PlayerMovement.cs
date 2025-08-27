@@ -294,7 +294,7 @@ public class PlayerMovement : MonoBehaviour
             Debug.LogWarning("Weapon is broken: " + weapon.template.weaponName);
             weaponInventory.DestroyWeapon(weapon); // インベントリから武器を削除
             EquipWeapon(PlayerWeaponInventory.HandType.Main); // メイン武器を再装備
-            EquipWeapon(PlayerWeaponInventory.HandType.Sub); // サブ武器を再装備
+            //EquipWeapon(PlayerWeaponInventory.HandType.Sub); // サブ武器を再装備
         }
     }
     public void EquipWeapon(PlayerWeaponInventory.HandType hand)
