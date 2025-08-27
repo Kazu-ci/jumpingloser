@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 1cc252a922d27804599741d59170467e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 8400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2021/Scripts - Shaders/STAINED
+    GLASS/New Render Texture.renderTexture
+  uploadId: 750475

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 88c9f6562ac9c784085f3c32c989abcb
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2024/Setting/NEW TEMPORAL NEW SHADER
+    v1.5 Ethereal 2024.asset
+  uploadId: 750475

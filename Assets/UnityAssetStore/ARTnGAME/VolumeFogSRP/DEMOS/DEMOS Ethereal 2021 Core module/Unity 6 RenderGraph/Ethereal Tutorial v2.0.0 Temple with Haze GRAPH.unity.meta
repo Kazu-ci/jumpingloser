@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 09f16542536480e46a6a4de8b129fb53
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/DEMOS/DEMOS Ethereal 2021 Core module/Unity
+    6 RenderGraph/Ethereal Tutorial v2.0.0 Temple with Haze GRAPH.unity
+  uploadId: 750475

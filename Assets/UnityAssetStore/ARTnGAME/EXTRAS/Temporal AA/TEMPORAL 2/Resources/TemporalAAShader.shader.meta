@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e70e79769116bcb459267c30398727c4
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/EXTRAS/Temporal AA/TEMPORAL 2/Resources/TemporalAAShader.shader
+  uploadId: 750475

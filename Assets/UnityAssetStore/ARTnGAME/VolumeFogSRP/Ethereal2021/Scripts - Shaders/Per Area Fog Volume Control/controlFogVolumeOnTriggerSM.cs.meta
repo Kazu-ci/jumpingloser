@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: bed63c19f0d824b4187888aa82f5ecd3
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2021/Scripts - Shaders/Per Area
+    Fog Volume Control/controlFogVolumeOnTriggerSM.cs
+  uploadId: 750475

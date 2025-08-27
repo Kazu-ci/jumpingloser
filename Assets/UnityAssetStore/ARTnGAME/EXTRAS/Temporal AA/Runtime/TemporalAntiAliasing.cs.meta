@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: b6de40c3d47391a4e89d129fbf4136c1
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/EXTRAS/Temporal AA/Runtime/TemporalAntiAliasing.cs
+  uploadId: 750475

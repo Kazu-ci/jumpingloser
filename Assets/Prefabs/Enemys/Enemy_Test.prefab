@@ -133,7 +133,6 @@ MonoBehaviour:
   attackRange: 2
   lookPlayerDir: 10
   playerPos: {fileID: 0}
-  angle: 90
   efe: {fileID: 6986804393615109387, guid: 0d88c0975e7668b439a2844f09267bbb, type: 3}
 --- !u!195 &5921120466548304363
 NavMeshAgent:
