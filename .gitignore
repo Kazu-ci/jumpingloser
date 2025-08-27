@@ -88,4 +88,4 @@ crashlytics-build.properties
 # Ignore platform-specific Unity engine DLL files
 UnityPlayer.dll
 # Ignore Asset Store files
-# /Assets/UnityAssetStore/
+/Assets/UnityAssetStore/
