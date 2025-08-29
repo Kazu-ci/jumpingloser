@@ -103,7 +103,7 @@ public class PlayerAttackState : IState
     {
         float attackRange = 2.0f;
         float boxWidth = 3f;
-        float boxHeight = 3f;
+        float boxHeight = 4f;
 
         Vector3 center = _player.transform.position
                          + _player.transform.forward * (attackRange * 0.5f)
