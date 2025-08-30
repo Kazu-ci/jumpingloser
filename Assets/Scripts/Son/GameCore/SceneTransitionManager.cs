@@ -48,14 +48,14 @@ public class SceneTransitionManager : MonoBehaviour
     }
     private void OnEnable()
     {
-        SystemEvents.OnGameStateChange += HandleGameStateChnange;
+        SystemEvents.OnGameStateChange += HandleGameStateChange;
     }
     private void OnDisable()
     {
-        SystemEvents.OnGameStateChange -= HandleGameStateChnange;
+        SystemEvents.OnGameStateChange -= HandleGameStateChange;
     }
 
-    private void HandleGameStateChnange(GameState state)
+    private void HandleGameStateChange(GameState state)
     {
         dicSceneName.TryGetValue(state,out string name);
         if (name != null)

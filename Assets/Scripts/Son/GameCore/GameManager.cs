@@ -35,8 +35,7 @@ public class GameManager : MonoBehaviour
     private bool _sceneLoadedFlag = false;
 
     /// <summary>Œ»İ‚Ìó‘Ô‚ğŒöŠJ</summary>
-
-    public GameState CurrentState { get; private set; } = GameState.Startup;
+    public GameState CurrentState = GameState.Startup;
     private GameState getCurrentState => _stateMachine != null ? _stateMachine.CurrentState : GameState.Startup;
     public GameState preGameState = GameState.Startup;
     private void Awake()
@@ -64,6 +63,7 @@ public class GameManager : MonoBehaviour
         SystemEvents.OnGamePause -= SetScaleTimeTo0;
         SystemEvents.OnGameResume -= SetScaleTimeTo1;
         SystemEvents.OnGameExit -= HandleGameExit;
+        SystemEvents.OnSceneLoadComplete -= HandleSceneLoaded;
     }
     private void Update()
     {
@@ -96,10 +96,7 @@ public class GameManager : MonoBehaviour
         );
         _stateMachine.SetupState(
             GameState.Preloading,
-            onEnter: () => {
-                CurrentState = getCurrentState;
-                _sceneLoadedFlag = false;
-                SystemEvents.OnGameStateChange?.Invoke(GameState.Preloading); },
+            onEnter: null,
             onExit: () => { preGameState = GameState.Preloading; },
             enterRoutine: EnterPreloadingRoutine
             );
@@ -167,6 +164,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private IEnumerator EnterPreloadingRoutine()
     {
+        CurrentState = getCurrentState;
+        _sceneLoadedFlag = false;
+        SystemEvents.OnGameStateChange?.Invoke(GameState.Preloading);
 
         while (!_sceneLoadedFlag)
             yield return null;
