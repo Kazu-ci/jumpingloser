@@ -189,6 +189,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("武器関連")]
     public GameObject weaponBoxR;             // 右手武器の親オブジェクト
     public GameObject weaponBoxL;             // 左手武器の親オブジェクト
+    public WeaponInstance fist;               // 素手
     private PlayerWeaponInventory weaponInventory; // プレイヤーの武器インベントリ
 
     [Header("プレイヤーモデル")]
