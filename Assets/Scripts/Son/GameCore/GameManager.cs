@@ -1,4 +1,5 @@
 using UnityEngine;
+using static EventBus;
 using System.Collections;
 
 public enum GameState
@@ -30,8 +31,14 @@ public class GameManager : MonoBehaviour
     /// <summary>メイン状態機</summary>
     private StateMachine<GameState, GameTrigger> _stateMachine;
 
-    private Coroutine _loadingRoutine;
-    
+    private bool _isTimePaused = false;
+    private bool _sceneLoadedFlag = false;
+
+    /// <summary>現在の状態を公開</summary>
+
+    public GameState CurrentState { get; private set; } = GameState.Startup;
+    private GameState getCurrentState => _stateMachine != null ? _stateMachine.CurrentState : GameState.Startup;
+    public GameState preGameState = GameState.Startup;
     private void Awake()
     {
         // シングルトン保証
@@ -45,21 +52,93 @@ public class GameManager : MonoBehaviour
 
         InitializeStateMachine();
     }
+    private void OnEnable()
+    {
+        SystemEvents.OnGamePause += SetScaleTimeTo0;
+        SystemEvents.OnGameResume += SetScaleTimeTo1;
+        SystemEvents.OnGameExit += HandleGameExit;
+        SystemEvents.OnSceneLoadComplete += HandleSceneLoaded;
+    }
+    private void OnDisable()
+    {
+        SystemEvents.OnGamePause -= SetScaleTimeTo0;
+        SystemEvents.OnGameResume -= SetScaleTimeTo1;
+        SystemEvents.OnGameExit -= HandleGameExit;
+    }
+    private void Update()
+    {
+        _stateMachine.Update(Time.deltaTime);
+        if(Input.GetKeyDown(KeyCode.Tab)) {HandleGameExit();}
+    }
     private void InitializeStateMachine()
     {
-        _stateMachine = new StateMachine<GameState, GameTrigger>(this,GameState.Startup);
+        _stateMachine = new StateMachine<GameState, GameTrigger>(this, GameState.Startup);
 
-/*
-        _stateMachine.RegisterState(GameState.Playing, new GamePlayingState(this);
-        _stateMachine.RegisterState(GameState.Paused, new GamePausedState(this));
-        _stateMachine.RegisterState(GameState.Result, new GameResultState(this));
-        _stateMachine.RegisterState(GameState.Title, new GameTitleState(this));
-        _stateMachine.RegisterState(GameState.Preloading, new GamePreloadingState(this));
-        _stateMachine.RegisterState(GameState.Startup, new GameStartupState(this));*/
-        
-        
+        _stateMachine.SetupState(
+                    GameState.Startup,
+                    onEnter: () =>
+                    {
+                        CurrentState = getCurrentState;
+                        SystemEvents.OnGameStateChange?.Invoke(GameState.Startup);
+                    },
+                    onExit: () =>
+                    {
+                        preGameState = GameState.Startup;
+                    }
+                );
+
+        _stateMachine.SetupState(
+            GameState.Title,
+            onEnter: () => {
+                CurrentState = getCurrentState;
+                SystemEvents.OnGameStateChange?.Invoke(GameState.Title); },
+            onExit: () => { preGameState = GameState.Title; }
+        );
+        _stateMachine.SetupState(
+            GameState.Preloading,
+            onEnter: () => {
+                CurrentState = getCurrentState;
+                _sceneLoadedFlag = false;
+                SystemEvents.OnGameStateChange?.Invoke(GameState.Preloading); },
+            onExit: () => { preGameState = GameState.Preloading; },
+            enterRoutine: EnterPreloadingRoutine
+            );
+        _stateMachine.SetupState(
+            GameState.Playing,
+            onEnter: () => {
+                CurrentState = getCurrentState;
+                SystemEvents.OnGameStateChange?.Invoke(GameState.Playing); },
+            onExit: () => { preGameState = GameState.Playing; },
+            onUpdate: null
+            );
+        _stateMachine.SetupState(
+            GameState.Result,
+            onEnter: () => {
+                CurrentState = getCurrentState;
+                SystemEvents.OnGameStateChange?.Invoke(GameState.Result); },
+            onExit: () => { preGameState = GameState.Result; }
+        );
+
+        _stateMachine.SetupState(
+            GameState.Paused,
+            onEnter: () =>
+            {
+                CurrentState = getCurrentState;
+                SystemEvents.OnGameStateChange?.Invoke(GameState.Paused);
+                _isTimePaused = true;
+                SystemEvents.OnGamePause?.Invoke();
+            },
+            onExit: () =>
+            {
+                _isTimePaused = false;
+                SystemEvents.OnGameResume?.Invoke();
+            }
+        );
+
+
+
         // Startup
-        _stateMachine.AddTransition(GameState.Startup,GameState.Title,GameTrigger.FinishLoading);
+        _stateMachine.AddTransition(GameState.Startup, GameState.Title, GameTrigger.FinishLoading);
 
         // Title
         _stateMachine.AddTransition(GameState.Title, GameState.Preloading, GameTrigger.StartGame);
@@ -70,6 +149,7 @@ public class GameManager : MonoBehaviour
         // Playing
         _stateMachine.AddTransition(GameState.Playing, GameState.Paused, GameTrigger.Pause);
         _stateMachine.AddTransition(GameState.Playing, GameState.Result, GameTrigger.GameOver);
+        //_stateMachine.AddTransition(GameState.Playing, GameState.Preloading, GameTrigger.StartGame);
 
         // Paused
         _stateMachine.AddTransition(GameState.Paused, GameState.Playing, GameTrigger.Resume);
@@ -78,17 +158,32 @@ public class GameManager : MonoBehaviour
 
         // Result
         _stateMachine.AddTransition(GameState.Result, GameState.Title, GameTrigger.ToTitle);
+
+        _stateMachine.ExecuteTrigger(GameTrigger.FinishLoading);
     }
 
     /// <summary>
     /// アドレスアブル経由でゲームプレイ用アセットを読み込む。
     /// </summary>
-    /*private IEnumerator LoadGameplayAssets()
+    private IEnumerator EnterPreloadingRoutine()
     {
-        // アセットバンドル / Addressables の読み込み（詳細は実装者へ委任）
-        yield return AddressableLoader.LoadGameplayGroup();
+
+        while (!_sceneLoadedFlag)
+            yield return null;
+
+        // ロード完了
         _stateMachine.ExecuteTrigger(GameTrigger.FinishLoading);
-    }*/
+
+        // Exit 通知は状態遷移時に呼ばれるため、このコルーチンでは不要
+        yield break;
+    }
+    private void SetScaleTimeTo0() { Time.timeScale = 0; }
+    private void SetScaleTimeTo1() { Time.timeScale = 1; }
+    private void HandleGameExit(){ Application.Quit(); }
+    private void HandleSceneLoaded()
+    {
+        _sceneLoadedFlag = true;
+    }
 
     /// <summary>
     /// タイトル画面のスタートボタンから呼ばれる。
