@@ -73,9 +73,8 @@ public class SceneTransitionManager : MonoBehaviour
         yield return StartCoroutine(Fade(1));
         AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
         while (!op.isDone) yield return null;
-        yield return StartCoroutine(Fade(0f));
-
         SystemEvents.OnSceneLoadComplete?.Invoke();
+        yield return StartCoroutine(Fade(0f));
     }
 
     IEnumerator Fade(float targetAlpha)

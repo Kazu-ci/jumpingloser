@@ -10,6 +10,7 @@ public class PlayerAttackState : IState
     private double elapsedTime;
     private bool hasCheckedHit;
     private DamageData damageData = new DamageData(1); // 仮のダメージデータ
+    private WeaponInstance weapon;
 
     public PlayerAttackState(PlayerMovement player)
     {
@@ -21,12 +22,22 @@ public class PlayerAttackState : IState
         Debug.Log("Enter Attack");
 
         // メイン武器取得
-        WeaponInstance weapon = _player.GetMainWeapon();
-        if (weapon == null || weapon.template.mainWeaponCombo.Count == 0)
+        weapon = _player.GetMainWeapon();
+        /*if (weapon == null || weapon.template.mainWeaponCombo.Count == 0)
         {
             Debug.LogWarning("Weapon or attack clips not found.");
             _player.ToIdle();
             return;
+        }*/
+
+        if(weapon == null)
+        {
+            weapon = _player?.fist;
+            if(weapon == null)
+            {
+                Debug.LogWarning("No weapon equipped and no fist attack available.");
+                return;
+            }
         }
 
         // 最初のComboAction取得（ここでは単純に先頭とする）
@@ -141,11 +152,8 @@ public class PlayerAttackState : IState
 
         if (hitEnemy)
         {
-            WeaponInstance weapon = _player.GetMainWeapon();
             ComboAction action = weapon.template.mainWeaponCombo[0];
-            weapon.Use(action.durabilityCost);
-            _player.tempUI?.UpdateWeapon(weapon);
-            Debug.Log($"Weapon durability after attack: {weapon.currentDurability}");
+            _player.weaponInventory.ConsumeDurability(HandType.Main, action.durabilityCost);
         }
         else
         {

@@ -25,6 +25,9 @@ public class Enemy : MonoBehaviour
     protected float distance;
     protected NavMeshAgent navMeshAgent;
 
+
+    protected GameObject TestTarget;
+
     private bool _isDead; // èdï°éÄñSñhé~ÉtÉâÉO
 
     void Start()
@@ -36,8 +39,19 @@ public class Enemy : MonoBehaviour
     {
         
     }
-    
 
+    protected virtual void UpdateTestTarget()
+    {
+        TestTarget = EventBus.PlayerEvents.GetPlayerObject?.Invoke();
+        if (TestTarget != null)
+        {
+            Debug.Log($"Enemy: Target{TestTarget.name} found");
+        }
+        else
+        {
+            Debug.Log("Enemy: No target found");
+        }
+    }
     protected virtual void OnDamage()
     {
         nowHp-=5;

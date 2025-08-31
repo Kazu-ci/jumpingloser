@@ -19,13 +19,13 @@ MonoBehaviour:
   numberOfCracks: 3
   mainWeaponCombo:
   - name: BuketAttack01
-    animation: {fileID: 7400000, guid: 4495a43c986886c40af23d3c9ec0d337, type: 2}
+    animation: {fileID: 1308209756001952186, guid: ff27f3bd9ad21314d998ecc9a7d231e9, type: 3}
     durabilityCost: 2
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 7e44dddba4947d24cb6b4f09277aa273, type: 3}
   subWeaponAttack: []
   finisherAttack: []
-  maxDurability: 10
+  maxDurability: 6
   attackPower: 3
   attackRange: 2
   attackSpeed: 1

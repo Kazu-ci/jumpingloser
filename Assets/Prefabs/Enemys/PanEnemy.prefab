@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 5869151043793375396}
   m_Layer: 0
   m_Name: PanEnemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -151,7 +151,7 @@ MonoBehaviour:
   attackDamage: 0
   attackRange: 0
   lookPlayerDir: 0
-  playerPos: {fileID: 0}
   angle: 0
+  playerPos: {fileID: 0}
   efe: {fileID: 0}
   attackObject: {fileID: 2539303250037542776, guid: a70e649e46f4a1a4f873ec41bba63804, type: 3}

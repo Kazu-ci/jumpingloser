@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 7382655295408416754}
   m_Layer: 0
   m_Name: ChikenEnemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -131,8 +131,8 @@ MonoBehaviour:
   attackDamage: 1
   attackRange: 4
   lookPlayerDir: 6
-  playerPos: {fileID: 0}
   angle: 120
+  playerPos: {fileID: 0}
   efe: {fileID: 6986804393615109387, guid: 0d88c0975e7668b439a2844f09267bbb, type: 3}
   attackCollider: {fileID: 0}
 --- !u!195 &7382655295408416754
