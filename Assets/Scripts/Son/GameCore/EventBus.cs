@@ -1,5 +1,7 @@
+using NUnit.Framework;
 using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class EventBus
 {
@@ -13,6 +15,23 @@ public class EventBus
     }
     public static class UIEvents
     {
+        // 引数: (所持武器リスト, fromIndex, toIndex)
+        public static Action<List<WeaponInstance>, int, int> OnRightWeaponSwitch;
+        public static Action<List<WeaponInstance>, int, int> OnLeftWeaponSwitch;
 
+        // 武器破壊（インベントリから削除された直前の index と WeaponItem）
+        public static Action<int, WeaponItem> OnWeaponDestroyed;
+
+        // 耐久度変更（手 / 現在 index / 現在耐久 / 最大耐久）
+        public static Action<HandType, int, int, int> OnDurabilityChanged;
+
+        public static Action<int, int> OnPlayerHpChange;
+        public static Action OnShowGameOverUI;
+        public static Action OnShowStageClearUI;
+    }
+    public static class PlayerEvents
+    {
+        public static Func<GameObject> GetPlayerObject;
+        public static Action<PlayerAudioPart,AudioClip> PlayClipByPart;
     }
 }

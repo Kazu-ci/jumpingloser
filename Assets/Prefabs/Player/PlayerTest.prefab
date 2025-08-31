@@ -671,7 +671,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65f613bf73438424aae13a1e460bb208, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 7
+  moveSpeed: 8
   gravity: -9.81
   rotationSpeed: 720
   groundCheck: {fileID: 8799999724265508820}
@@ -679,9 +679,15 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 2081
-  tempUI: {fileID: 0}
   weaponBoxR: {fileID: 8157183961826809668}
   weaponBoxL: {fileID: 1917872819493027273}
+  fist:
+    template: {fileID: 11400000, guid: 20538c7066df7c04cbdbe2a9c6c18442, type: 2}
+    currentDurability: 999
+  weaponInventory:
+    weapons: []
+    mainIndex: -1
+    subIndex: -1
   playerModel: {fileID: 2316986977053185667}
   playerAnimator: {fileID: 9046723507332552259}
   idleClip: {fileID: -3418260577071603586, guid: ebbc670e7b746c844a204cb7cf13102b, type: 3}

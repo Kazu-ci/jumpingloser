@@ -51,6 +51,10 @@ public class GameManager : MonoBehaviour
 
         InitializeStateMachine();
     }
+    private void Start()
+    {
+        Application.targetFrameRate = 60;
+    }
     private void OnEnable()
     {
         SystemEvents.OnGamePause += SetScaleTimeTo0;

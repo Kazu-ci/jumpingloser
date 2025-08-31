@@ -3,145 +3,387 @@ using UnityEngine.Playables;
 using System.Collections.Generic;
 using UnityEngine.Animations;
 using UnityEngine.InputSystem;
+using UnityEngine.XR;
+using static EventBus;
+
+public enum PlayerState
+{
+    Idle,        // 待機
+    Move,        // 歩き
+    Hit,         // 被弾
+    Pickup,      // ピックアップ
+    SwitchWeapon,// 武器切り替え
+    Attack       // 攻撃
+}
+
+public enum PlayerTrigger
+{
+    MoveStart,
+    MoveStop,
+    GetHit,
+    StartPickup,
+    EndPickup,
+    SwitchWeapon,
+    AttackInput
+}
+
+[RequireComponent(typeof(CharacterController))]
+public class PlayerMovement : MonoBehaviour
+{
+    // ====== 入力系 ======
+    private InputSystem_Actions inputActions;
+    private Vector2 moveInput;
+    private Vector2 lookInput;
+
+    // ====== 移動設定 ======
+    [Header("移動設定")]
+    public float moveSpeed = 5f;           // 移動速度
+    public float gravity = -9.81f;         // 重力加速度
+    public float rotationSpeed = 360f;     // 回転速度（度/秒）
+
+    // ====== 接地判定 ======
+    [Header("接地判定")]
+    public Transform groundCheck;
+    public float groundDistance = 0.4f;
+    public LayerMask groundMask;
+
+    // ====== 武器・モデル ======
+    [Header("武器関連")]
+    public GameObject weaponBoxR;          // 右手の武器親
+    public GameObject weaponBoxL;          // 左手の武器親
+    public WeaponInstance fist;            // 素手
+
+    // 武器インベントリ
+    public PlayerWeaponInventory weaponInventory = new PlayerWeaponInventory();
+
+    [Header("プレイヤーモデル")]
+    public GameObject playerModel;
+    public Animator playerAnimator;
+
+    // ====== アニメーション（PlayableGraph）======
+    [Header("アニメーションクリップ")]
+    public AnimationClip idleClip;
+    public AnimationClip moveClip;
+    public PlayableGraph playableGraph;
+    public AnimationMixerPlayable mixer;
+    private AnimationClipPlayable idlePlayable;
+    private AnimationClipPlayable movePlayable;
+
+    [Header("サウンド")]
+    public PlayerAudioManager audioManager;
+
+    // ====== 内部状態 ======
+    private CharacterController controller;
+    private Vector3 velocity;
+    private bool isGrounded;
+    private Transform mainCam;
+    private StateMachine<PlayerState, PlayerTrigger> _fsm;
+
+    // ====== ライフサイクル ======
+    private void Awake()
+    {
+        controller = GetComponent<CharacterController>();
+        PlayerEvents.GetPlayerObject = () => this.gameObject; // プレイヤーオブジェクトの提供
+    }
+
+    private void OnEnable()
+    {
+        // --- 入力購読 ---
+        inputActions = new InputSystem_Actions();
+        inputActions.Enable();
+
+        inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        inputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+
+        inputActions.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
+        inputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
+
+        inputActions.Player.Attack.performed += ctx => OnAttackInput();
+        inputActions.Player.SwitchWeapon.performed += ctx => OnSwitchWeaponInput();
+        inputActions.Player.SwitchWeapon2.performed += ctx => OnSwitchWeaponInput2();
+
+        // --- UIEvents の購読：装備切替/破壊/耐久 ---
+        UIEvents.OnRightWeaponSwitch += HandleRightWeaponSwitch;   // (weapons, from, to)
+        UIEvents.OnLeftWeaponSwitch += HandleLeftWeaponSwitch;    // (weapons, from, to)
+        UIEvents.OnWeaponDestroyed += HandleWeaponDestroyed;     // (removedIndex, item)
+        UIEvents.OnDurabilityChanged += HandleDurabilityChanged;   // (hand, index, cur, max)
+
+       
+    }
+
+    private void OnDisable()
+    {
+        // 入力解除
+        inputActions?.Disable();
+
+        // 購読解除
+        UIEvents.OnRightWeaponSwitch -= HandleRightWeaponSwitch;
+        UIEvents.OnLeftWeaponSwitch -= HandleLeftWeaponSwitch;
+        UIEvents.OnWeaponDestroyed -= HandleWeaponDestroyed;
+        UIEvents.OnDurabilityChanged -= HandleDurabilityChanged;
+
+        if (PlayerEvents.GetPlayerObject != null)
+        {
+            PlayerEvents.GetPlayerObject = null;
+        }
+    }
+
+    private void Start()
+    {
+        mainCam = Camera.main.transform;
+
+        // --- PlayableGraph 初期化 ---
+        playableGraph = PlayableGraph.Create("PlayerGraph");
+        idleClip.wrapMode = WrapMode.Loop;
+        moveClip.wrapMode = WrapMode.Loop;
+
+        idlePlayable = AnimationClipPlayable.Create(playableGraph, idleClip);
+        movePlayable = AnimationClipPlayable.Create(playableGraph, moveClip);
+
+        mixer = AnimationMixerPlayable.Create(playableGraph, 2);
+        mixer.ConnectInput(0, idlePlayable, 0, 1f);
+        mixer.ConnectInput(1, movePlayable, 0, 0f);
+
+        var playableOutput = AnimationPlayableOutput.Create(playableGraph, "Animation", playerAnimator);
+        playableOutput.SetSourcePlayable(mixer);
+        playableGraph.Play();
+
+        // --- FSM 初期化 ---
+        SetupStateMachine();
+
+        // --- 初期装備（必要なら右手→左手の順で）---
+        // ここでは何も装備していない前提。初期武器を持たせたい場合は AddWeapon 後に TrySwitchRight() 等を呼ぶ。
+        // 例:
+        // weaponInventory.AddWeapon(startWeaponItem);
+        // weaponInventory.TrySwitchRight();
+    }
+
+    private void OnDestroy()
+    {
+        if (playableGraph.IsValid())
+            playableGraph.Destroy();
+    }
+
+    private void Update()
+    {
+        // 接地
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        if (isGrounded && velocity.y < 0f) velocity.y = -2f;
+
+        // ステート更新
+        _fsm.Update(Time.deltaTime);
+
+        // 重力
+        velocity.y += gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
+    }
+
+    // ====== FSM 構築 ======
+    private void SetupStateMachine()
+    {
+        _fsm = new StateMachine<PlayerState, PlayerTrigger>(this, PlayerState.Idle);
+
+        _fsm.RegisterState(PlayerState.Idle, new PlayerIdleState(this));
+        _fsm.RegisterState(PlayerState.Move, new PlayerMoveState(this));
+        _fsm.RegisterState(PlayerState.Attack, new PlayerAttackState(this));
+
+        _fsm.AddTransition(PlayerState.Idle, PlayerState.Move, PlayerTrigger.MoveStart);
+        _fsm.AddTransition(PlayerState.Move, PlayerState.Idle, PlayerTrigger.MoveStop);
+
+        _fsm.AddTransition(PlayerState.Idle, PlayerState.Attack, PlayerTrigger.AttackInput);
+        _fsm.AddTransition(PlayerState.Move, PlayerState.Attack, PlayerTrigger.AttackInput);
+        _fsm.AddTransition(PlayerState.Attack, PlayerState.Idle, PlayerTrigger.MoveStop);
+        _fsm.AddTransition(PlayerState.Attack, PlayerState.Move, PlayerTrigger.MoveStart);
+    }
+
+    // ====== 入力ハンドラ ======
+    private void OnAttackInput()
+    {
+        var weapon = weaponInventory.GetWeapon(HandType.Main);
+        _fsm.ExecuteTrigger(PlayerTrigger.AttackInput);
+
+    }
+
+    private void OnSwitchWeaponInput()
+    {
+        // 右手優先の切替。攻撃中は不可
+        if (_fsm.CurrentState == PlayerState.Attack)
+        {
+            Debug.Log("Cannot switch weapon while attacking!");
+            return;
+        }
+        // --- 直接インベントリに命じる。装備・モデル同期はイベントで反映 ---
+        if (!weaponInventory.TrySwitchRight())
+        {
+            Debug.Log("No usable weapon for right hand.");
+        }
+    }
+    private void OnSwitchWeaponInput2()
+    {
+        // 攻撃中は不可
+        if (_fsm.CurrentState == PlayerState.Attack)
+        {
+            Debug.Log("Cannot switch weapon while attacking!");
+            return;
+        }
+        // --- 直接インベントリに命じる。装備・モデル同期はイベントで反映 ---
+        if (!weaponInventory.TrySwitchLeft())
+        {
+            Debug.Log("No usable weapon for left hand.");
+        }
+    }
+
+    // ====== モデル同期（イベントドリブン） ======
+
+    // 右手の切替イベント
+    private void HandleRightWeaponSwitch(List<WeaponInstance> list, int from, int to)
+    {
+        // ・from->to の変化を受けて、右手の武器モデルを入れ替える
+        // ・to == -1 の場合は右手を空にする
+        ApplyHandModel(HandType.Main, list, to);
+    }
+
+    // 左手の切替イベント
+    private void HandleLeftWeaponSwitch(List<WeaponInstance> list, int from, int to)
+    {
+        ApplyHandModel(HandType.Sub, list, to);
+    }
+
+    // 破壊イベント（UI向け）。モデルは切替イベントで反映されるため、ここはログ程度でOK
+    private void HandleWeaponDestroyed(int removedIndex, WeaponItem item)
+    {
+        // ・removedIndex は削除前の番号
+        // ・手元に持っている場合は、RemoveAtAndRecover 内で SetHandIndex が走り、
+        //   結果として OnRightWeaponSwitch / OnLeftWeaponSwitch が飛んでくるので、
+        //   見た目の同期はそちらで実施される
+        Debug.Log($"Weapon destroyed @index={removedIndex} ({item?.weaponName})");
+    }
+
+    // 耐久イベント（必要に応じて UI に転送、ここではログ表示）
+    private void HandleDurabilityChanged(HandType hand, int index, int current, int max)
+    {
+        // TODO: HP/耐久UIがあればここで反映
+        // Debug.Log($"[{hand}] durability: {current}/{max} (list index={index})");
+    }
+
+    // 指定手の武器モデルを更新
+    private void ApplyHandModel(HandType hand, List<WeaponInstance> list, int toIndex)
+    {
+        // ・現行の子を全削除し、toIndex が有効なら新しいプレハブをインスタンス化する
+        GameObject box = (hand == HandType.Main) ? weaponBoxR : weaponBoxL;
+
+        // 既存子オブジェクト破棄
+        for (int i = box.transform.childCount - 1; i >= 0; --i)
+        {
+            Transform c = box.transform.GetChild(i);
+            if (c) Destroy(c.gameObject);
+        }
+
+        if (toIndex < 0 || toIndex >= list.Count) return;
+        var inst = list[toIndex];
+        if (inst == null || inst.template == null || inst.template.modelPrefab == null) return;
+
+        // 新規インスタンス化
+        GameObject newWeapon = Instantiate(inst.template.modelPrefab, box.transform);
+        newWeapon.transform.localPosition = Vector3.zero;
+        newWeapon.transform.localRotation = Quaternion.identity;
+        newWeapon.transform.localScale = Vector3.one;
+    }
+
+    // ====== ユーティリティ ======
+    public void HandleMovement(float deltaTime)
+    {
+        float inputX = moveInput.x;
+        float inputZ = moveInput.y;
+
+        Vector3 camForward = mainCam.forward; camForward.y = 0f; camForward.Normalize();
+        Vector3 camRight = mainCam.right; camRight.y = 0f; camRight.Normalize();
+
+        Vector3 moveDir = camRight * inputX + camForward * inputZ;
+        moveDir = (moveDir.sqrMagnitude > 1e-4f) ? moveDir.normalized : Vector3.zero;
+
+        if (moveDir.sqrMagnitude > 0f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * deltaTime);
+            controller.Move(moveDir * moveSpeed * deltaTime);
+        }
+    }
+
+    public void CheckMoveInput()
+    {
+        // 旧 Input 系を残している場合の互換チェック（必要なら削除）
+        float inputX = Input.GetAxisRaw("Horizontal");
+        float inputZ = Input.GetAxisRaw("Vertical");
+        if (Mathf.Abs(inputX) > 0.1f || Mathf.Abs(inputZ) > 0.1f)
+        {
+            _fsm.ExecuteTrigger(PlayerTrigger.MoveStart);
+        }
+    }
+
+    public void CheckMoveStop()
+    {
+        float inputX = Input.GetAxisRaw("Horizontal");
+        float inputZ = Input.GetAxisRaw("Vertical");
+        if (Mathf.Abs(inputX) < 0.1f && Mathf.Abs(inputZ) < 0.1f)
+        {
+            _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
+        }
+    }
+
+    public void EnsureMixerInputCount(int requiredCount)
+    {
+        if (mixer.GetInputCount() < requiredCount)
+        {
+            mixer.SetInputCount(requiredCount);
+        }
+    }
+
+    public WeaponInstance GetMainWeapon()
+    {
+        return weaponInventory.GetWeapon(HandType.Main);
+    }
+
+    public void ToIdle()
+    {
+        _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
+    }
+
+    // === 物拾い（現状は単純に所持へ追加）===
+    public void PickUpWeapon(WeaponItem weapon)
+    {
+        if (weapon == null) return;
+        weaponInventory.AddWeapon(weapon);
+        Debug.Log("PickUp: " + weapon.weaponName);
+
+        // 例：初回装備の自動化（右手が空なら右手に装備 etc）
+        if (weaponInventory.GetWeapon(HandType.Main) == null)
+        {
+            weaponInventory.TrySwitchRight(); // イベントで右手モデルが生成される
+        }
+        else if (weaponInventory.GetWeapon(HandType.Sub) == null)
+        {
+            weaponInventory.TrySwitchLeft(); // イベントで左手モデルが生成される
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+/*using UnityEngine;
+using UnityEngine.Playables;
+using System.Collections.Generic;
+using UnityEngine.Animations;
+//using static EventBus;
+using UnityEngine.InputSystem;
 using Unity.VisualScripting;
-
-[System.Serializable]
-public class WeaponInstance
-{
-    public WeaponItem template;
-    public int currentDurability;
-
-    public WeaponInstance(WeaponItem weapon)
-    {
-        template = weapon;
-        currentDurability = weapon.maxDurability;
-    }
-
-    public void Use(float cost)
-    {
-        currentDurability -= Mathf.CeilToInt(cost);
-        currentDurability = Mathf.Max(0, currentDurability);
-    }
-
-    public bool IsBroken => currentDurability <= 0;
-}
-[System.Serializable]
-public class PlayerWeaponInventory
-{
-    public List<WeaponInstance> weapons = new List<WeaponInstance>();
-    public int mainIndex = -1; // 現在のメイン武器インデックス
-    public int subIndex = -1; // 現在のサブ武器インデックス
-    public enum HandType
-    {
-        Main, // メイン武器
-        Sub   // サブ武器
-    }
-    public void AddWeapon(WeaponItem weapon)
-    {
-        if (weapon != null)
-        {
-            weapons.Add(new WeaponInstance(weapon));
-        }
-    }
-    public void RemoveWeapon(int index)
-    {
-        if (index >= 0 && index < weapons.Count)
-        {
-            weapons.RemoveAt(index);
-        }
-    }
-    public WeaponInstance GetWeapon(HandType handType)
-    {
-        if (handType == HandType.Main && mainIndex >= 0 && mainIndex < weapons.Count)
-        {
-            return weapons[mainIndex];
-        }
-        else if (handType == HandType.Sub && subIndex >= 0 && subIndex < weapons.Count)
-        {
-            return weapons[subIndex];
-        }
-        return null; // 武器がない場合
-    }
-
-    public int SwitchWeapon(HandType handType)
-    {
-        if (weapons.Count == 0)
-        {
-            Debug.LogWarning("No weapons available to switch.");
-            return 0; // 武器がない場合は何もしない
-        }
-        if (handType == HandType.Main)
-        {
-            mainIndex = (mainIndex + 1) % weapons.Count; // メイン武器を切り替え
-            return 1;
-        }
-        else if (handType == HandType.Sub)
-        {
-            subIndex = (subIndex + 1) % weapons.Count; // サブ武器を切り替え
-            return -1;
-        }
-        else
-        {
-            Debug.LogWarning("Invalid hand type specified for weapon switch.");
-            return 0; // 無効なハンドタイプの場合は何もしない
-        }
-    }
-    public void UnequipWeapon(HandType handType)
-    {
-        if (handType == HandType.Main)
-        {
-            mainIndex = -1; // メイン武器を外す
-        }
-        else if (handType == HandType.Sub)
-        {
-            subIndex = -1; // サブ武器を外す
-        }
-    }
-    public void DestroyWeapon(WeaponInstance target)
-    {
-        int index = GetIndex(target);
-        if (index >= 0)
-        {
-            WeaponInstance main = null;
-            WeaponInstance sub = null;
-            if (mainIndex != -1 && mainIndex < weapons.Count) main = weapons[mainIndex];
-            if (subIndex != -1 && subIndex < weapons.Count) sub = weapons[subIndex];
-            // weapons から削除
-            weapons.RemoveAt(index);
-
-            if (weapons.Count == 0)
-            {
-                mainIndex = -1; // 全ての武器が削除された場合、メイン武器のインデックスをリセット
-                subIndex = -1; // サブ武器のインデックスもリセット
-                return;
-            }
-
-            if (mainIndex == index)
-            {
-                mainIndex %= weapons.Count; // メイン武器のインデックスをリセット
-            }
-            else if (main != null)
-            {
-                mainIndex = GetIndex(main); // メイン武器のインデックスを再設定
-            }
-
-            if (subIndex == index)
-            {
-                subIndex %= weapons.Count;
-            }
-            else if (sub != null)
-            {
-                subIndex = GetIndex(sub); // サブ武器のインデックスを再設定
-            }
-        }
-    }
-    private int GetIndex(WeaponInstance weapon)
-    {
-        return weapons.IndexOf(weapon);
-    }
-}
-
-
+using UnityEngine.XR;
 
 
 public enum PlayerState
@@ -184,13 +426,12 @@ public class PlayerMovement : MonoBehaviour
     public Transform groundCheck;            // 地面判定のためのTransform
     public float groundDistance = 0.4f;      // 接地チェックの半径
     public LayerMask groundMask;             // 地面として判定されるレイヤー
-    public TempUI tempUI;
 
     [Header("武器関連")]
     public GameObject weaponBoxR;             // 右手武器の親オブジェクト
     public GameObject weaponBoxL;             // 左手武器の親オブジェクト
     public WeaponInstance fist;               // 素手
-    private PlayerWeaponInventory weaponInventory; // プレイヤーの武器インベントリ
+    private PlayerWeaponInventory weaponInventory = new PlayerWeaponInventory(); // プレイヤーの武器インベントリ
 
     [Header("プレイヤーモデル")]
     public GameObject playerModel;           // プレイヤーモデルのGameObject
@@ -218,12 +459,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
-        tempUI = FindObjectsByType<TempUI>(FindObjectsSortMode.None)[0]; // シーン内の最初のTempUIを取得
+        
 
         controller = GetComponent<CharacterController>();
         mainCam = Camera.main.transform; // メインカメラを取得
-        weaponInventory = new PlayerWeaponInventory(); // 武器インベントリの初期化
-        SwitchWeapon(PlayerWeaponInventory.HandType.Main); // 初期武器を設定
+        SwitchWeapon(HandType.Main); // 初期武器を設定
 
 
         inputActions = new InputSystem_Actions();
@@ -282,11 +522,12 @@ public class PlayerMovement : MonoBehaviour
         inputActions?.Disable();
     }
 
-    void SwitchWeapon(PlayerWeaponInventory.HandType hand)
+    void SwitchWeapon(HandType hand)
     {
-        if (weaponInventory.SwitchWeapon(hand) == 0)
+        int from = weaponInventory.mainIndex;
+        if (weaponInventory.SwitchRightWeapon() == -1)
         {
-            tempUI?.UpdateWeapon(null); // 武器がない場合はUIを更新
+            //UIEvents.OnRightWeaponSwitch?.Invoke(weaponInventory.weapons,-1,-1); // 武器がない場合はUIを更新
             return; // 失敗の場合は何もしない
         }
         EquipWeapon(hand); // 武器を装備
@@ -297,32 +538,31 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.LogWarning("Weapon is broken: " + weapon.template.weaponName);
             weaponInventory.DestroyWeapon(weapon); // インベントリから武器を削除
-            EquipWeapon(PlayerWeaponInventory.HandType.Main); // メイン武器を再装備
-            //EquipWeapon(PlayerWeaponInventory.HandType.Sub); // サブ武器を再装備
+            EquipWeapon(HandType.Main); // メイン武器を再装備
         }
     }
-    public void EquipWeapon(PlayerWeaponInventory.HandType hand)
+    public void EquipWeapon(HandType hand)
     {
-        WeaponInstance weapon = weaponInventory.GetWeapon(hand);
-        if (weapon == null)
+        GameObject weaponBox = hand == HandType.Main ? weaponBoxR : weaponBoxL;
+        while (weaponBox.transform.childCount > 0)
         {
-            Debug.LogWarning("No weapon equipped for hand: " + hand);
-            tempUI?.UpdateWeapon(null); // 武器がない場合はUIを更新
-            return; // 武器がない場合は何もしない
-        }
-        if (weaponBoxR.transform.childCount > 0)
-        {
-            Transform oldWeapon = weaponBoxR.transform.GetChild(0);
+            Transform oldWeapon = weaponBox.transform.GetChild(0);
             if (oldWeapon != null)
             {
                 Destroy(oldWeapon.gameObject); // 古い武器を削除
             }
         }
-        GameObject weaponBox = hand == PlayerWeaponInventory.HandType.Main ? weaponBoxR : weaponBoxL;
+        WeaponInstance weapon = weaponInventory.GetWeapon(hand);
+        if (weapon == null)
+        {
+            Debug.Log("No weapon equipped for hand: " + hand);
+            return; // 武器がない場合は何もしない
+        }
+        
         GameObject newWeapon = Instantiate(weapon.template.modelPrefab, weaponBox.transform);
         newWeapon.transform.localPosition = Vector3.zero; // 武器の位置をリセット
         newWeapon.transform.localRotation = Quaternion.identity; // 武器の回転をリセット
-        tempUI?.UpdateWeapon(weapon);
+        //tempUI?.UpdateWeapon(weapon);
     }
     public void PickUpWeapon(WeaponItem weapon)
     {
@@ -396,7 +636,7 @@ public class PlayerMovement : MonoBehaviour
     }
     public WeaponInstance GetMainWeapon()
     {
-        return weaponInventory.GetWeapon(PlayerWeaponInventory.HandType.Main);
+        return weaponInventory.GetWeapon(HandType.Main);
     }
     public void ToIdle()
     {
@@ -412,7 +652,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnAttackInput()
     {
-        WeaponInstance weapon = weaponInventory.GetWeapon(PlayerWeaponInventory.HandType.Main);
+        WeaponInstance weapon = weaponInventory.GetWeapon(HandType.Main);
         if (weapon != null)
         {
             Debug.Log("Attacking with: " + weapon.template.weaponName + "Durability now: " + weapon.currentDurability);
@@ -429,7 +669,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_fsm.CurrentState != PlayerState.Attack)
         {
-            SwitchWeapon(PlayerWeaponInventory.HandType.Main);
+            SwitchWeapon(HandType.Main);
         }
         else
         {
@@ -437,3 +677,4 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 }
+*/
