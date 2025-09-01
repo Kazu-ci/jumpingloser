@@ -43,6 +43,11 @@ public class ThirdPersonCamera : MonoBehaviour
         inputActions.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         inputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
     }
+    private void OnDisable()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
 
     void LateUpdate()
     {
