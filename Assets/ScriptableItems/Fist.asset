@@ -26,7 +26,7 @@ MonoBehaviour:
   subWeaponAttack: []
   finisherAttack: []
   maxDurability: 100
-  attackPower: 3
+  attackPower: 1
   attackRange: 2
   attackSpeed: 1
   hitSFX: {fileID: 0}
