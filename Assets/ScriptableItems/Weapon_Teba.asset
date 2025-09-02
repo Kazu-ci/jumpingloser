@@ -18,11 +18,56 @@ MonoBehaviour:
   crackDropPrefab: {fileID: 0}
   numberOfCracks: 3
   mainWeaponCombo:
-  - name: Attack
+  - name: Attack1
     animation: {fileID: 5536427086270334551, guid: 44241c4aa8e50374e88d93d30a5c96a3, type: 3}
     durabilityCost: 1
     actionType: 0
+    swingSFX: {fileID: 8300000, guid: 2e8b8a5fe9ce2904595a059107b24a44, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
+  - name: Attack2
+    animation: {fileID: 8641655017184524851, guid: d0915abee10ae0d4593c13f3105a2dca, type: 3}
+    durabilityCost: 1
+    actionType: 0
+    swingSFX: {fileID: 8300000, guid: ad1fd69220efc9c4f91fd32c87a5be2d, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
+  - name: Attack3
+    animation: {fileID: 2364173616317398974, guid: 935b9ac754260ce45a0ba037c214df64, type: 3}
+    durabilityCost: 1
+    actionType: 0
+    swingSFX: {fileID: 8300000, guid: 22e459df665cf9d42bf9fb40d139d5e8, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
+  - name: Attack4
+    animation: {fileID: 3385201959052277824, guid: f20611588ca5e2f458acd59d29786cd8, type: 3}
+    durabilityCost: 1
+    actionType: 0
+    swingSFX: {fileID: 8300000, guid: b6f35e12764d7f64188fe475be275233, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
+  - name: Attack5
+    animation: {fileID: 1216864209599048995, guid: 184c63456d7f13744aedc79e2b73ca54, type: 3}
+    durabilityCost: 1
+    actionType: 0
     swingSFX: {fileID: 8300000, guid: 9715264c622e55a41a4b7dcdd0b25d63, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
   subWeaponAttack: []
   finisherAttack: []
   maxDurability: 5

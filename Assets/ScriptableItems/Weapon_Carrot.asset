@@ -22,7 +22,52 @@ MonoBehaviour:
     animation: {fileID: 6558176424447691871, guid: d51b57030ad431544ba4d22252f70716, type: 3}
     durabilityCost: 2
     actionType: 0
+    swingSFX: {fileID: 8300000, guid: 1215e8eab5a07fb46b37ea34440668a7, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
+  - name: Attack2
+    animation: {fileID: 3878471701507660605, guid: 8c8b08780b136fd46b62591e3a99a076, type: 3}
+    durabilityCost: 2
+    actionType: 0
+    swingSFX: {fileID: 8300000, guid: 65e17687c247246489282d63a5ef1d2f, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
+  - name: Attack3
+    animation: {fileID: 8672263195707164059, guid: dc3608c8e5ee67b43beb18b0f490cd1f, type: 3}
+    durabilityCost: 2
+    actionType: 0
     swingSFX: {fileID: 8300000, guid: 9cf6710d9ca8a3842ab66d59742e60ec, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
+  - name: Attack4
+    animation: {fileID: 7969338187987883900, guid: 01cb076390f1e7543af18bcea9ecb93c, type: 3}
+    durabilityCost: 2
+    actionType: 0
+    swingSFX: {fileID: 8300000, guid: f362c9918c3204841b15c740d6d698e6, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
+  - name: Attack5
+    animation: {fileID: -904864237794195412, guid: cff2332bf6ef4cf4789f5b198a8b8507, type: 3}
+    durabilityCost: 2
+    actionType: 0
+    swingSFX: {fileID: 8300000, guid: 18a92cf2f0abd7d429e293a05c006c3d, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    hitCheckTime: 0.2
+    endNormalizedTime: 0.8
+    blendToNext: 0.12
   subWeaponAttack: []
   finisherAttack: []
   maxDurability: 10
