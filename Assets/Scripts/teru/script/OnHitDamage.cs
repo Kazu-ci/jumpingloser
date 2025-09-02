@@ -13,7 +13,8 @@ public class OnHitDamage : MonoBehaviour
         var player = other.GetComponent<PlayerMovement>();
         if(player != null)
         {
-            player.TakeDamage(enemy.GetDamage());
+            DamageData damageData = new DamageData(enemy.GetDamage());
+            player.TakeDamage(damageData);
         }
     }
 }
