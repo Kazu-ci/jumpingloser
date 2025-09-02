@@ -24,14 +24,21 @@ public class ComboAction
     [Range(0f, 1f)] public float inputWindowStart = 0.3f;
     [Range(0f, 1f)] public float inputWindowEnd = 0.8f;
 
-    [Header("ヒット判定タイミング（秒）0未満なら手動")]
-    public float hitCheckTime = 0.2f;
-
     [Header("次段へ遷移する終了タイミング（0~1）")]
     [Range(0f, 1f)] public float endNormalizedTime = 0.9f;
 
     [Header("次段へのブレンド時間（秒）")]
     [Min(0f)] public float blendToNext = 0.12f;
+
+    [Header("攻撃判定")]
+    public Vector3 hitBoxCenter = new Vector3(0.5f, 1.0f, 1.0f); // ヒットボックスの中心（ローカル座標）
+    public Vector3 hitBoxSize = new Vector3(1.0f, 1.0f, 1.0f);   // ヒットボックスのサイズ
+    [Header("ヒット判定タイミング（秒）0未満なら手動")]
+    public float hitCheckTime = 0.2f;
+
+    [Header("エフェクト")]
+    public GameObject attackVFXPrefab; // ヒット時のエフェクトプレハブ
+    public float attackVFXTime = 0.2f; // エフェクト発生タイミング
 }
 [CreateAssetMenu(fileName = "WeaponItem", menuName = "Scriptable Objects/WeaponItem")]
 public class WeaponItem : ScriptableObject
