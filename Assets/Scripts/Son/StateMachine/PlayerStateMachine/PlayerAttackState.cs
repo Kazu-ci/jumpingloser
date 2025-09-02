@@ -371,7 +371,7 @@ public class PlayerAttackState : IState
         // 日本語：ヒットボックス中心（世界座標）に生成。トレイル等は武器ソケットに付け替えても良い
         if (currentAction.attackVFXPrefab == null) return;
 
-        Vector3 worldCenter = _player.transform.TransformPoint(currentAction.hitBoxCenter);
+        Vector3 worldCenter = _player.transform.position;
         Quaternion rot = _player.transform.rotation;
         var go = Object.Instantiate(currentAction.attackVFXPrefab, worldCenter, rot);
         // 日本語：VFX の自己破棄に頼る。なければ一定時間後に破棄
@@ -410,7 +410,7 @@ public class PlayerAttackState : IState
     private void PlayHitSFX()
     {
         var sfx = weapon?.template?.hitSFX;
-        if (sfx != null) _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.RHand, sfx);
+        if (sfx != null) _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.LHand, sfx);
     }
 
     // ====== 武器破壊イベント：連段を強制終了する ======
