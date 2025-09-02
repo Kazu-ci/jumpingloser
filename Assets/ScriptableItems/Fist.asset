@@ -23,6 +23,15 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 6647a7f35968aa0419f0befba95e63bc, type: 3}
+    inputWindowStart: 0.3
+    inputWindowEnd: 0.8
+    endNormalizedTime: 0.9
+    blendToNext: 0.12
+    hitBoxCenter: {x: 0, y: -0.5, z: 1}
+    hitBoxSize: {x: 3, y: 3, z: 2}
+    hitCheckTime: 0.2
+    attackVFXPrefab: {fileID: 6773056508968745887, guid: 706c02c7a196ffd4eae115c4bb094205, type: 3}
+    attackVFXTime: 0.1
   subWeaponAttack: []
   finisherAttack: []
   maxDurability: 100
@@ -30,4 +39,4 @@ MonoBehaviour:
   attackRange: 2
   attackSpeed: 1
   hitSFX: {fileID: 0}
-  hitVFXPrefab: {fileID: 0}
+  hitVFXPrefab: {fileID: 8778328243042707411, guid: 374aa05c79e9e4d4f8b03441dc2cc978, type: 3}

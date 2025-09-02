@@ -25,9 +25,13 @@ MonoBehaviour:
     swingSFX: {fileID: 8300000, guid: 7e44dddba4947d24cb6b4f09277aa273, type: 3}
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
-    hitCheckTime: 0.2
     endNormalizedTime: 0.8
     blendToNext: 0.12
+    hitBoxCenter: {x: 0, y: -0.5, z: 1}
+    hitBoxSize: {x: 3, y: 3, z: 4}
+    hitCheckTime: 0.2
+    attackVFXPrefab: {fileID: 0}
+    attackVFXTime: 0.2
   - name: BuketAttack02
     animation: {fileID: -1834131061766230352, guid: bd47813839e615b4f8ddf655142bab29, type: 3}
     durabilityCost: 2
@@ -35,9 +39,13 @@ MonoBehaviour:
     swingSFX: {fileID: 8300000, guid: adfc66decb7e78148a1e864183039cf7, type: 3}
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
-    hitCheckTime: 0.2
     endNormalizedTime: 0.8
     blendToNext: 0.12
+    hitBoxCenter: {x: 0, y: -0.5, z: 1}
+    hitBoxSize: {x: 3, y: 3, z: 3}
+    hitCheckTime: 0.2
+    attackVFXPrefab: {fileID: 0}
+    attackVFXTime: 0.2
   - name: BuketAttack03
     animation: {fileID: -3490873762448051091, guid: 7829d778d018b534b951294ea35295fb, type: 3}
     durabilityCost: 2
@@ -45,9 +53,13 @@ MonoBehaviour:
     swingSFX: {fileID: 8300000, guid: 5f5c54e139ff57d4a8362e6e1afb87a7, type: 3}
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
-    hitCheckTime: 0.2
     endNormalizedTime: 0.8
     blendToNext: 0.12
+    hitBoxCenter: {x: 0, y: -0.5, z: 1}
+    hitBoxSize: {x: 3, y: 3, z: 3}
+    hitCheckTime: 0.2
+    attackVFXPrefab: {fileID: 0}
+    attackVFXTime: 0.3
   - name: BuketAttack04
     animation: {fileID: -1077583268679194387, guid: d70552bda10169845978a6e2961760ad, type: 3}
     durabilityCost: 2
@@ -55,9 +67,13 @@ MonoBehaviour:
     swingSFX: {fileID: 8300000, guid: 5f5c54e139ff57d4a8362e6e1afb87a7, type: 3}
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
-    hitCheckTime: 0.2
     endNormalizedTime: 0.8
     blendToNext: 0.12
+    hitBoxCenter: {x: 0, y: -0.5, z: 1}
+    hitBoxSize: {x: 3, y: 3, z: 4}
+    hitCheckTime: 0.2
+    attackVFXPrefab: {fileID: 0}
+    attackVFXTime: 0.2
   - name: BuketAttack05
     animation: {fileID: -7262094285337094028, guid: 2712dd956b0bfd341b888154e1b5eaca, type: 3}
     durabilityCost: 2
@@ -65,9 +81,13 @@ MonoBehaviour:
     swingSFX: {fileID: 8300000, guid: 3d4fe76e9c3d78b41a1dabc864b88f78, type: 3}
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
-    hitCheckTime: 0.2
     endNormalizedTime: 0.8
     blendToNext: 0.12
+    hitBoxCenter: {x: 0, y: -0.5, z: 1}
+    hitBoxSize: {x: 4, y: 4, z: 4}
+    hitCheckTime: 0.4
+    attackVFXPrefab: {fileID: 0}
+    attackVFXTime: 0.2
   subWeaponAttack: []
   finisherAttack: []
   maxDurability: 10
@@ -75,4 +95,4 @@ MonoBehaviour:
   attackRange: 2
   attackSpeed: 1
   hitSFX: {fileID: 0}
-  hitVFXPrefab: {fileID: 0}
+  hitVFXPrefab: {fileID: 8778328243042707411, guid: 374aa05c79e9e4d4f8b03441dc2cc978, type: 3}
