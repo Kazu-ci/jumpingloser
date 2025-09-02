@@ -15,7 +15,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float maxHp;
     [SerializeField] protected float maxSpeed;
     [SerializeField] protected float attackSpeed;
-    [SerializeField] protected float attackDamage;
+    [SerializeField] protected int attackDamage;
     [SerializeField] protected float attackRange;
     [SerializeField] protected float lookPlayerDir;
     [SerializeField] protected float angle;
@@ -90,5 +90,26 @@ public class Enemy : MonoBehaviour
     {
         return true;
     }
-    
+    public int GetDamage()
+    {
+        return attackDamage;
+    }
+    public Vector3 GetRandomNavMeshPoint(Vector3 center, float radius)
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            Vector3 rand = center + new Vector3(
+                Random.Range(-radius, radius),
+                0,
+                Random.Range(-radius, radius)
+            );
+            rand.y = center.y; // ‚‚³‚ðŒÅ’è
+
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(rand, out hit, radius, NavMesh.AllAreas))
+                return hit.position;
+        }
+        return center;
+    }
+
 }
