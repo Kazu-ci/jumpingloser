@@ -75,31 +75,38 @@ public class ChikenEnemy : Enemy
         Vector3 endPos;
         Vector3 startPos;
         bool goingToEnd = true;
+        bool firstInit = true;
         public override void OnStart()
         {
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
-            if (startPos == Vector3.zero && endPos == Vector3.zero)
+            if (firstInit)
             {
                 startPos = Owner.transform.position;
-                endPos = new Vector3(
-                    Random.Range(startPos.x - 5, startPos.x + 5),
-                    0,
-                    Random.Range(startPos.z - 5, startPos.z + 5)
-                );
+                endPos = Owner.GetRandomNavMeshPoint(startPos,7f);
+                firstInit = false;
             }
+
             cDis = Owner.lookPlayerDir;
             Debug.Log("Patrolだよ");
+            Debug.Log(startPos);
+            Debug.Log(endPos);
         }
         public override void OnUpdate()
         {
             float playerDis = Owner.GetDistance();
             var playerDir = Owner.playerPos.transform.position - Owner.transform.position;
             var angle = Vector3.Angle(Owner.transform.forward, playerDir);
-            if (playerDis <= cDis && angle <= Owner.angle) { StateMachine.ChangeState((int)EnemyState.Chase); }
+            if (playerDis <= cDis && angle <= Owner.angle)            // プレイヤー検出
+            {
+                StateMachine.ChangeState((int)EnemyState.Chase);
+                return;
+            }
+            // パトロール
             Vector3 targetPos = goingToEnd ? endPos : startPos;
             navMeshAgent.SetDestination(targetPos);
-            if (!navMeshAgent.pathPending && navMeshAgent.remainingDistance <= 0.5f)
+            // 到着判定
+            if (!navMeshAgent.pathPending && navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
             {
                 goingToEnd = !goingToEnd;
                 StateMachine.ChangeState((int)EnemyState.Idle);
@@ -122,15 +129,14 @@ public class ChikenEnemy : Enemy
         }
         public override void OnUpdate()
         {
-            Vector3 playerPos = Owner.playerPos.transform.position;
-            navMeshAgent.SetDestination(playerPos);
             if (Owner.GetDistance() <= Owner.attackRange)
             {
                 StateMachine.ChangeState((int)EnemyState.Attack);
                 navMeshAgent.isStopped = true;
             }
-
-
+            if (Owner.GetDistance() >= Owner.lookPlayerDir) { StateMachine.ChangeState((int)EnemyState.Idle); }
+            Vector3 playerPos = Owner.playerPos.transform.position;
+            navMeshAgent.SetDestination(playerPos);
         }
         public override void OnEnd()
         {

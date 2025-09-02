@@ -61,20 +61,42 @@ public class NinzinEnemy : Enemy
     {
         NavMeshAgent navMeshAgent;
         float cDis;
+        Vector3 endPos;
+        Vector3 startPos;
+        bool goingToEnd = true;
+        bool firstInit = true;
         public override void OnStart()
         {
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
+            if (firstInit)
+            {
+                 startPos = Owner.transform.position;
+                endPos = Owner.GetRandomNavMeshPoint(startPos, 7f);
+                firstInit = false;
+            }
             cDis = Owner.lookPlayerDir;
             Debug.Log("Patrolだよ");
         }
         public override void OnUpdate()
         {
             float playerDis = Owner.GetDistance();
-            if (playerDis <= cDis) { StateMachine.ChangeState((int)EnemyState.Chase); }
-            Vector3 currentPos = Owner.transform.position;
-            Vector3 randomDestination = currentPos + new Vector3(Random.Range(-5f, 5f), 0, Random.Range(-5f, 5f));
-            navMeshAgent.SetDestination(randomDestination);
+            var playerDir = Owner.playerPos.transform.position - Owner.transform.position;
+            var angle = Vector3.Angle(Owner.transform.forward, playerDir);
+            if (playerDis <= cDis && angle <= Owner.angle)            // プレイヤー検出
+            {
+                StateMachine.ChangeState((int)EnemyState.Chase);
+                return;
+            }
+            // パトロール
+            Vector3 targetPos = goingToEnd ? endPos : startPos;
+            navMeshAgent.SetDestination(targetPos);
+            // 到着判定
+            if (!navMeshAgent.pathPending && navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
+            {
+                goingToEnd = !goingToEnd;
+                StateMachine.ChangeState((int)EnemyState.Idle);
+            }
         }
         public override void OnEnd()
         {
@@ -92,15 +114,14 @@ public class NinzinEnemy : Enemy
         }
         public override void OnUpdate()
         {
-            Vector3 playerPos = Owner.playerPos.transform.position;
-            navMeshAgent.SetDestination(playerPos);
             if (Owner.GetDistance() <= Owner.attackRange)
             {
                 StateMachine.ChangeState((int)EnemyState.Attack);
                 navMeshAgent.isStopped = true;
-                
             }
-            
+            if (Owner.GetDistance() >= Owner.lookPlayerDir) { StateMachine.ChangeState((int)EnemyState.Idle); }
+            Vector3 playerPos = Owner.playerPos.transform.position;
+            navMeshAgent.SetDestination(playerPos);
 
         }
         public override void OnEnd()
