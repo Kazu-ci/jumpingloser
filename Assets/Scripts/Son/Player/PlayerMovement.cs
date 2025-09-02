@@ -35,6 +35,11 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveInput;
     private Vector2 lookInput;
 
+    [Header("ステータス")]
+    public int maxHealth = 50;
+    private int currentHealth = 50;
+
+
     // ====== 移動設定 ======
     [Header("移動設定")]
     public float moveSpeed = 5f;           // 移動速度
@@ -158,6 +163,9 @@ public class PlayerMovement : MonoBehaviour
         // --- 初期装備（必要なら右手→左手の順で）---
         // weaponInventory.AddWeapon(startWeaponItem);
         // weaponInventory.TrySwitchRight();
+
+        // --- ライフ初期化 ---
+        currentHealth = maxHealth;
     }
 
     private void OnDestroy()
@@ -370,6 +378,24 @@ public class PlayerMovement : MonoBehaviour
         {
             weaponInventory.TrySwitchLeft(); // イベントで左手モデルが生成される
         }
+    }
+
+    // === ダメージ・回復 ===
+    public void TakeDamage(int amount)
+    {
+        if (amount <= 0) return;
+        currentHealth -= amount;
+        currentHealth = Mathf.Max(currentHealth, 0);
+        Debug.Log($"Player took {amount} damage. Current health: {currentHealth}/{maxHealth}");
+        //audioManager?.PlayHurtSound();
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+    private void Die()
+    {
+        Debug.Log("Player has died.");
     }
 }
 
