@@ -49,6 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponPrefab: {fileID: 11400000, guid: b611bf77121604e419dce1ab503c8921, type: 2}
   rotSpeed: 180
+  pickEffect: {fileID: 2140346996359558647, guid: 97edd99d1e14c544e8c303ee8e044ee7, type: 3}
 --- !u!65 &6733416870188300596
 BoxCollider:
   m_ObjectHideFlags: 0

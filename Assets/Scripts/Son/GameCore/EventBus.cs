@@ -33,5 +33,7 @@ public class EventBus
     {
         public static Func<GameObject> GetPlayerObject;
         public static Action<PlayerAudioPart,AudioClip> PlayClipByPart;
+
+        public static Action<HandType> OnWeaponBroke;
     }
 }

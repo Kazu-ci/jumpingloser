@@ -684,6 +684,7 @@ MonoBehaviour:
   fist:
     template: {fileID: 11400000, guid: 20538c7066df7c04cbdbe2a9c6c18442, type: 2}
     currentDurability: 999
+  wpBrokeEffect: {fileID: 483269617434788623, guid: 5de658852142b3a41b0ca90f373a7501, type: 3}
   weaponInventory:
     weapons: []
     mainIndex: -1

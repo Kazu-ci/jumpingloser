@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3798074774437186939}
+  - component: {fileID: 3549218126829701852}
   m_Layer: 0
   m_Name: Weapon_BuketRoot 1
   m_TagString: Untagged
@@ -33,6 +34,19 @@ Transform:
   - {fileID: 2410930642282392330}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3549218126829701852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8296909117549551263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d780d17fe81448a41bd3a4dd8b4436e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  switchEffect: {fileID: 3460952067627614809, guid: bedc927dae31c25479a5b56791cdfe1a, type: 3}
 --- !u!1001 &1018741236215457510
 PrefabInstance:
   m_ObjectHideFlags: 0

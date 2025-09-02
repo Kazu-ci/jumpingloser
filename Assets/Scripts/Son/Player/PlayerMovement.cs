@@ -52,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
     public GameObject weaponBoxR;          // 右手の武器親
     public GameObject weaponBoxL;          // 左手の武器親
     public WeaponInstance fist;            // 素手
+    public GameObject wpBrokeEffect;      // 武器破壊エフェクト
 
     // 武器インベントリ
     public PlayerWeaponInventory weaponInventory = new PlayerWeaponInventory();
@@ -106,9 +107,11 @@ public class PlayerMovement : MonoBehaviour
         UIEvents.OnRightWeaponSwitch += HandleRightWeaponSwitch;   // (weapons, from, to)
         UIEvents.OnLeftWeaponSwitch += HandleLeftWeaponSwitch;    // (weapons, from, to)
         UIEvents.OnWeaponDestroyed += HandleWeaponDestroyed;     // (removedIndex, item)
-        UIEvents.OnDurabilityChanged += HandleDurabilityChanged;   // (hand, index, cur, max)
 
-       
+        // --- PlayerEvents の購読 ---
+        PlayerEvents.OnWeaponBroke += PlayrWeaponBrokeEffect; // (handType)
+
+
     }
 
     private void OnDisable()
@@ -120,7 +123,8 @@ public class PlayerMovement : MonoBehaviour
         UIEvents.OnRightWeaponSwitch -= HandleRightWeaponSwitch;
         UIEvents.OnLeftWeaponSwitch -= HandleLeftWeaponSwitch;
         UIEvents.OnWeaponDestroyed -= HandleWeaponDestroyed;
-        UIEvents.OnDurabilityChanged -= HandleDurabilityChanged;
+
+        PlayerEvents.OnWeaponBroke -= PlayrWeaponBrokeEffect;
 
         if (PlayerEvents.GetPlayerObject != null)
         {
@@ -152,8 +156,6 @@ public class PlayerMovement : MonoBehaviour
         SetupStateMachine();
 
         // --- 初期装備（必要なら右手→左手の順で）---
-        // ここでは何も装備していない前提。初期武器を持たせたい場合は AddWeapon 後に TrySwitchRight() 等を呼ぶ。
-        // 例:
         // weaponInventory.AddWeapon(startWeaponItem);
         // weaponInventory.TrySwitchRight();
     }
@@ -235,17 +237,27 @@ public class PlayerMovement : MonoBehaviour
 
     // ====== モデル同期（イベントドリブン） ======
 
+    private void PlayrWeaponBrokeEffect(HandType handType)
+    {
+        if(wpBrokeEffect != null)
+        {
+            GameObject box = (handType == HandType.Main) ? weaponBoxR : weaponBoxL;
+            Instantiate(wpBrokeEffect, box.transform.position, Quaternion.identity);
+        }
+    }
+
     // 右手の切替イベント
     private void HandleRightWeaponSwitch(List<WeaponInstance> list, int from, int to)
     {
         // ・from->to の変化を受けて、右手の武器モデルを入れ替える
-        // ・to == -1 の場合は右手を空にする
+        if(from == to) return; // 変化なし
         ApplyHandModel(HandType.Main, list, to);
     }
 
     // 左手の切替イベント
     private void HandleLeftWeaponSwitch(List<WeaponInstance> list, int from, int to)
     {
+        if (from == to) return; // 変化なし
         ApplyHandModel(HandType.Sub, list, to);
     }
 
@@ -257,13 +269,6 @@ public class PlayerMovement : MonoBehaviour
         //   結果として OnRightWeaponSwitch / OnLeftWeaponSwitch が飛んでくるので、
         //   見た目の同期はそちらで実施される
         Debug.Log($"Weapon destroyed @index={removedIndex} ({item?.weaponName})");
-    }
-
-    // 耐久イベント（必要に応じて UI に転送、ここではログ表示）
-    private void HandleDurabilityChanged(HandType hand, int index, int current, int max)
-    {
-        // TODO: HP/耐久UIがあればここで反映
-        // Debug.Log($"[{hand}] durability: {current}/{max} (list index={index})");
     }
 
     // 指定手の武器モデルを更新
