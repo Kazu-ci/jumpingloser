@@ -5,6 +5,7 @@ public class PickableWeapon : MonoBehaviour
 {
     public WeaponItem weaponPrefab; // ïêäÌÇÃÉvÉåÉnÉu
     public float rotSpeed;
+    public GameObject pickEffect;
     private void Update()
     {
         transform.Rotate(Vector3.up, rotSpeed * Time.deltaTime, Space.World);
@@ -17,6 +18,10 @@ public class PickableWeapon : MonoBehaviour
             if (player != null)
             {
                 player.PickUpWeapon(weaponPrefab);
+                if (pickEffect != null)
+                {
+                    Instantiate(pickEffect, transform.position, Quaternion.identity);
+                }
                 Destroy(gameObject);
             }
         }

@@ -47,16 +47,24 @@ public class PlayerWeaponInventory
         return idx >= 0 && idx < weapons.Count && weapons[idx] != null && !weapons[idx].IsBroken;
     }
 
-    // ラウンドロビン検索（exclude を1つだけ除外。exclude < 0 は除外なし）
-    private int FindNextUsable(int startIdx, int exclude)
+    // dir: +1 = 前方向に巡回, -1 = 後方向に巡回
+    private int FindNextUsable(int startIdx, int exclude, int dir = 1)
     {
+        // ※ 安全ガード
         int n = weapons.Count;
         if (n == 0) return -1;
+        if (dir == 0) dir = +1;
 
+        // startIdx は [-1, n-1] に正規化（-1 は「今の位置の直前」みたいに扱う）
         int start = Mathf.Clamp(startIdx, -1, n - 1);
+
+        // n 回まで見にいく
         for (int step = 1; step <= n; ++step)
         {
-            int i = (start + step) % n;
+            // 巡回インデックス計算（負数補正あり）
+            int i = (start + step * dir) % n;
+            if (i < 0) i += n;
+
             if (exclude >= 0 && i == exclude) continue;
             if (IsUsableIndex(i)) return i;
         }
@@ -97,7 +105,7 @@ public class PlayerWeaponInventory
         // 右手と左手が同じになったら、左手を逃がす（右手優先）
         if (subIndex == mainIndex)
         {
-            int newSub = FindNextUsable(subIndex, exclude: mainIndex);
+            int newSub = FindNextUsable(subIndex, exclude: mainIndex, -1);
             SetHandIndex(HandType.Sub, newSub);
         }
         return true;
@@ -106,7 +114,7 @@ public class PlayerWeaponInventory
     public bool TrySwitchLeft()
     {
         // 左手は右手使用中の武器をスキップ
-        int next = FindNextUsable(subIndex, exclude: mainIndex);
+        int next = FindNextUsable(subIndex, exclude: mainIndex, -1);
 
         SetHandIndex(HandType.Sub, next);
         if (next == -1) return false;
@@ -173,7 +181,7 @@ public class PlayerWeaponInventory
         // 念のため最終同一チェック（右手優先で左手を逃がす）
         if (mainIndex >= 0 && subIndex == mainIndex)
         {
-            int newSub = FindNextUsable(subIndex, exclude: mainIndex);
+            int newSub = FindNextUsable(subIndex, exclude: mainIndex, -1);
             SetHandIndex(HandType.Sub, newSub);
         }
     }
@@ -197,6 +205,8 @@ public class PlayerWeaponInventory
         {
             // 破壊 → 削除 & 自動切替（右手優先ルールを内部で実行）
             RemoveAtAndRecover(idx);
+            // --- 破壊イベント ---
+            PlayerEvents.OnWeaponBroke?.Invoke(hand);
         }
     }
 
@@ -210,126 +220,3 @@ public class PlayerWeaponInventory
 
 
 
-/*public class PlayerWeaponInventory
-{
-    public List<WeaponInstance> weapons = new List<WeaponInstance>();
-    public int mainIndex = -1; // 現在のメイン武器インデックス
-    public int subIndex = -1; // 現在のサブ武器インデックス
-
-    public void AddWeapon(WeaponItem weapon)
-    {
-        if (weapon != null)
-        {
-            weapons.Add(new WeaponInstance(weapon));
-        }
-    }
-    public void RemoveWeapon(int index)
-    {
-        if (index >= 0 && index < weapons.Count)
-        {
-            weapons.RemoveAt(index);
-        }
-    }
-    public WeaponInstance GetWeapon(HandType handType)
-    {
-        if (handType == HandType.Main && mainIndex >= 0 && mainIndex < weapons.Count)
-        {
-            return weapons[mainIndex];
-        }
-        else if (handType == HandType.Sub && subIndex >= 0 && subIndex < weapons.Count)
-        {
-            return weapons[subIndex];
-        }
-        return null; // 武器がない場合
-    }
-
-    public int SwitchWeapon(HandType handType)
-    {
-        if (weapons.Count == 0)
-        {
-            Debug.LogWarning("No weapons available to switch.");
-            return 0; // 武器がない場合は何もしない
-        }
-        if (handType == HandType.Main)
-        {
-            mainIndex = (mainIndex + 1) % weapons.Count; // メイン武器を切り替え
-            return 1;
-        }
-        else if (handType == HandType.Sub)
-        {
-            subIndex = (subIndex + 1) % weapons.Count; // サブ武器を切り替え
-            return -1;
-        }
-        else
-        {
-            Debug.LogWarning("Invalid hand type specified for weapon switch.");
-            return 0; // 無効なハンドタイプの場合は何もしない
-        }
-    }
-    public int SwitchRightWeapon()
-    {
-        if (weapons.Count == 0)
-        {
-            Debug.LogWarning("No weapons available to switch.");
-            return -1; // 武器がない場合は何もしない
-        }
-        else
-        {
-            mainIndex = (mainIndex + 1) % weapons.Count;
-            return mainIndex;
-        }
-    }
-    public void UnequipWeapon(HandType handType)
-    {
-        if (handType == HandType.Main)
-        {
-            mainIndex = -1; // メイン武器を外す
-        }
-        else if (handType == HandType.Sub)
-        {
-            subIndex = -1; // サブ武器を外す
-        }
-    }
-    public void DestroyWeapon(WeaponInstance target)
-    {
-        int index = GetIndex(target);
-        if (index >= 0)
-        {
-            WeaponInstance main = null;
-            WeaponInstance sub = null;
-            if (mainIndex != -1 && mainIndex < weapons.Count) main = weapons[mainIndex];
-            if (subIndex != -1 && subIndex < weapons.Count) sub = weapons[subIndex];
-            // weapons から削除
-            weapons.RemoveAt(index);
-
-            if (weapons.Count == 0)
-            {
-                mainIndex = -1; // 全ての武器が削除された場合、メイン武器のインデックスをリセット
-                subIndex = -1; // サブ武器のインデックスもリセット
-                return;
-            }
-
-            if (mainIndex == index)
-            {
-                mainIndex %= weapons.Count; // メイン武器のインデックスをリセット
-            }
-            else if (main != null)
-            {
-                mainIndex = GetIndex(main); // メイン武器のインデックスを再設定
-            }
-
-            if (subIndex == index)
-            {
-                subIndex %= weapons.Count;
-            }
-            else if (sub != null)
-            {
-                subIndex = GetIndex(sub); // サブ武器のインデックスを再設定
-            }
-        }
-    }
-    private int GetIndex(WeaponInstance weapon)
-    {
-        return weapons.IndexOf(weapon);
-    }
-}*/
