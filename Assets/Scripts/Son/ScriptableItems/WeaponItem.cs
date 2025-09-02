@@ -19,7 +19,19 @@ public class ComboAction
     public ATKActType actionType;
     [Tooltip("攻撃時のサウンドエフェクト")]
     public AudioClip swingSFX;
-    // 攻撃判定や入力受付タイミングは AnimationEvent で制御する
+
+    [Header("入力受付ウィンドウ（0~1）")]
+    [Range(0f, 1f)] public float inputWindowStart = 0.3f;
+    [Range(0f, 1f)] public float inputWindowEnd = 0.8f;
+
+    [Header("ヒット判定タイミング（秒）0未満なら手動")]
+    public float hitCheckTime = 0.2f;
+
+    [Header("次段へ遷移する終了タイミング（0~1）")]
+    [Range(0f, 1f)] public float endNormalizedTime = 0.9f;
+
+    [Header("次段へのブレンド時間（秒）")]
+    [Min(0f)] public float blendToNext = 0.12f;
 }
 [CreateAssetMenu(fileName = "WeaponItem", menuName = "Scriptable Objects/WeaponItem")]
 public class WeaponItem : ScriptableObject
@@ -56,4 +68,6 @@ public class WeaponItem : ScriptableObject
     [Header("効果音・エフェクト")]
     public AudioClip hitSFX; // ヒット時の効果音
     public GameObject hitVFXPrefab; // ヒット時のエフェクトプレハブ
+
+    
 }

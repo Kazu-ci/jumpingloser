@@ -35,9 +35,12 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveInput;
     private Vector2 lookInput;
 
+    [HideInInspector] public bool attackHeld;                // 押しっぱなしフラグ
+    [HideInInspector] public bool attackPressedThisFrame;    // そのフレームに押下されたか
+
     [Header("ステータス")]
-    public int maxHealth = 50;
-    private int currentHealth = 50;
+    public float maxHealth = 50;
+    private float currentHealth = 50;
 
 
     // ====== 移動設定 ======
@@ -79,6 +82,8 @@ public class PlayerMovement : MonoBehaviour
     public PlayerAudioManager audioManager;
 
     // ====== 内部状態 ======
+
+
     private CharacterController controller;
     private Vector3 velocity;
     private bool isGrounded;
@@ -104,7 +109,16 @@ public class PlayerMovement : MonoBehaviour
         inputActions.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         inputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
 
-        inputActions.Player.Attack.performed += ctx => OnAttackInput();
+        inputActions.Player.Attack.performed += ctx =>
+        {
+            attackHeld = true;               // ← 押しっぱ開始
+            attackPressedThisFrame = true;   // ← そのフレーム押下
+            OnAttackInput();                 
+        };
+        inputActions.Player.Attack.canceled += ctx =>
+        {
+            attackHeld = false;              // ← ボタンを離した
+        };
         inputActions.Player.SwitchWeapon.performed += ctx => OnSwitchWeaponInput();
         inputActions.Player.SwitchWeapon2.performed += ctx => OnSwitchWeaponInput2();
 
@@ -181,7 +195,9 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded && velocity.y < 0f) velocity.y = -2f;
 
         // ステート更新
+        bool pressedNow = attackPressedThisFrame;
         _fsm.Update(Time.deltaTime);
+        attackPressedThisFrame = false && pressedNow;
 
         // 重力
         velocity.y += gravity * Time.deltaTime;
@@ -381,12 +397,12 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // === ダメージ・回復 ===
-    public void TakeDamage(int amount)
+    public void TakeDamage(DamageData damage)
     {
-        if (amount <= 0) return;
-        currentHealth -= amount;
+        if (damage.damageAmount <= 0) return;
+        currentHealth -= damage.damageAmount;
         currentHealth = Mathf.Max(currentHealth, 0);
-        Debug.Log($"Player took {amount} damage. Current health: {currentHealth}/{maxHealth}");
+        Debug.Log($"Player took {damage.damageAmount} damage. Current health: {currentHealth}/{maxHealth}");
         //audioManager?.PlayHurtSound();
         if (currentHealth <= 0)
         {
