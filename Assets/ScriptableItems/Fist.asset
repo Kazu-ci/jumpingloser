@@ -31,7 +31,7 @@ MonoBehaviour:
     hitBoxSize: {x: 3, y: 3, z: 2}
     hitCheckTime: 0.2
     attackVFXPrefab: {fileID: 6773056508968745887, guid: 706c02c7a196ffd4eae115c4bb094205, type: 3}
-    attackVFXTime: 0.1
+    attackVFXTime: 0.3
   subWeaponAttack: []
   finisherAttack: []
   maxDurability: 100
