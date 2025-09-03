@@ -15,8 +15,7 @@ MonoBehaviour:
   weaponName: Buket
   modelPrefab: {fileID: 840819371027446578, guid: 1ec7646a5a0a00440ba5853c885e2350, type: 3}
   icon: {fileID: 21300000, guid: 0e19bf499acb4fd459b91da1071456d0, type: 3}
-  crackDropPrefab: {fileID: 0}
-  numberOfCracks: 3
+  weaponType: 2
   mainWeaponCombo:
   - name: BuketAttack01
     animation: {fileID: 1308209756001952186, guid: ff27f3bd9ad21314d998ecc9a7d231e9, type: 3}
@@ -88,7 +87,21 @@ MonoBehaviour:
     hitCheckTime: 0.4
     attackVFXPrefab: {fileID: 0}
     attackVFXTime: 0.2
-  subWeaponAttack: []
+  subWeaponAttack:
+  - name: 
+    animation: {fileID: 0}
+    durabilityCost: 0
+    actionType: 0
+    swingSFX: {fileID: 0}
+    inputWindowStart: 0
+    inputWindowEnd: 0
+    endNormalizedTime: 0
+    blendToNext: 0
+    hitBoxCenter: {x: 0, y: 0, z: 0}
+    hitBoxSize: {x: 0, y: 0, z: 0}
+    hitCheckTime: 0
+    attackVFXPrefab: {fileID: 0}
+    attackVFXTime: 0
   finisherAttack: []
   maxDurability: 10
   attackPower: 3

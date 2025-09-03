@@ -15,8 +15,7 @@ MonoBehaviour:
   weaponName: Teba
   modelPrefab: {fileID: 2342130772000090208, guid: 367b66993255d1546a0f9e8d206a50c7, type: 3}
   icon: {fileID: 21300000, guid: ae68d361f1ad8704caeea652ec8231e3, type: 3}
-  crackDropPrefab: {fileID: 0}
-  numberOfCracks: 3
+  weaponType: 3
   mainWeaponCombo:
   - name: Attack1
     animation: {fileID: 5536427086270334551, guid: 44241c4aa8e50374e88d93d30a5c96a3, type: 3}

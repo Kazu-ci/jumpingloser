@@ -282,7 +282,7 @@ public class PlayerMovement : MonoBehaviour
     private void HandleLeftWeaponSwitch(List<WeaponInstance> list, int from, int to)
     {
         if (from == to) return; // 変化なし
-        ApplyHandModel(HandType.Sub, list, to);
+        //ApplyHandModel(HandType.Sub, list, to);
     }
 
     // 破壊イベント（UI向け）。モデルは切替イベントで反映されるため、ここはログ程度でOK

@@ -8,6 +8,13 @@ public enum ATKActType
     SubAttack,      // サブ攻撃
     Finisher        // フィニッシュ攻撃
 }
+public enum WeaponType
+{
+    Fist,
+    Sword,
+    Spear,
+    Boomerang
+}
 [System.Serializable]
 public class ComboAction
 {
@@ -47,8 +54,7 @@ public class WeaponItem : ScriptableObject
     public string weaponName;              // 武器の名前
     public GameObject modelPrefab;         // モデルのプレハブ
     public Sprite icon;                    // UI用アイコン
-    public GameObject crackDropPrefab;     // 耐久値が0になったときにドロップするクラックのプレハブ
-    public int numberOfCracks = 3;         // クラックの数
+    public WeaponType weaponType;          // 武器の種類
 
     [Header("主武器コンボ攻撃")]
     [Tooltip("主武器で使用する連続攻撃")]

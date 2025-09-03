@@ -15,12 +15,11 @@ MonoBehaviour:
   weaponName: Carrot
   modelPrefab: {fileID: 8296909117549551263, guid: e74f0586a76a4bb4494c13b156c06d66, type: 3}
   icon: {fileID: 21300000, guid: b1ab1d63398e1bf43bc73117d461bf47, type: 3}
-  crackDropPrefab: {fileID: 0}
-  numberOfCracks: 3
+  weaponType: 1
   mainWeaponCombo:
   - name: Attack1
     animation: {fileID: 6558176424447691871, guid: d51b57030ad431544ba4d22252f70716, type: 3}
-    durabilityCost: 2
+    durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 1215e8eab5a07fb46b37ea34440668a7, type: 3}
     inputWindowStart: 0.3
