@@ -55,7 +55,7 @@ MonoBehaviour:
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
     blendToNext: 0.12
-    hitBoxCenter: {x: 0.5, y: 0, z: 1}
+    hitBoxCenter: {x: 0, y: 0, z: 1}
     hitBoxSize: {x: 5, y: 5, z: 5}
     hitCheckTime: 0.2
     attackVFXPrefab: {fileID: 0}
@@ -69,7 +69,7 @@ MonoBehaviour:
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
     blendToNext: 0.12
-    hitBoxCenter: {x: 0.5, y: 0, z: 1}
+    hitBoxCenter: {x: 0, y: 0, z: 1}
     hitBoxSize: {x: 5, y: 5, z: 5}
     hitCheckTime: 0.2
     attackVFXPrefab: {fileID: 0}
@@ -83,7 +83,7 @@ MonoBehaviour:
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
     blendToNext: 0.12
-    hitBoxCenter: {x: 0.5, y: 0, z: 1}
+    hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 5, y: 5, z: 3}
     hitCheckTime: 0.2
     attackVFXPrefab: {fileID: 0}

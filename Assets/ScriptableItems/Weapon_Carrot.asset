@@ -31,7 +31,7 @@ MonoBehaviour:
     hitBoxSize: {x: 3, y: 3, z: 2}
     hitCheckTime: 0.2
     attackVFXPrefab: {fileID: 0}
-    attackVFXTime: 0.2
+    attackVFXTime: 0.05
   - name: Attack2
     animation: {fileID: 3878471701507660605, guid: 8c8b08780b136fd46b62591e3a99a076, type: 3}
     durabilityCost: 2
