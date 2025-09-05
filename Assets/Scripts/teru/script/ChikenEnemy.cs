@@ -89,8 +89,6 @@ public class ChikenEnemy : Enemy
 
             cDis = Owner.lookPlayerDir;
             Debug.Log("Patrol‚¾‚æ");
-            Debug.Log(startPos);
-            Debug.Log(endPos);
         }
         public override void OnUpdate()
         {
