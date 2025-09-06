@@ -57,8 +57,8 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
-    attackVFXPrefab: {fileID: 0}
-    attackVFXTime: 0.3
+    attackVFXPrefab: {fileID: 4038626604293783246, guid: 2d06c730798cea04b94142e55454d6a7, type: 3}
+    attackVFXTime: 0.35
   - name: BuketAttack04
     animation: {fileID: -1077583268679194387, guid: d70552bda10169845978a6e2961760ad, type: 3}
     durabilityCost: 2
@@ -71,8 +71,8 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 4}
     hitCheckTime: 0.2
-    attackVFXPrefab: {fileID: 0}
-    attackVFXTime: 0.2
+    attackVFXPrefab: {fileID: 6750709850005052051, guid: f9615688b8772784591296f7aa2e1b61, type: 3}
+    attackVFXTime: 0.28
   - name: BuketAttack05
     animation: {fileID: -7262094285337094028, guid: 2712dd956b0bfd341b888154e1b5eaca, type: 3}
     durabilityCost: 2
