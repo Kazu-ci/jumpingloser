@@ -184,7 +184,7 @@ public class BossEnemy : Enemy
         }
         public override void OnUpdate()
         {
-            if (Owner.animationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle); }
+            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle); }
         }
         public override void OnEnd()
         {
@@ -199,7 +199,7 @@ public class BossEnemy : Enemy
         }
         public override void OnUpdate()
         {
-            if (Owner.animationEnd())
+            if (Owner.AnimationEnd())
             {
                 Owner.OnDead();
             }

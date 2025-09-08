@@ -34,8 +34,9 @@ public class NinzinEnemy : Enemy
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         stateMachine.OnUpdate();
     }
     private class IdleState : EStateMachine<NinzinEnemy>.StateBase
@@ -43,17 +44,20 @@ public class NinzinEnemy : Enemy
         float cDis;
         public override void OnStart()
         {
+            Owner.ChangeTexture(0);
             Debug.Log("Idleだよ");
+            Owner.enemyAnimation.SetTrigger("Idle");
             cDis = Owner.lookPlayerDir;
         }
         public override void OnUpdate()
         {
-            float playerDis = Owner.GetDistance();
-            if (playerDis <= cDis) { StateMachine.ChangeState((int)EnemyState.Chase); }
-            else { StateMachine.ChangeState((int)EnemyState.Patrol); }
+                float playerDis = Owner.GetDistance();
+                if (playerDis <= cDis) { StateMachine.ChangeState((int)EnemyState.Chase); }
+                else { StateMachine.ChangeState((int)EnemyState.Patrol); }
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Idle");
             Debug.Log("Idleは終わった");
         }
     }
@@ -67,6 +71,7 @@ public class NinzinEnemy : Enemy
         bool firstInit = true;
         public override void OnStart()
         {
+            Owner.ChangeTexture(0);
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
             if (firstInit)
@@ -80,10 +85,11 @@ public class NinzinEnemy : Enemy
         }
         public override void OnUpdate()
         {
+            Owner.enemyAnimation.SetTrigger("Walk");
             float playerDis = Owner.GetDistance();
             var playerDir = Owner.playerPos.transform.position - Owner.transform.position;
             var angle = Vector3.Angle(Owner.transform.forward, playerDir);
-            if (playerDis <= cDis && angle <= Owner.angle)            // プレイヤー検出
+            if (playerDis <= cDis && angle <= Owner.angle)            
             {
                 StateMachine.ChangeState((int)EnemyState.Chase);
                 return;
@@ -101,6 +107,7 @@ public class NinzinEnemy : Enemy
         public override void OnEnd()
         {
             Debug.Log("Patrolは終わった");
+            Owner.enemyAnimation.ResetTrigger("Walk");
         }
     }
     private class ChaseState : EStateMachine<NinzinEnemy>.StateBase
@@ -108,6 +115,8 @@ public class NinzinEnemy : Enemy
         NavMeshAgent navMeshAgent;
         public override void OnStart()
         {
+            Owner.ChangeTexture(1);
+            Owner.enemyAnimation.SetTrigger("Walk");
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
             Debug.Log("Chaseだよ");
@@ -126,6 +135,7 @@ public class NinzinEnemy : Enemy
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Walk");
             Debug.Log("Chaseは終わった");
         }
     }
@@ -133,14 +143,16 @@ public class NinzinEnemy : Enemy
     {
         public override void OnStart()
         {
+            Owner.ChangeTexture(1);
             Debug.Log("Attackだよ");
-
+            Owner.enemyAnimation.SetTrigger("Attack");
+            Owner.navMeshAgent.isStopped = true;
         }
         public override void OnUpdate()
         {
-            GameObject game = Instantiate(Owner.efe);
-            game.transform.position = Owner.playerPos.transform.position;
-            StateMachine.ChangeState((int)EnemyState.AttackInterbal);
+            //GameObject game = Instantiate(Owner.efe);
+            //game.transform.position = Owner.playerPos.transform.position;
+            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.AttackInterbal); }
             /*if (Owner.GetDistance() > Owner.attackRange)
             {
                 StateMachine.ChangeState((int)EnemyState.Patrol);
@@ -148,6 +160,7 @@ public class NinzinEnemy : Enemy
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Attack");
             Debug.Log("Attackは終わった");
         }
     }
@@ -156,18 +169,55 @@ public class NinzinEnemy : Enemy
         float time;
         public override void OnStart()
         {
+            Owner.ChangeTexture(1);
+            Owner.enemyAnimation.SetTrigger("Idle");
             Debug.Log("AttackInterbalだよ");
         }
         public override void OnUpdate()
         {
             time += Time.deltaTime;
-            if (time > Owner.maxSpeed) { StateMachine.ChangeState((int)EnemyState.Idle); time = 0; }
+            if (time > Owner.attackSpeed) { StateMachine.ChangeState((int)EnemyState.Idle); time = 0; }
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Idle");
             Debug.Log("AttackInterbalは終わり");
         }
     }
-    private class HitState : EStateMachine<NinzinEnemy>.StateBase { }
-    private class DeadState : EStateMachine<NinzinEnemy>.StateBase { }
+    private class HitState : EStateMachine<NinzinEnemy>.StateBase
+    {
+        public override void OnStart()
+        {
+            Owner.ChangeTexture(2);
+            Debug.Log("Hitだよ");
+        }
+        public override void OnUpdate()
+        {
+            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle); }
+        }
+        public override void OnEnd()
+        {
+            Debug.Log("Hitは終わり");
+        }
+    }
+    private class DeadState : EStateMachine<NinzinEnemy>.StateBase
+    {
+        public override void OnStart()
+        {
+            Owner.ChangeTexture(2);
+            Debug.Log("Deadだよ");
+            Owner.enemyAnimation.SetTrigger("Dead");
+        }
+        public override void OnUpdate()
+        {
+            if (Owner.AnimationEnd())
+            {
+                Owner.OnDead();
+            }
+        }
+        public override void OnEnd()
+        {
+            Debug.Log("Deadは終わり");
+        }
+    }
 }

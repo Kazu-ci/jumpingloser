@@ -36,14 +36,15 @@ public class PanEnemy : Enemy
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         stateMachine.OnUpdate();
     }
     public override void OnAttackSet()
     {
-        var go=Instantiate(gameObject);
-        go.transform.position=transform.position+ new Vector3(0,4,0);
+        var go=Instantiate(attackObject);
+        go.transform.position=transform.position+ new Vector3(1,1,0);
     }
     
     private class IdleState : EStateMachine<PanEnemy>.StateBase
@@ -51,6 +52,8 @@ public class PanEnemy : Enemy
         float cDis;
         public override void OnStart()
         {
+            Owner.ChangeTexture(0);
+            Owner.enemyAnimation.SetTrigger("Idle");
             Debug.Log("Idleだよ");
             cDis = Owner.lookPlayerDir;
         }
@@ -65,6 +68,7 @@ public class PanEnemy : Enemy
         public override void OnEnd()
         {
             Debug.Log("Idleは終わった");
+            Owner.enemyAnimation.ResetTrigger("Idle");
         }
     }
     private class PatrolState : EStateMachine<PanEnemy>.StateBase
@@ -77,6 +81,7 @@ public class PanEnemy : Enemy
         bool firstInit = true;
         public override void OnStart()
         {
+            Owner.ChangeTexture(0);
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
             if (firstInit)
@@ -90,6 +95,7 @@ public class PanEnemy : Enemy
         }
         public override void OnUpdate()
         {
+            Owner.enemyAnimation.SetTrigger("Walk");
             float playerDis = Owner.GetDistance();
             var playerDir = Owner.playerPos.transform.position - Owner.transform.position;
             var angle = Vector3.Angle(Owner.transform.forward, playerDir);
@@ -111,6 +117,7 @@ public class PanEnemy : Enemy
 
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Walk");
             Debug.Log("Patrolは終わった");
         }
     }
@@ -119,6 +126,8 @@ public class PanEnemy : Enemy
         NavMeshAgent navMeshAgent;
         public override void OnStart()
         {
+            Owner.ChangeTexture(1);
+            Owner.enemyAnimation.SetTrigger("Walk");
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
             Debug.Log("Chaseだよ");
@@ -136,6 +145,7 @@ public class PanEnemy : Enemy
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Walk");
             Debug.Log("Chaseは終わった");
         }
     }
@@ -143,14 +153,16 @@ public class PanEnemy : Enemy
     {
         public override void OnStart()
         {
+            Owner.ChangeTexture(1);
+            Owner.enemyAnimation.SetTrigger("Attack");
             Debug.Log("Attackだよ");
-
         }
         public override void OnUpdate()
         {
-            GameObject game = Instantiate(Owner.efe);
-            game.transform.position = Owner.playerPos.transform.position;
-            StateMachine.ChangeState((int)EnemyState.AttackInterbal);
+            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.AttackInterbal); }
+            //GameObject game = Instantiate(Owner.efe);
+            //game.transform.position = Owner.playerPos.transform.position;
+            //StateMachine.ChangeState((int)EnemyState.AttackInterbal);
             /*if (Owner.GetDistance() > Owner.attackRange)
             {
                 StateMachine.ChangeState((int)EnemyState.Patrol);
@@ -159,6 +171,7 @@ public class PanEnemy : Enemy
         public override void OnEnd()
         {
             Debug.Log("Attackは終わった");
+            Owner.enemyAnimation.ResetTrigger("Attack");
         }
     }
     private class AttackInterbalState : EStateMachine<PanEnemy>.StateBase
@@ -166,15 +179,18 @@ public class PanEnemy : Enemy
         float time;
         public override void OnStart()
         {
+            Owner.ChangeTexture(1);
+            Owner.enemyAnimation.SetTrigger("Idle");
             Debug.Log("AttackInterbalだよ");
         }
         public override void OnUpdate()
         {
             time += Time.deltaTime;
-            if (time > Owner.maxSpeed) { StateMachine.ChangeState((int)EnemyState.Idle); time = 0; }
+            if (time > Owner.attackSpeed) { StateMachine.ChangeState((int)EnemyState.Idle); time = 0; }
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Idle");
             Debug.Log("AttackInterbalは終わり");
         }
     }
@@ -182,11 +198,12 @@ public class PanEnemy : Enemy
     {
         public override void OnStart()
         {
+            Owner.ChangeTexture(2);
             Debug.Log("Hitだよ");
         }
         public override void OnUpdate()
         {
-            if (Owner.animationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle); }
+            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle); }
         }
         public override void OnEnd()
         {
@@ -197,11 +214,12 @@ public class PanEnemy : Enemy
     {
         public override void OnStart()
         {
+            Owner.ChangeTexture(2);
             Debug.Log("Deadだよ");
         }
         public override void OnUpdate()
         {
-            if (Owner.animationEnd())
+            if (Owner.AnimationEnd())
             {
                 Owner.OnDead();
             }
