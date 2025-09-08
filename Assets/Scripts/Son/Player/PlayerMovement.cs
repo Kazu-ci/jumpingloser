@@ -13,7 +13,9 @@ public enum PlayerState
     Hit,         // 被弾
     Pickup,      // ピックアップ
     SwitchWeapon,// 武器切り替え
-    Attack       // 攻撃
+    Attack,      // 攻撃
+    Skill,       // スキル
+    Dash         // ダッシュ
 }
 
 public enum PlayerTrigger
@@ -24,7 +26,10 @@ public enum PlayerTrigger
     StartPickup,
     EndPickup,
     SwitchWeapon,
-    AttackInput
+    AttackInput,
+    AttackUp,
+    Hold,
+    DashInput,
 }
 
 [RequireComponent(typeof(CharacterController))]
@@ -385,7 +390,7 @@ public class PlayerMovement : MonoBehaviour
         weaponInventory.AddWeapon(weapon);
         Debug.Log("PickUp: " + weapon.weaponName);
 
-        // 例：初回装備の自動化（右手が空なら右手に装備 etc）
+        // 初回装備の自動化（右手が空なら右手に装備 etc）
         if (weaponInventory.GetWeapon(HandType.Main) == null)
         {
             weaponInventory.TrySwitchRight(); // イベントで右手モデルが生成される

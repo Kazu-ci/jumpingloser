@@ -16,7 +16,7 @@ public class WeaponInstance
     public WeaponInstance(WeaponItem weapon)
     {
         template = weapon;
-        currentDurability = weapon.maxDurability;
+        currentDurability = (int)(weapon.maxDurability / 2);
     }
 
     public void Use(float cost)
@@ -40,6 +40,8 @@ public class PlayerWeaponInventory
 
     [Tooltip("左手（Sub）の現在装備インデックス。-1 は未装備")]
     public int subIndex = -1;
+
+    private Dictionary<WeaponType,int> typeToIndex = new Dictionary<WeaponType, int>();
 
     // ==== 内部ユーティリティ ====
     private bool IsUsableIndex(int idx)
@@ -97,7 +99,9 @@ public class PlayerWeaponInventory
     public bool TrySwitchRight()
     {
         // 右手は左手を除外しない
-        int next = FindNextUsable(mainIndex, exclude: -1);
+        //int next = FindNextUsable(mainIndex, exclude: -1);
+        int next = -1;
+        if (weapons.Count > 0) next = (mainIndex + 1) % (weapons.Count);
 
         SetHandIndex(HandType.Main, next);
         if (next == -1) return false;
@@ -130,12 +134,25 @@ public class PlayerWeaponInventory
     public void AddWeapon(WeaponItem weapon)
     {
         if (weapon == null) return;
-        weapons.Add(new WeaponInstance(weapon));
-        UIEvents.OnRightWeaponSwitch?.Invoke(weapons, mainIndex, mainIndex); // UI更新
+        if(typeToIndex.ContainsKey(weapon.weaponType))
+        {
+            int idx = typeToIndex[weapon.weaponType];
+            weapons[idx].currentDurability += weapons[idx].template.addDurabilityOnPickup;
+            weapons[idx].currentDurability = Mathf.Min(weapons[idx].currentDurability, weapons[idx].template.maxDurability);
+            UIEvents.OnDurabilityChanged?.Invoke(HandType.Main, idx, weapons[idx].currentDurability, weapons[idx].template.maxDurability);
+            return;
+        }
+        else
+        {
+            weapons.Add(new WeaponInstance(weapon));
+            typeToIndex[weapon.weaponType] = weapons.Count - 1;
+            UIEvents.OnRightWeaponSwitch?.Invoke(weapons, mainIndex, mainIndex); // UI更新
+        }
+        
     }
 
     // インベントリから removeIndex を削除し、手持ちを自動回復
-    public void RemoveAtAndRecover(int removeIndex)
+   /* public void RemoveAtAndRecover(int removeIndex)
     {
         if (removeIndex < 0 || removeIndex >= weapons.Count) return;
 
@@ -184,9 +201,10 @@ public class PlayerWeaponInventory
             int newSub = FindNextUsable(subIndex, exclude: mainIndex, -1);
             SetHandIndex(HandType.Sub, newSub);
         }
-    }
+    }*/
 
     // ==== 耐久消費（破壊時は自動 Remove & Recover）====
+    // 仕様変更：武器壊せずに耐久0で放置できるよう
     public void ConsumeDurability(HandType hand, float cost)
     {
         int idx = GetHandIndex(hand);
@@ -194,6 +212,7 @@ public class PlayerWeaponInventory
 
         WeaponInstance inst = weapons[idx];
         int before = inst.currentDurability;
+        if (before < cost && cost > 0) return;
         inst.Use(cost);
 
         // --- 耐久度更新イベント ---
@@ -201,19 +220,27 @@ public class PlayerWeaponInventory
             hand, idx, inst.currentDurability, inst.template.maxDurability
         );
 
-        if (inst.IsBroken)
+        /*if (inst.IsBroken)
         {
             // 破壊 → 削除 & 自動切替（右手優先ルールを内部で実行）
             RemoveAtAndRecover(idx);
             // --- 破壊イベント ---
             PlayerEvents.OnWeaponBroke?.Invoke(hand);
-        }
+        }*/
     }
 
     public WeaponInstance GetWeapon(HandType hand)
     {
         int idx = GetHandIndex(hand);
-        return IsUsableIndex(idx) ? weapons[idx] : null;
+        //return IsUsableIndex(idx) ? weapons[idx] : null;
+        if(idx> 0 && idx < weapons.Count)
+        {
+            return weapons[idx];
+        }
+        else
+        {
+            return null;
+        }
     }
 }
 
