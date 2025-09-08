@@ -43,6 +43,11 @@ public class ComboAction
     [Header("ヒット判定タイミング（秒）0未満なら手動")]
     public float hitCheckTime = 0.2f;
 
+    [Header("突進動作")]
+    public Vector3 lungeDistance = Vector3.zero; // 突進距離
+    public float lungeSpeed = 10f; // 突進速度
+    public float lungeTime = 0.1f; // 突進時間
+
     [Header("エフェクト")]
     public GameObject attackVFXPrefab; // ヒット時のエフェクトプレハブ
     public float attackVFXTime = 0.2f; // エフェクト発生タイミング
@@ -77,6 +82,8 @@ public class WeaponItem : ScriptableObject
     public float attackRange = 2f;
     [Tooltip("攻撃速度")]
     public float attackSpeed = 1.0f;
+    [Tooltip("耐久回復値")]
+    public int addDurabilityOnPickup = 20; // 拾得時に回復する耐久値
 
     [Header("効果音・エフェクト")]
     public AudioClip hitSFX; // ヒット時の効果音
