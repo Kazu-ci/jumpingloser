@@ -233,7 +233,7 @@ public class PlayerWeaponInventory
     {
         int idx = GetHandIndex(hand);
         //return IsUsableIndex(idx) ? weapons[idx] : null;
-        if(idx> 0 && idx < weapons.Count)
+        if(idx >= 0 && idx < weapons.Count)
         {
             return weapons[idx];
         }
