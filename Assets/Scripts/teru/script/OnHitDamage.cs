@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class OnHitDamage : MonoBehaviour
 {
-    private Enemy enemy;
+    [SerializeField ]private Enemy enemy;
     private void Awake()
     {
         enemy = GetComponentInParent<Enemy>();
@@ -16,5 +16,6 @@ public class OnHitDamage : MonoBehaviour
             DamageData damageData = new DamageData(enemy.GetDamage());
             player.TakeDamage(damageData);
         }
+        else { return; }
     }
 }

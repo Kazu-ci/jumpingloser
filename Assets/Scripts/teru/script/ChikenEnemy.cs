@@ -35,8 +35,9 @@ public class ChikenEnemy : Enemy
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         stateMachine.OnUpdate();
     }
     public override void OnAttackSet()
@@ -52,6 +53,8 @@ public class ChikenEnemy : Enemy
         float cDis;
         public override void OnStart()
         {
+            Owner.ChangeTexture(0);
+            Owner.enemyAnimation.SetTrigger("Idle");
             Debug.Log("Idleだよ");
             cDis = Owner.lookPlayerDir;
         }
@@ -65,6 +68,7 @@ public class ChikenEnemy : Enemy
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Idle");
             Debug.Log("Idleは終わった");
         }
     }
@@ -78,6 +82,7 @@ public class ChikenEnemy : Enemy
         bool firstInit = true;
         public override void OnStart()
         {
+            Owner.ChangeTexture(0);
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
             if (firstInit)
@@ -92,6 +97,7 @@ public class ChikenEnemy : Enemy
         }
         public override void OnUpdate()
         {
+            Owner.enemyAnimation.SetTrigger("Walk");
             float playerDis = Owner.GetDistance();
             var playerDir = Owner.playerPos.transform.position - Owner.transform.position;
             var angle = Vector3.Angle(Owner.transform.forward, playerDir);
@@ -112,6 +118,7 @@ public class ChikenEnemy : Enemy
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Walk");
             Debug.Log("Patrolは終わった");
         }
 
@@ -121,6 +128,8 @@ public class ChikenEnemy : Enemy
         NavMeshAgent navMeshAgent;
         public override void OnStart()
         {
+            Owner.ChangeTexture(1);
+            Owner.enemyAnimation.SetTrigger("Run");
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
             Debug.Log("Chaseだよ");
@@ -138,6 +147,7 @@ public class ChikenEnemy : Enemy
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Run");
             Debug.Log("Chaseは終わった");
         }
     }
@@ -145,21 +155,23 @@ public class ChikenEnemy : Enemy
     {
         public override void OnStart()
         {
+            Owner.enemyAnimation.SetTrigger("Attack");
             Debug.Log("Attackだよ");
-
         }
         public override void OnUpdate()
         {
-            GameObject game = Instantiate(Owner.efe);
-            game.transform.position = Owner.playerPos.transform.position;
-            StateMachine.ChangeState((int)EnemyState.AttackInterbal);
+            //GameObject game = Instantiate(Owner.efe);
+            //game.transform.position = Owner.playerPos.transform.position;
+            //StateMachine.ChangeState((int)EnemyState.AttackInterbal);
             /*if (Owner.GetDistance() > Owner.attackRange)
             {
                 StateMachine.ChangeState((int)EnemyState.Patrol);
             }*/
+            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.AttackInterbal); }
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Attack");
             Debug.Log("Attackは終わった");
         }
     }
@@ -168,15 +180,18 @@ public class ChikenEnemy : Enemy
         float time;
         public override void OnStart()
         {
+            Owner.ChangeTexture(1);
+            Owner.enemyAnimation.SetTrigger("Idle");
             Debug.Log("AttackInterbalだよ");
         }
         public override void OnUpdate()
         {
             time += Time.deltaTime;
-            if (time > Owner.maxSpeed) { StateMachine.ChangeState((int)EnemyState.Idle); time = 0; }
+            if (time > Owner.attackSpeed) { StateMachine.ChangeState((int)EnemyState.Idle); time = 0; }
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Idle");
             Debug.Log("AttackInterbalは終わり");
         }
     }
@@ -184,11 +199,12 @@ public class ChikenEnemy : Enemy
     {
         public override void OnStart()
         {
+            Owner.ChangeTexture(2);
             Debug.Log("Hitだよ");
         }
         public override void OnUpdate()
         {
-            if (Owner.animationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle);}
+            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle);}
         }
         public override void OnEnd()
         {
@@ -199,11 +215,12 @@ public class ChikenEnemy : Enemy
     {
         public override void OnStart()
         {
+            Owner.ChangeTexture(2);
             Debug.Log("Deadだよ");
         }
         public override void OnUpdate()
         {
-            if (Owner.animationEnd())
+            if (Owner.AnimationEnd())
             {
                 Owner.OnDead();
             }
