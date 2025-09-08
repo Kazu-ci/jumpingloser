@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Rendering;
 public struct DamageData
 {
     public float damageAmount; // ダメージ量
@@ -12,6 +13,7 @@ public struct DamageData
 public class Enemy : MonoBehaviour
 {
     [SerializeField] GameObject[] weaponDrops; // ドロップされる武器のプレハブ（2種類）
+    [SerializeField] protected Texture[] textures;
     [SerializeField] protected float maxHp;
     [SerializeField] protected float maxSpeed;
     [SerializeField] protected float attackSpeed;
@@ -20,10 +22,13 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected float lookPlayerDir;
     [SerializeField] protected float angle;
     [SerializeField] protected GameObject playerPos;
+    [SerializeField] protected Animator enemyAnimation;
+    [SerializeField] protected GameObject thisObject;
     protected float nowHp;
     protected float nowSpeed;
     protected float distance;
     protected NavMeshAgent navMeshAgent;
+    protected AnimatorStateInfo info;
 
 
     protected GameObject TestTarget;
@@ -32,12 +37,13 @@ public class Enemy : MonoBehaviour
 
     void Start()
     {
+
     }
 
     // Update is called once per frame
-    void Update()
+    protected virtual void Update()
     {
-        
+        info = enemyAnimation.GetCurrentAnimatorStateInfo(0);
     }
 
     protected virtual void UpdateTestTarget()
@@ -86,9 +92,10 @@ public class Enemy : MonoBehaviour
         Instantiate(weaponDrops[index], transform.position, Quaternion.identity);
 
     }
-    protected bool animationEnd()
+    protected bool AnimationEnd()
     {
-        return true;
+        if (info.normalizedTime >= 0.8f) { return true; }
+        else { return false; }
     }
     public int GetDamage()
     {
@@ -110,6 +117,19 @@ public class Enemy : MonoBehaviour
                 return hit.position;
         }
         return center;
+    }
+    protected void ChangeTexture(int index)
+    {
+        if (index < 0 || index >= textures.Length){index=0; }
+        Texture newTexture = textures[index];
+        Renderer[] renderers = thisObject.GetComponentsInChildren<Renderer>();
+        foreach (Renderer rend in renderers)
+        {
+            foreach (Material mat in rend.materials)
+            {
+                mat.mainTexture = newTexture;
+            }
+        }
     }
 
 }

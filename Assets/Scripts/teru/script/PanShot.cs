@@ -8,8 +8,7 @@ public class PanShot : MonoBehaviour
     private Transform playerVec;
     private GameObject player;
     bool shot = true;
-    public bool orientation;
-    int now = 0;
+    float now = 0;
     public int shotTime;
     private void Start()
     {
@@ -18,16 +17,13 @@ public class PanShot : MonoBehaviour
         //shotTime = Random.Range(30, 60);
     }
     private void Update()
-    {
-        if (orientation)
-        {
-            transform.LookAt(playerVec);
-        }
+    { 
+        transform.LookAt(playerVec);
         if (now > shotTime && shot)
         {
             OnShot();
         }
-        now++;
+        now += Time.deltaTime;
     }
 
     public void OnShot()
