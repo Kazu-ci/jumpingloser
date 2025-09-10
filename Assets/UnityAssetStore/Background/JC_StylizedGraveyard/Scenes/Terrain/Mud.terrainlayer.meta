@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 596f1da233593c14c9fd76ecde804d97
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 8574412962073106934
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 271224
+  packageName: Stylized Graveyard with Church
+  packageVersion: 1.02
+  assetPath: Assets/JC_StylizedGraveyard/Scenes/Terrain/Mud.terrainlayer
+  uploadId: 659724

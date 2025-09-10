@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: d4cae0f4d71ff5644938818c1ee6b55e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2021/Scripts - Shaders/STAINED
+    GLASS/SampleSceneProfile 10 PLANETARY 6a.asset
+  uploadId: 750475

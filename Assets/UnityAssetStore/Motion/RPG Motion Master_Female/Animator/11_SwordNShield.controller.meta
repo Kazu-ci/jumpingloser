@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 6faf3023b2ca69648b357c271e211525
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 321572
+  packageName: 'RPG Animation Mega Bundle Pack [Female]'
+  packageVersion: 1.0
+  assetPath: Assets/RPG Motion Master_Female/Animator/11_SwordNShield.controller
+  uploadId: 765402

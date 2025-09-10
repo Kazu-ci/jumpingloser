@@ -11,13 +11,13 @@ public class PlayerFallingState : IState
 
     public void OnEnter()
     {
-        // 日本語：落下レイヤーへクロスフェード（遷移時間は設定で解決）
+        // 落下レイヤーへクロスフェード（遷移時間は設定で解決）
         _player.BlendToState(PlayerState.Falling);
     }
 
     public void OnExit()
     {
-        // 日本語：特になし
+        // 特になし
     }
 
     public void OnUpdate(float deltaTime)

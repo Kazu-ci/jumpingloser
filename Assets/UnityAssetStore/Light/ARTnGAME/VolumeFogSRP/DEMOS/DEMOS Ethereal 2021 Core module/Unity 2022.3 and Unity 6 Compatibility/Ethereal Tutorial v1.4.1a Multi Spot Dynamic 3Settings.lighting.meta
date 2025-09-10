@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 4aff9622f804e41468656cbc5d28abab
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/DEMOS/DEMOS Ethereal 2021 Core module/Unity
+    2022.3 and Unity 6 Compatibility/Ethereal Tutorial v1.4.1a Multi Spot Dynamic
+    3Settings.lighting
+  uploadId: 750475

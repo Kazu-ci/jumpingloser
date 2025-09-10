@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c1055bac5fe4d3a448552deb8b30b612
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 8400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 232525
+  packageName: AA Map and Minimap System
+  packageVersion: 1.4.0
+  assetPath: Assets/AA Map and Minimap System/Render Textures/Minimap Render Textures/Minimap_Render_Texture_1.renderTexture
+  uploadId: 673832

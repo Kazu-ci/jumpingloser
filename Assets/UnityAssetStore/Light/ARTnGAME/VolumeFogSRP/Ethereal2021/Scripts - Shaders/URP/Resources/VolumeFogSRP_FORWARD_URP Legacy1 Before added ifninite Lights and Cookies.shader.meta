@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f8e9bc5e9a023cb4cb0bf08a9b09b28d
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2021/Scripts - Shaders/URP/Resources/VolumeFogSRP_FORWARD_URP
+    Legacy1 Before added ifninite Lights and Cookies.shader
+  uploadId: 750475

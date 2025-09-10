@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 202d5612cfe100c4e9aa4f60dd6ef557
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 133137
+  packageName: Witch A
+  packageVersion: 1.0
+  assetPath: Assets/Hit/Witch/Animator/Witch.controller
+  uploadId: 530547

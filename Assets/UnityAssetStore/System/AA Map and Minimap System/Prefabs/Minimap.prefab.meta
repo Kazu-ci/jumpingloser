@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e20348c64b713e5439f086b914bc2d83
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 232525
+  packageName: AA Map and Minimap System
+  packageVersion: 1.4.0
+  assetPath: Assets/AA Map and Minimap System/Prefabs/Minimap.prefab
+  uploadId: 673832

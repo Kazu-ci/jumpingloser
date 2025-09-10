@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 908a603f851df764ab29329e1f62b30b
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 232525
+  packageName: AA Map and Minimap System
+  packageVersion: 1.4.0
+  assetPath: Assets/AA Map and Minimap System/SampleScene/AAMMSampleScene.unity
+  uploadId: 673832

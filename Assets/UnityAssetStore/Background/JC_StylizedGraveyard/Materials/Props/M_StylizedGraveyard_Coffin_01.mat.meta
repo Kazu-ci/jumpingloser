@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4b32f263095ed834397381c701413b04
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 271224
+  packageName: Stylized Graveyard with Church
+  packageVersion: 1.02
+  assetPath: Assets/JC_StylizedGraveyard/Materials/Props/M_StylizedGraveyard_Coffin_01.mat
+  uploadId: 659724
