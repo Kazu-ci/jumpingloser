@@ -13,9 +13,7 @@ public class PlayerMoveState : IState
     public void OnEnter()
     {
         //Debug.Log("Enter Move");
-        _player.mixer.SetInputWeight(0, 0f);
-        _player.mixer.SetInputWeight(1, 1f);
-        _player.playableGraph.Evaluate();
+        _player.BlendToState(PlayerState.Move);
     }
 
     public void OnExit()

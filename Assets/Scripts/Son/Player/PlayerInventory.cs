@@ -23,6 +23,7 @@ public class WeaponInstance
     {
         currentDurability -= Mathf.CeilToInt(cost);
         currentDurability = Mathf.Max(0, currentDurability);
+        currentDurability = Mathf.Min(currentDurability, template.maxDurability);
     }
 
     public bool IsBroken => currentDurability <= 0;
@@ -212,7 +213,7 @@ public class PlayerWeaponInventory
 
         WeaponInstance inst = weapons[idx];
         int before = inst.currentDurability;
-        if (before < cost && cost > 0) return;
+        //if (before < cost && cost > 0) return;
         inst.Use(cost);
 
         // --- 耐久度更新イベント ---

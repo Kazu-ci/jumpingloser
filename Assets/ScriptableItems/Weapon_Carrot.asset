@@ -29,11 +29,15 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 2}
     hitCheckTime: 0.2
+    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeSpeed: 10
+    lungeTime: 0.1
+    attackPrefab: {fileID: 0}
     attackVFXPrefab: {fileID: 0}
     attackVFXTime: 0.05
   - name: Attack2
     animation: {fileID: 3878471701507660605, guid: 8c8b08780b136fd46b62591e3a99a076, type: 3}
-    durabilityCost: 2
+    durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 65e17687c247246489282d63a5ef1d2f, type: 3}
     inputWindowStart: 0.3
@@ -43,11 +47,15 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 2}
     hitCheckTime: 0.2
+    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeSpeed: 10
+    lungeTime: 0.1
+    attackPrefab: {fileID: 0}
     attackVFXPrefab: {fileID: 0}
     attackVFXTime: 0.2
   - name: Attack3
     animation: {fileID: 8672263195707164059, guid: dc3608c8e5ee67b43beb18b0f490cd1f, type: 3}
-    durabilityCost: 2
+    durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 9cf6710d9ca8a3842ab66d59742e60ec, type: 3}
     inputWindowStart: 0.3
@@ -57,11 +65,15 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
+    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeSpeed: 10
+    lungeTime: 0.1
+    attackPrefab: {fileID: 0}
     attackVFXPrefab: {fileID: 0}
     attackVFXTime: 0.2
   - name: Attack4
     animation: {fileID: 7969338187987883900, guid: 01cb076390f1e7543af18bcea9ecb93c, type: 3}
-    durabilityCost: 2
+    durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: f362c9918c3204841b15c740d6d698e6, type: 3}
     inputWindowStart: 0.3
@@ -71,11 +83,15 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 4, z: 3}
     hitCheckTime: 0.2
+    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeSpeed: 10
+    lungeTime: 0.1
+    attackPrefab: {fileID: 0}
     attackVFXPrefab: {fileID: 0}
     attackVFXTime: 0.2
   - name: Attack5
     animation: {fileID: -904864237794195412, guid: cff2332bf6ef4cf4789f5b198a8b8507, type: 3}
-    durabilityCost: 2
+    durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 18a92cf2f0abd7d429e293a05c006c3d, type: 3}
     inputWindowStart: 0.3
@@ -85,6 +101,10 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 4, z: 4}
     hitCheckTime: 0.5
+    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeSpeed: 10
+    lungeTime: 0.1
+    attackPrefab: {fileID: 0}
     attackVFXPrefab: {fileID: 0}
     attackVFXTime: 0.2
   subWeaponAttack: []
@@ -93,5 +113,6 @@ MonoBehaviour:
   attackPower: 3
   attackRange: 2
   attackSpeed: 1
+  addDurabilityOnPickup: 20
   hitSFX: {fileID: 0}
   hitVFXPrefab: {fileID: 8778328243042707411, guid: 374aa05c79e9e4d4f8b03441dc2cc978, type: 3}
