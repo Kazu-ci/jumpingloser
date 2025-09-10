@@ -232,7 +232,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1fe086e5b1c3d949a3dec73e761f8af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemy: {fileID: 0}
+  enemy: {fileID: 3670577260336825001}
 --- !u!1001 &3347104414544473054
 PrefabInstance:
   m_ObjectHideFlags: 0

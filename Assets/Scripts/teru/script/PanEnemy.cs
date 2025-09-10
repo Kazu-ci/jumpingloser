@@ -44,7 +44,8 @@ public class PanEnemy : Enemy
     public override void OnAttackSet()
     {
         var go=Instantiate(attackObject);
-        go.transform.position=transform.position+ new Vector3(1,1,0);
+        go.transform.position=transform.position+ new Vector3(0,0,0);
+        
     }
     
     private class IdleState : EStateMachine<PanEnemy>.StateBase
