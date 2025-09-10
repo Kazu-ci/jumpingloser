@@ -48,6 +48,12 @@ public class ComboAction
     public float lungeSpeed = 10f; // 突進速度
     public float lungeTime = 0.1f; // 突進時間
 
+    [Header("アニメーション速度補正")]
+    public float animationSpeed = 1.0f; // アニメーション再生速度補正
+
+    [Header("攻撃判定プレハブ")]
+    public GameObject attackPrefab; // 攻撃判定用のプレハブ（nullならヒットボックスのみ）
+
     [Header("エフェクト")]
     public GameObject attackVFXPrefab; // ヒット時のエフェクトプレハブ
     public float attackVFXTime = 0.2f; // エフェクト発生タイミング

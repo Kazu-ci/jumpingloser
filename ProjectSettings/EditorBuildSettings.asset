@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TestResultScene.unity
     guid: fde75e6591d568248a2007ee0bf15411
+  - enabled: 1
+    path: Assets/Scenes/Map1_temple.unity
+    guid: ba190e32a26da0f4c8089c37324a2918
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

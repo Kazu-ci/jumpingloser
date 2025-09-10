@@ -14,9 +14,7 @@ public class PlayerIdleState : IState
     public void OnEnter()
     {
         //Debug.Log("Enter Idle");
-
-        _player.mixer.SetInputWeight(0, 1f);
-        _player.mixer.SetInputWeight(1, 0f);
+        _player.BlendToState(PlayerState.Idle);
     }
 
     public void OnExit()

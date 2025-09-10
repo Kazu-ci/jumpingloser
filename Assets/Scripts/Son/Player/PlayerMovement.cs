@@ -15,7 +15,9 @@ public enum PlayerState
     SwitchWeapon,// 武器切り替え
     Attack,      // 攻撃
     Skill,       // スキル
-    Dash         // ダッシュ
+    Dash,        // ダッシュ
+    Dead,        // 死亡
+    Falling      // 落下
 }
 
 public enum PlayerTrigger
@@ -30,7 +32,13 @@ public enum PlayerTrigger
     AttackUp,
     Hold,
     DashInput,
+    Die,
+    NoGround,
+    Grounded,
+    SkillInput
 }
+
+
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement : MonoBehaviour
@@ -42,6 +50,11 @@ public class PlayerMovement : MonoBehaviour
 
     [HideInInspector] public bool attackHeld;                // 押しっぱなしフラグ
     [HideInInspector] public bool attackPressedThisFrame;    // そのフレームに押下されたか
+
+    [Header("攻撃入力（長押し判定）")]
+    [Tooltip("この秒数以上ならスキルとして扱う")]
+    public float skillHoldThreshold = 0.35f;   // 例：0.35秒
+    private double attackPressStartTime = -1.0; // 押下時刻（Time.timeAsDouble）
 
     [Header("ステータス")]
     public float maxHealth = 50;
@@ -66,6 +79,7 @@ public class PlayerMovement : MonoBehaviour
     public GameObject weaponBoxL;          // 左手の武器親
     public WeaponInstance fist;            // 素手
     public GameObject wpBrokeEffect;      // 武器破壊エフェクト
+    public bool isHitboxVisible = true; // ヒットボックス可視化
 
     // 武器インベントリ
     public PlayerWeaponInventory weaponInventory = new PlayerWeaponInventory();
@@ -78,10 +92,68 @@ public class PlayerMovement : MonoBehaviour
     [Header("アニメーションクリップ")]
     public AnimationClip idleClip;
     public AnimationClip moveClip;
+    public AnimationClip dashClip;
+    public AnimationClip fallClip;
+    public AnimationClip hitClip;
+    public AnimationClip dieClip;
     public PlayableGraph playableGraph;
     public AnimationMixerPlayable mixer;
     private AnimationClipPlayable idlePlayable;
     private AnimationClipPlayable movePlayable;
+
+    // 日本語：メインレイヤー用の追加Playable
+    private AnimationClipPlayable fallPlayable;
+    private AnimationClipPlayable hitPlayable;
+    private AnimationClipPlayable deadPlayable;
+    // 日本語：アクションスロットのダミー（未接続時の穴埋め）
+    private AnimationClipPlayable actionPlaceholder;
+
+    // 日本語：メインレイヤーのフェード用コルーチン
+    private Coroutine mainLayerFadeCo;
+
+    // 日本語：落下中に死亡が確定したフラグ（着地で死亡へ）
+    private bool pendingDie;
+
+    // ================== 状態間ブレンド設定 ==================
+    // 個別(from→to)のブレンド時間を上書きするエントリ
+    // メインレイヤーのスロット番号（Mixer入力の固定割り当て）
+    public enum MainLayerSlot
+    {
+        Idle = 0, // アイドル
+        Move = 1, // 移動
+        Action = 2, // 攻撃/スキル
+        Falling = 3, // 落下
+        Hit = 4, // 被弾
+        Dead = 5  // 死亡
+    }
+    [System.Serializable]
+    public class StateBlendEntry
+    {
+        public PlayerState from;                 // 例：Move
+        public PlayerState to;                   // 例：Hit
+        [Min(0f)] public float duration = 0.12f; // 例：0.06f（被弾は速く）
+    }
+
+    //「to状態」単位のデフォルトブレンド（from未一致時のフォールバック）
+    [System.Serializable]
+    public class StateDefaultBlend
+    {
+        public PlayerState to;                   // 例：Hit
+        [Min(0f)] public float duration = 0.12f; // 例：0.06f
+    }
+
+    [Header("状態間ブレンド（可変）")]
+    [Tooltip("全体の規定値（個別設定やto既定が見つからない場合のフォールバック）")]
+    public float defaultStateCrossfade = 0.12f;
+
+    [Tooltip("特定のfrom→toで上書きしたいブレンド時間（任意件）")]
+    public List<StateBlendEntry> blendOverrides = new List<StateBlendEntry>();
+
+    [Tooltip("to状態ごとの既定ブレンド（from未一致時に使用）")]
+    public List<StateDefaultBlend> toStateDefaults = new List<StateDefaultBlend>();
+
+    // 日本語：直近の論理状態（ブレンド計算用）
+    public PlayerState lastBlendState = PlayerState.Idle;
 
     [Header("サウンド")]
     public PlayerAudioManager audioManager;
@@ -92,6 +164,7 @@ public class PlayerMovement : MonoBehaviour
     private CharacterController controller;
     private Vector3 velocity;
     private bool isGrounded;
+    public bool IsGrounded => isGrounded;
     private Transform mainCam;
     private StateMachine<PlayerState, PlayerTrigger> _fsm;
 
@@ -114,23 +187,44 @@ public class PlayerMovement : MonoBehaviour
         inputActions.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         inputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
 
+        // 攻撃キー：押下時は時刻を記録、離した瞬間に短押し/長押しを分岐する
         inputActions.Player.Attack.performed += ctx =>
         {
-            attackHeld = true;               // ← 押しっぱ開始
-            attackPressedThisFrame = true;   // ← そのフレーム押下
-            OnAttackInput();                 
+            //押しっぱ開始。ここでは発動しない（確定は離した瞬間）
+            attackHeld = true;
+            attackPressedThisFrame = false;                  // このフレームでの先行受付はしない
+            attackPressStartTime = Time.timeAsDouble;        // 押下時刻を記録
         };
+
         inputActions.Player.Attack.canceled += ctx =>
         {
-            attackHeld = false;              // ← ボタンを離した
+            //ボタンを離した。押下継続時間で通常攻撃/スキルを分岐
+            attackHeld = false;
+            double held = (attackPressStartTime < 0.0) ? 0.0 : (Time.timeAsDouble - attackPressStartTime);
+            attackPressStartTime = -1.0;
+
+            // 死亡/落下など上位優先状態では無視
+            if (_fsm.CurrentState == PlayerState.Dead) return;
+
+            if (held >= skillHoldThreshold)
+            {
+                //長押し→スキル入力トリガー
+                WeaponInstance wp = GetMainWeapon();
+                //if(wp!=null)_fsm.ExecuteTrigger(PlayerTrigger.SkillInput);
+            }
+            else
+            {
+                attackPressedThisFrame = true;
+                _fsm.ExecuteTrigger(PlayerTrigger.AttackInput);
+            }
         };
         inputActions.Player.SwitchWeapon.performed += ctx => OnSwitchWeaponInput();
         inputActions.Player.SwitchWeapon2.performed += ctx => OnSwitchWeaponInput2();
+        inputActions.Player.SwitchHitbox.performed += ctx => { isHitboxVisible = !isHitboxVisible; };
 
         // --- UIEvents の購読：装備切替/破壊/耐久 ---
         UIEvents.OnRightWeaponSwitch += HandleRightWeaponSwitch;   // (weapons, from, to)
-        UIEvents.OnLeftWeaponSwitch += HandleLeftWeaponSwitch;    // (weapons, from, to)
-        UIEvents.OnWeaponDestroyed += HandleWeaponDestroyed;     // (removedIndex, item)
+        
 
         // --- PlayerEvents の購読 ---
         PlayerEvents.OnWeaponBroke += PlayrWeaponBrokeEffect; // (handType)
@@ -145,8 +239,6 @@ public class PlayerMovement : MonoBehaviour
 
         // 購読解除
         UIEvents.OnRightWeaponSwitch -= HandleRightWeaponSwitch;
-        UIEvents.OnLeftWeaponSwitch -= HandleLeftWeaponSwitch;
-        UIEvents.OnWeaponDestroyed -= HandleWeaponDestroyed;
 
         PlayerEvents.OnWeaponBroke -= PlayrWeaponBrokeEffect;
 
@@ -158,19 +250,43 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
+        //Time.timeScale = 0.3f;
         mainCam = Camera.main.transform;
 
         // --- PlayableGraph 初期化 ---
         playableGraph = PlayableGraph.Create("PlayerGraph");
+
+        // 日本語：ルートモーションは制御コード側で扱うため無効化
+        playerAnimator.applyRootMotion = false;
+
+        // 日本語：各クリップのラップモード（落下は最終フレーム保持）
         idleClip.wrapMode = WrapMode.Loop;
         moveClip.wrapMode = WrapMode.Loop;
+        fallClip.wrapMode = WrapMode.ClampForever;    // ★ 変更：Loop→ClampForever
+        hitClip.wrapMode = WrapMode.ClampForever;
+        dieClip.wrapMode = WrapMode.ClampForever;
 
         idlePlayable = AnimationClipPlayable.Create(playableGraph, idleClip);
         movePlayable = AnimationClipPlayable.Create(playableGraph, moveClip);
+        fallPlayable = AnimationClipPlayable.Create(playableGraph, fallClip);
+        hitPlayable = AnimationClipPlayable.Create(playableGraph, hitClip);
+        deadPlayable = AnimationClipPlayable.Create(playableGraph, dieClip);
 
-        mixer = AnimationMixerPlayable.Create(playableGraph, 2);
-        mixer.ConnectInput(0, idlePlayable, 0, 1f);
-        mixer.ConnectInput(1, movePlayable, 0, 0f);
+        // 日本語：メインミキサーは6入力（Idle/Move/Action/Falling/Hit/Dead）
+        mixer = AnimationMixerPlayable.Create(playableGraph, 6);
+
+        // 0:Idle, 1:Move
+        mixer.ConnectInput((int)MainLayerSlot.Idle, idlePlayable, 0, 1f);
+        mixer.ConnectInput((int)MainLayerSlot.Move, movePlayable, 0, 0f);
+
+        // 2:Action（初期はダミーを接続。攻撃/スキル時に子ミキサーへ差し替え）
+        actionPlaceholder = AnimationClipPlayable.Create(playableGraph, new AnimationClip());
+        mixer.ConnectInput((int)MainLayerSlot.Action, actionPlaceholder, 0, 0f);
+
+        // 3:Fall, 4:Hit, 5:Dead
+        mixer.ConnectInput((int)MainLayerSlot.Falling, fallPlayable, 0, 0f);
+        mixer.ConnectInput((int)MainLayerSlot.Hit, hitPlayable, 0, 0f);
+        mixer.ConnectInput((int)MainLayerSlot.Dead, deadPlayable, 0, 0f);
 
         var playableOutput = AnimationPlayableOutput.Create(playableGraph, "Animation", playerAnimator);
         playableOutput.SetSourcePlayable(mixer);
@@ -178,10 +294,6 @@ public class PlayerMovement : MonoBehaviour
 
         // --- FSM 初期化 ---
         SetupStateMachine();
-
-        // --- 初期装備（必要なら右手→左手の順で）---
-        // weaponInventory.AddWeapon(startWeaponItem);
-        // weaponInventory.TrySwitchRight();
 
         // --- ライフ初期化 ---
         currentHealth = maxHealth;
@@ -195,18 +307,45 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        // 接地
+        // 接地判定
+        bool wasGrounded = isGrounded;
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-        if (isGrounded && velocity.y < 0f) velocity.y = -2f;
+
+        // 日本語：地上では垂直速度を小さな負値に固定し、接地安定を確保
+        if (isGrounded && velocity.y < 0f)
+        {
+            velocity.y = -4f; // ★ これにより微小な押し付けで浮遊を防止
+        }
+
+        // 離地検出 → Fallingへ（Dead/Falling を除外）
+        if (!isGrounded && _fsm.CurrentState != PlayerState.Dead && _fsm.CurrentState != PlayerState.Falling)
+        {
+            _fsm.ExecuteTrigger(PlayerTrigger.NoGround);
+        }
+
+        if (isGrounded && _fsm.CurrentState == PlayerState.Falling)
+        {
+            _fsm.ExecuteTrigger(PlayerTrigger.Grounded);
+            if (pendingDie) { pendingDie = false; _fsm.ExecuteTrigger(PlayerTrigger.Die); }
+        }
+
+        // 地面かつ Idle/Move 時は移動入力で確実に遷移を駆動（保険）
+        if (isGrounded && (_fsm.CurrentState == PlayerState.Idle || _fsm.CurrentState == PlayerState.Move))
+        {
+            if (moveInput.sqrMagnitude > 0.01f)
+                _fsm.ExecuteTrigger(PlayerTrigger.MoveStart);
+            else
+                _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
+        }
+
+        // 重力/移動（重力は常時加算）
+        velocity.y += gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
 
         // ステート更新
         bool pressedNow = attackPressedThisFrame;
         _fsm.Update(Time.deltaTime);
         attackPressedThisFrame = false && pressedNow;
-
-        // 重力
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
     }
 
     // ====== FSM 構築 ======
@@ -217,23 +356,52 @@ public class PlayerMovement : MonoBehaviour
         _fsm.RegisterState(PlayerState.Idle, new PlayerIdleState(this));
         _fsm.RegisterState(PlayerState.Move, new PlayerMoveState(this));
         _fsm.RegisterState(PlayerState.Attack, new PlayerAttackState(this));
+        _fsm.RegisterState(PlayerState.Skill, new PlayerSkillState(this));
+        _fsm.RegisterState(PlayerState.Falling, new PlayerFallingState(this));
+        _fsm.RegisterState(PlayerState.Hit, new PlayerHitState(this));
+        _fsm.RegisterState(PlayerState.Dead, new PlayerDeadState(this));
 
+        // Locomotion
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Move, PlayerTrigger.MoveStart);
         _fsm.AddTransition(PlayerState.Move, PlayerState.Idle, PlayerTrigger.MoveStop);
 
+        // Attack / Skill
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Attack, PlayerTrigger.AttackInput);
         _fsm.AddTransition(PlayerState.Move, PlayerState.Attack, PlayerTrigger.AttackInput);
+        _fsm.AddTransition(PlayerState.Idle, PlayerState.Skill, PlayerTrigger.SkillInput);
+        _fsm.AddTransition(PlayerState.Move, PlayerState.Skill, PlayerTrigger.SkillInput);
+
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Idle, PlayerTrigger.MoveStop);
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Move, PlayerTrigger.MoveStart);
+        // 攻撃中に長押しでスキル移行を許す設計なら以下を維持
+        _fsm.AddTransition(PlayerState.Attack, PlayerState.Skill, PlayerTrigger.SkillInput);
+
+        // Falling（Dead以外の全状態→Falling）
+        _fsm.AddTransition(PlayerState.Idle, PlayerState.Falling, PlayerTrigger.NoGround);
+        _fsm.AddTransition(PlayerState.Move, PlayerState.Falling, PlayerTrigger.NoGround);
+        _fsm.AddTransition(PlayerState.Attack, PlayerState.Falling, PlayerTrigger.NoGround);
+        _fsm.AddTransition(PlayerState.Skill, PlayerState.Falling, PlayerTrigger.NoGround);
+        _fsm.AddTransition(PlayerState.Hit, PlayerState.Falling, PlayerTrigger.NoGround);
+
+        // Falling → Idle
+        _fsm.AddTransition(PlayerState.Falling, PlayerState.Idle, PlayerTrigger.Grounded);
+
+        // Hit（地上のみ：Falling/Dead以外→Hit）
+        _fsm.AddTransition(PlayerState.Idle, PlayerState.Hit, PlayerTrigger.GetHit);
+        _fsm.AddTransition(PlayerState.Move, PlayerState.Hit, PlayerTrigger.GetHit);
+        _fsm.AddTransition(PlayerState.Attack, PlayerState.Hit, PlayerTrigger.GetHit);
+        _fsm.AddTransition(PlayerState.Skill, PlayerState.Hit, PlayerTrigger.GetHit);
+
+        // Dead（どこからでも → Dead）
+        _fsm.AddTransition(PlayerState.Idle, PlayerState.Dead, PlayerTrigger.Die);
+        _fsm.AddTransition(PlayerState.Move, PlayerState.Dead, PlayerTrigger.Die);
+        _fsm.AddTransition(PlayerState.Attack, PlayerState.Dead, PlayerTrigger.Die);
+        _fsm.AddTransition(PlayerState.Skill, PlayerState.Dead, PlayerTrigger.Die);
+        _fsm.AddTransition(PlayerState.Falling, PlayerState.Dead, PlayerTrigger.Die);
+        _fsm.AddTransition(PlayerState.Hit, PlayerState.Dead, PlayerTrigger.Die);
     }
 
     // ====== 入力ハンドラ ======
-    private void OnAttackInput()
-    {
-        var weapon = weaponInventory.GetWeapon(HandType.Main);
-        _fsm.ExecuteTrigger(PlayerTrigger.AttackInput);
-
-    }
 
     private void OnSwitchWeaponInput()
     {
@@ -268,7 +436,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void PlayrWeaponBrokeEffect(HandType handType)
     {
-        if(wpBrokeEffect != null)
+        if (wpBrokeEffect != null)
         {
             GameObject box = (handType == HandType.Main) ? weaponBoxR : weaponBoxL;
             Instantiate(wpBrokeEffect, box.transform.position, Quaternion.identity);
@@ -279,25 +447,8 @@ public class PlayerMovement : MonoBehaviour
     private void HandleRightWeaponSwitch(List<WeaponInstance> list, int from, int to)
     {
         // ・from->to の変化を受けて、右手の武器モデルを入れ替える
-        if(from == to) return; // 変化なし
-        ApplyHandModel(HandType.Main, list, to);
-    }
-
-    // 左手の切替イベント
-    private void HandleLeftWeaponSwitch(List<WeaponInstance> list, int from, int to)
-    {
         if (from == to) return; // 変化なし
-        //ApplyHandModel(HandType.Sub, list, to);
-    }
-
-    // 破壊イベント（UI向け）。モデルは切替イベントで反映されるため、ここはログ程度でOK
-    private void HandleWeaponDestroyed(int removedIndex, WeaponItem item)
-    {
-        // ・removedIndex は削除前の番号
-        // ・手元に持っている場合は、RemoveAtAndRecover 内で SetHandIndex が走り、
-        //   結果として OnRightWeaponSwitch / OnLeftWeaponSwitch が飛んでくるので、
-        //   見た目の同期はそちらで実施される
-        Debug.Log($"Weapon destroyed @index={removedIndex} ({item?.weaponName})");
+        ApplyHandModel(HandType.Main, list, to);
     }
 
     // 指定手の武器モデルを更新
@@ -364,6 +515,10 @@ public class PlayerMovement : MonoBehaviour
             _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
         }
     }
+    public void HandleFalling()
+    {
+        _fsm.ExecuteTrigger(PlayerTrigger.NoGround);
+    }
 
     public void EnsureMixerInputCount(int requiredCount)
     {
@@ -382,6 +537,8 @@ public class PlayerMovement : MonoBehaviour
     {
         _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
     }
+
+
 
     // === 物拾い（現状は単純に所持へ追加）===
     public void PickUpWeapon(WeaponItem weapon)
@@ -405,328 +562,134 @@ public class PlayerMovement : MonoBehaviour
     public void TakeDamage(DamageData damage)
     {
         if (damage.damageAmount <= 0) return;
-        currentHealth -= damage.damageAmount;
-        currentHealth = Mathf.Max(currentHealth, 0);
-        Debug.Log($"Player took {damage.damageAmount} damage. Current health: {currentHealth}/{maxHealth}");
-        //audioManager?.PlayHurtSound();
+        if (_fsm.CurrentState == PlayerState.Dead) return; // 死亡後は無視
+
+        currentHealth = Mathf.Max(0, currentHealth - damage.damageAmount);
+
         if (currentHealth <= 0)
         {
-            Die();
-        }
-    }
-    private void Die()
-    {
-        Debug.Log("Player has died.");
-    }
-}
-
-
-
-
-
-
-
-
-
-/*using UnityEngine;
-using UnityEngine.Playables;
-using System.Collections.Generic;
-using UnityEngine.Animations;
-//using static EventBus;
-using UnityEngine.InputSystem;
-using Unity.VisualScripting;
-using UnityEngine.XR;
-
-
-public enum PlayerState
-{
-    Idle,// 待機
-    Move,// 歩き
-    Hit,// 被弾
-    Pickup,// ピックアップ
-    SwitchWeapon,// 武器切り替え
-    Attack //攻撃
-}
-
-public enum PlayerTrigger
-{
-    MoveStart, 
-    MoveStop,
-    GetHit,
-    StartPickup,
-    EndPickup,
-    SwitchWeapon,
-    AttackInput
-}
-
-
-[RequireComponent(typeof(CharacterController))]
-public class PlayerMovement : MonoBehaviour
-{
-
-    private InputSystem_Actions inputActions;
-    private Vector2 moveInput;
-    private Vector2 lookInput;
-
-    [Header("移動設定")]
-    public float moveSpeed = 5f;             // 移動速度
-    //public float jumpHeight = 2f;            // ジャンプの高さ（未使用）
-    public float gravity = -9.81f;           // 重力加速度
-    public float rotationSpeed = 360f;       // 回転速度（度／秒）
-
-    [Header("接地判定")]
-    public Transform groundCheck;            // 地面判定のためのTransform
-    public float groundDistance = 0.4f;      // 接地チェックの半径
-    public LayerMask groundMask;             // 地面として判定されるレイヤー
-
-    [Header("武器関連")]
-    public GameObject weaponBoxR;             // 右手武器の親オブジェクト
-    public GameObject weaponBoxL;             // 左手武器の親オブジェクト
-    public WeaponInstance fist;               // 素手
-    private PlayerWeaponInventory weaponInventory = new PlayerWeaponInventory(); // プレイヤーの武器インベントリ
-
-    [Header("プレイヤーモデル")]
-    public GameObject playerModel;           // プレイヤーモデルのGameObject
-    public Animator playerAnimator;       // プレイヤーのアニメーションコンポーネント
-
-    [Header("アニメーションクリップ")]
-    public AnimationClip idleClip;           // 待機アニメーション
-    public AnimationClip moveClip;
-    public PlayableGraph playableGraph;
-    public AnimationMixerPlayable mixer;
-    private AnimationClipPlayable idlePlayable;
-    private AnimationClipPlayable movePlayable;
-
-    [Header("サウンド")]    
-    public PlayerAudioManager audioManager;
-    
-
-    private CharacterController controller;  // CharacterControllerの参照
-    private Vector3 velocity;                // 垂直方向の速度
-    private bool isGrounded;                 // 接地しているかどうか
-    private Transform mainCam;               // メインカメラのTransform
-
-    // プレイヤーの状態
-    private StateMachine<PlayerState, PlayerTrigger> _fsm;
-
-    void Start()
-    {
-        
-
-        controller = GetComponent<CharacterController>();
-        mainCam = Camera.main.transform; // メインカメラを取得
-        SwitchWeapon(HandType.Main); // 初期武器を設定
-
-
-        inputActions = new InputSystem_Actions();
-        inputActions.Enable();
-
-        inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        inputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
-
-        inputActions.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
-        inputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
-
-        inputActions.Player.Attack.performed += ctx => OnAttackInput();
-        inputActions.Player.SwitchWeapon.performed += ctx => OnSwitchWeaponInput();
-
-
-
-        // PlayableGraph 初期化
-        playableGraph = PlayableGraph.Create("PlayerGraph");
-
-        idleClip.wrapMode = WrapMode.Loop; // 待機アニメーションをループさせる
-        moveClip.wrapMode = WrapMode.Loop; // 移動アニメーションをループさせる
-
-        idlePlayable = AnimationClipPlayable.Create(playableGraph, idleClip);
-        movePlayable = AnimationClipPlayable.Create(playableGraph, moveClip);
-       
-        // Mixer 2 inputs
-        mixer = AnimationMixerPlayable.Create(playableGraph, 2);
-
-        mixer.ConnectInput(0, idlePlayable, 0, 1f);
-        mixer.ConnectInput(1, movePlayable, 0, 0f);
-
-        var playableOutput = AnimationPlayableOutput.Create(playableGraph, "Animation", playerAnimator);
-        playableOutput.SetSourcePlayable(mixer);
-
-        playableGraph.Play();
-        SetupStateMachine();
-    }
-
-    void Update()
-    {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-        if (isGrounded && velocity.y < 0)
-        {
-            velocity.y = -2f;
-        }
-
-        _fsm.Update(Time.deltaTime);
-
-        //　重力
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
-    }
-
-    private void OnDisable()
-    {
-        inputActions?.Disable();
-    }
-
-    void SwitchWeapon(HandType hand)
-    {
-        int from = weaponInventory.mainIndex;
-        if (weaponInventory.SwitchRightWeapon() == -1)
-        {
-            //UIEvents.OnRightWeaponSwitch?.Invoke(weaponInventory.weapons,-1,-1); // 武器がない場合はUIを更新
-            return; // 失敗の場合は何もしない
-        }
-        EquipWeapon(hand); // 武器を装備
-    }
-    private void WeaponBroke(WeaponInstance weapon)
-    {
-        if (weapon != null && weapon.IsBroken)
-        {
-            Debug.LogWarning("Weapon is broken: " + weapon.template.weaponName);
-            weaponInventory.DestroyWeapon(weapon); // インベントリから武器を削除
-            EquipWeapon(HandType.Main); // メイン武器を再装備
-        }
-    }
-    public void EquipWeapon(HandType hand)
-    {
-        GameObject weaponBox = hand == HandType.Main ? weaponBoxR : weaponBoxL;
-        while (weaponBox.transform.childCount > 0)
-        {
-            Transform oldWeapon = weaponBox.transform.GetChild(0);
-            if (oldWeapon != null)
+            // 空中なら着地後に死亡へ、地上なら即死亡へ
+            if (!isGrounded)
             {
-                Destroy(oldWeapon.gameObject); // 古い武器を削除
+                pendingDie = true;
+                _fsm.ExecuteTrigger(PlayerTrigger.NoGround);
             }
-        }
-        WeaponInstance weapon = weaponInventory.GetWeapon(hand);
-        if (weapon == null)
-        {
-            Debug.Log("No weapon equipped for hand: " + hand);
-            return; // 武器がない場合は何もしない
-        }
-        
-        GameObject newWeapon = Instantiate(weapon.template.modelPrefab, weaponBox.transform);
-        newWeapon.transform.localPosition = Vector3.zero; // 武器の位置をリセット
-        newWeapon.transform.localRotation = Quaternion.identity; // 武器の回転をリセット
-        //tempUI?.UpdateWeapon(weapon);
-    }
-    public void PickUpWeapon(WeaponItem weapon)
-    {
-        if (weapon!= null)
-        {
-            weaponInventory.AddWeapon(weapon);
-            Debug.Log("PickUp:" + weapon.weaponName);
-        }
-    }
-    private void OnDestroy()
-    {
-        playableGraph.Destroy();
-    }
-    public void CheckMoveInput()
-    {
-        float inputX = Input.GetAxisRaw("Horizontal");
-        float inputZ = Input.GetAxisRaw("Vertical");
-        if (Mathf.Abs(inputX) > 0.1f || Mathf.Abs(inputZ) > 0.1f)
-        {
-            _fsm.ExecuteTrigger(PlayerTrigger.MoveStart);
-        }
-    }
-    private void SetupStateMachine()
-    {
-        _fsm = new StateMachine<PlayerState, PlayerTrigger>(this, PlayerState.Idle);
-
-        _fsm.RegisterState(PlayerState.Idle, new PlayerIdleState(this));
-        _fsm.RegisterState(PlayerState.Move, new PlayerMoveState(this));
-        _fsm.RegisterState(PlayerState.Attack, new PlayerAttackState(this));
-
-        _fsm.AddTransition(PlayerState.Idle, PlayerState.Move, PlayerTrigger.MoveStart);
-        _fsm.AddTransition(PlayerState.Move, PlayerState.Idle, PlayerTrigger.MoveStop);
-
-        _fsm.AddTransition(PlayerState.Idle, PlayerState.Attack, PlayerTrigger.AttackInput);
-        _fsm.AddTransition(PlayerState.Move, PlayerState.Attack, PlayerTrigger.AttackInput);
-        _fsm.AddTransition(PlayerState.Attack, PlayerState.Idle, PlayerTrigger.MoveStop);
-        _fsm.AddTransition(PlayerState.Attack, PlayerState.Move, PlayerTrigger.MoveStart);
-    }
-    public void HandleMovement(float deltaTime)
-    {
-        float inputX = moveInput.x;
-        float inputZ = moveInput.y;
-
-        Vector3 camForward = mainCam.forward;
-        Vector3 camRight = mainCam.right;
-        camForward.y = 0;
-        camRight.y = 0;
-        camForward.Normalize();
-        camRight.Normalize();
-
-        Vector3 moveDir = camRight * inputX + camForward * inputZ;
-        moveDir.Normalize();
-
-        if (moveDir.magnitude >= 0.1f)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * deltaTime);
-
-            controller.Move(moveDir * moveSpeed * deltaTime);
-        }
-    }
-
-    public void CheckMoveStop()
-    {
-        float inputX = Input.GetAxisRaw("Horizontal");
-        float inputZ = Input.GetAxisRaw("Vertical");
-        if (Mathf.Abs(inputX) < 0.1f && Mathf.Abs(inputZ) < 0.1f)
-        {
-            _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
-        }
-    }
-    public WeaponInstance GetMainWeapon()
-    {
-        return weaponInventory.GetWeapon(HandType.Main);
-    }
-    public void ToIdle()
-    {
-        _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
-    }
-    public void EnsureMixerInputCount(int requiredCount)
-    {
-        if (mixer.GetInputCount() < requiredCount)
-        {
-            mixer.SetInputCount(requiredCount);
-        }
-    }
-
-    private void OnAttackInput()
-    {
-        WeaponInstance weapon = weaponInventory.GetWeapon(HandType.Main);
-        if (weapon != null)
-        {
-            Debug.Log("Attacking with: " + weapon.template.weaponName + "Durability now: " + weapon.currentDurability);
-            _fsm.ExecuteTrigger(PlayerTrigger.AttackInput);
-
-            if (weapon.IsBroken)
+            else
             {
-                WeaponBroke(weapon); // 武器が壊れた場合の処理
+                _fsm.ExecuteTrigger(PlayerTrigger.Die);
             }
+            return;
+        }
+
+        // 地上であれば被弾を優先
+        if (isGrounded)
+        {
+            _fsm.ExecuteTrigger(PlayerTrigger.GetHit);
+        }
+        // 空中被弾はFallingで処理（死亡のみ遅延フラグ）
+    }
+
+    // ====== アニメーション制御 ======
+    // メインレイヤーの指定スロットへクロスフェード（他の入力は0へ）
+    public void BlendToMainSlot(MainLayerSlot target, float duration)
+    {
+        if (mainLayerFadeCo != null) StopCoroutine(mainLayerFadeCo);
+        mainLayerFadeCo = StartCoroutine(CoBlendToMainSlot(target, duration));
+    }
+
+    private System.Collections.IEnumerator CoBlendToMainSlot(MainLayerSlot target, float duration)
+    {
+        int inputCount = mixer.GetInputCount();
+        if (duration <= 0f)
+        {
+            for (int i = 0; i < inputCount; ++i)
+                mixer.SetInputWeight(i, (i == (int)target) ? 1f : 0f);
+            yield break;
+        }
+
+        // 現在重みのスナップショット
+        float[] start = new float[inputCount];
+        for (int i = 0; i < inputCount; ++i) start[i] = mixer.GetInputWeight(i);
+
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float w = Mathf.Clamp01(t / duration);
+            for (int i = 0; i < inputCount; ++i)
+            {
+                float dst = (i == (int)target) ? 1f : 0f;
+                mixer.SetInputWeight(i, Mathf.Lerp(start[i], dst, w));
+            }
+            yield return null;
+        }
+        for (int i = 0; i < inputCount; ++i)
+            mixer.SetInputWeight(i, (i == (int)target) ? 1f : 0f);
+    }
+    // 
+    private MainLayerSlot MapStateToSlot(PlayerState s)
+    {
+        switch (s)
+        {
+            case PlayerState.Idle: return MainLayerSlot.Idle;
+            case PlayerState.Move: return MainLayerSlot.Move;
+            case PlayerState.Attack: return MainLayerSlot.Action; // 子ミキサー
+            case PlayerState.Skill: return MainLayerSlot.Action; // 子ミキサー
+            case PlayerState.Falling: return MainLayerSlot.Falling;
+            case PlayerState.Hit: return MainLayerSlot.Hit;
+            case PlayerState.Dead: return MainLayerSlot.Dead;
+            default: return MainLayerSlot.Idle;
         }
     }
 
-    private void OnSwitchWeaponInput()
+    // 日本語：ブレンド時間の解決（1.個別from to > 2.to既定 > 3.全体既定）
+    public float ResolveBlendDuration(PlayerState from, PlayerState to)
     {
-        if (_fsm.CurrentState != PlayerState.Attack)
+        // 1) 個別オーバーライド検索
+        for (int i = 0; i < blendOverrides.Count; ++i)
         {
-            SwitchWeapon(HandType.Main);
+            var e = blendOverrides[i];
+            if (e != null && e.from == from && e.to == to) return Mathf.Max(0f, e.duration);
         }
-        else
+        // 2) to状態の既定
+        for (int i = 0; i < toStateDefaults.Count; ++i)
         {
-            Debug.Log("Cannot switch weapon while attacking!");
+            var d = toStateDefaults[i];
+            if (d != null && d.to == to) return Mathf.Max(0f, d.duration);
         }
+        // 3) 全体既定
+        return Mathf.Max(0f, defaultStateCrossfade);
+    }
+
+    // 日本語：論理状態へブレンド（呼び出し側はto状態だけ渡せばよい）
+    public void BlendToState(PlayerState toState)
+    {
+        var slot = MapStateToSlot(toState);
+        float dur = ResolveBlendDuration(lastBlendState, toState);
+
+        // 既存のメイン層フェードAPIを使用
+        BlendToMainSlot(slot, dur);
+
+        // 次回のために記録
+        lastBlendState = toState;
+    }
+
+    public void SnapToMainSlot(MainLayerSlot target)
+    {
+        if (mainLayerFadeCo != null) StopCoroutine(mainLayerFadeCo);
+        int n = mixer.GetInputCount();
+        for (int i = 0; i < n; ++i)
+            mixer.SetInputWeight(i, i == (int)target ? 1f : 0f);
+
+        playableGraph.Evaluate(0f);
+    }
+
+    public void ReconnectActionPlaceholder()
+    {
+        int slot = (int)MainLayerSlot.Action;
+        EnsureMixerInputCount(6);
+        mixer.DisconnectInput(slot);
+        mixer.ConnectInput(slot, actionPlaceholder, 0, 0f);
     }
 }
-*/
+

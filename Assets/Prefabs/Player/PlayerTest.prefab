@@ -833,6 +833,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackHeld: 0
   attackPressedThisFrame: 0
+  skillHoldThreshold: 0.35
   maxHealth: 50
   moveSpeed: 8
   gravity: -9.81
@@ -841,13 +842,14 @@ MonoBehaviour:
   groundDistance: 0.4
   groundMask:
     serializedVersion: 2
-    m_Bits: 2081
+    m_Bits: 2049
   weaponBoxR: {fileID: 8157183961826809668}
   weaponBoxL: {fileID: 1917872819493027273}
   fist:
     template: {fileID: 11400000, guid: 20538c7066df7c04cbdbe2a9c6c18442, type: 2}
     currentDurability: 999
   wpBrokeEffect: {fileID: 483269617434788623, guid: 5de658852142b3a41b0ca90f373a7501, type: 3}
+  isHitboxVisible: 0
   weaponInventory:
     weapons: []
     mainIndex: -1
@@ -856,6 +858,13 @@ MonoBehaviour:
   playerAnimator: {fileID: 9046723507332552259}
   idleClip: {fileID: -3418260577071603586, guid: ebbc670e7b746c844a204cb7cf13102b, type: 3}
   moveClip: {fileID: -4955486450484351198, guid: d21be321361c0c140bb693abaf591b78, type: 3}
+  dashClip: {fileID: 3528826173874674379, guid: dce54660248ee324ca2e84b21a9c9a11, type: 3}
+  fallClip: {fileID: -3051452435703574602, guid: 8921bd0f1bbab6144809443ccb1b5e8b, type: 3}
+  hitClip: {fileID: -5840618108478607940, guid: 3abd3ba48449b4a4c8717668f577b497, type: 3}
+  dieClip: {fileID: -2742837773590489959, guid: 74db02ed338647143b1b6b274a988632, type: 3}
+  defaultStateCrossfade: 0.12
+  blendOverrides: []
+  toStateDefaults: []
   audioManager: {fileID: 5637540522521544949}
 --- !u!1001 &4736297648020079165
 PrefabInstance:
