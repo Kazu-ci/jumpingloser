@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 4cd5bd9b34381994cb1c13b79e2319b6
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 287353
+  packageName: Grasslands - Stylized Nature
+  packageVersion: 1.0
+  assetPath: Assets/Raygeas/Shared Assets/Scripts/Interactive.cs
+  uploadId: 670112

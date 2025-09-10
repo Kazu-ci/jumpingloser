@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f76593ecbe727c947b3a6cf0c4edd934
+timeCreated: 1452514781
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2024/Lumina/Demos/Assets/Demo Scene/Materials/CaveOccluderSunlight.mat
+  uploadId: 750475

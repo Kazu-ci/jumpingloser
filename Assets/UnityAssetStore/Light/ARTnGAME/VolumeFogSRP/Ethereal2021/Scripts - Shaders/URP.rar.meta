@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6332cb86a9690c04996e274ec85f8556
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2021/Scripts - Shaders/URP.rar
+  uploadId: 750475

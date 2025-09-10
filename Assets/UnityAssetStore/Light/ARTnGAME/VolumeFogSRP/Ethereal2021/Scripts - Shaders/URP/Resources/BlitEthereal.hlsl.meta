@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 86a158d7323f631489e3138986472e01
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2021/Scripts - Shaders/URP/Resources/BlitEthereal.hlsl
+  uploadId: 750475

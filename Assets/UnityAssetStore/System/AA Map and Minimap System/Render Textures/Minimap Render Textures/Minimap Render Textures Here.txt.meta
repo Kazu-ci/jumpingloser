@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5fc68e376f442554f8aa52b5a5a1ab1a
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 232525
+  packageName: AA Map and Minimap System
+  packageVersion: 1.4.0
+  assetPath: Assets/AA Map and Minimap System/Render Textures/Minimap Render Textures/Minimap
+    Render Textures Here.txt
+  uploadId: 673832

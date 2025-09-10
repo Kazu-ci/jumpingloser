@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 20d7dad74d54d81449af3064487aab4f
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 232525
+  packageName: AA Map and Minimap System
+  packageVersion: 1.4.0
+  assetPath: Assets/AA Map and Minimap System/Editor/MapManagerEditor.cs
+  uploadId: 673832

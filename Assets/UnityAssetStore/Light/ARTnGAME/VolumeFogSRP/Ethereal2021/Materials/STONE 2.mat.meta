@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 82ef2edc58937b14da231fbb99d41a35
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2021/Materials/STONE 2.mat
+  uploadId: 750475

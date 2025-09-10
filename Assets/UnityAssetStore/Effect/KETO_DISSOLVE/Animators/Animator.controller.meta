@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b0919c9ebd7ec6a4896455a3b697a3e2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 241832
+  packageName: Dissolve & Disintegrate
+  packageVersion: 1.0
+  assetPath: Assets/KETO_DISSOLVE/Animators/Animator.controller
+  uploadId: 549631

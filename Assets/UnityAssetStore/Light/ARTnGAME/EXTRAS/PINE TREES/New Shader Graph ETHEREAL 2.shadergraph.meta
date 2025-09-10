@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 93d3192a9e2029c4ab0aab165be3d308
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/EXTRAS/PINE TREES/New Shader Graph ETHEREAL 2.shadergraph
+  uploadId: 750475

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a2a733277e4a4d742a6b8f0691251d5a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 232525
+  packageName: AA Map and Minimap System
+  packageVersion: 1.4.0
+  assetPath: Assets/AA Map and Minimap System/SampleScene/Sample Scene Collection/Player
+    UI.prefab
+  uploadId: 673832

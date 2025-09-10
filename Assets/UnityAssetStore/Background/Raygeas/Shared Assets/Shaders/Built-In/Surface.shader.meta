@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: b292d4a0bae788b44b40a2d6c7d6fccc
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 287353
+  packageName: Grasslands - Stylized Nature
+  packageVersion: 1.0
+  assetPath: Assets/Raygeas/Shared Assets/Shaders/Built-In/Surface.shader
+  uploadId: 670112

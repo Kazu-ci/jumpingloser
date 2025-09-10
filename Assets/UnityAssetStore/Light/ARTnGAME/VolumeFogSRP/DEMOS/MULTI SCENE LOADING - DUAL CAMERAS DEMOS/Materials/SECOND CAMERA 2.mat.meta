@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: c8910882fedef9a4daa342dd1ba2709c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/DEMOS/MULTI SCENE LOADING - DUAL CAMERAS
+    DEMOS/Materials/SECOND CAMERA 2.mat
+  uploadId: 750475

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: f2b58574f98b3dd4da323a01b006084f
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2024/Shaders/OpaqueAtmosphereScattering.shader
+  uploadId: 750475

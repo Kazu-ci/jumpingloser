@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7f3aa4a36d964224c8cdb0623a24fb71
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/PREFABS/Ethereal 2021 - Uses Renderer 8.prefab
+  uploadId: 750475

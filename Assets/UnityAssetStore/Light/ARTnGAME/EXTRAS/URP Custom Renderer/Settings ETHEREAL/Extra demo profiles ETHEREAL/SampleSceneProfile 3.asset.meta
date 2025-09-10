@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: d0e6a53d0387138498ea54d99a3dc539
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/EXTRAS/URP Custom Renderer/Settings ETHEREAL/Extra demo
+    profiles ETHEREAL/SampleSceneProfile 3.asset
+  uploadId: 750475

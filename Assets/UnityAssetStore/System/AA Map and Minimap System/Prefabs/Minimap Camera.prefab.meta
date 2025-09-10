@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9dbe998fcb26f12488880b876715a73c
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 232525
+  packageName: AA Map and Minimap System
+  packageVersion: 1.4.0
+  assetPath: Assets/AA Map and Minimap System/Prefabs/Minimap Camera.prefab
+  uploadId: 673832

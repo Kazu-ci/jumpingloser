@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1b9c6e18454de6d46a8142ce017c31dc
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 191805
+  packageName: URP Sword Slashes
+  packageVersion: 1.0
+  assetPath: Assets/Red_clue/Slash_effects/Scripts_Slashfx/PreviousAndNext_Slashfx.cs
+  uploadId: 566748
