@@ -106,8 +106,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponDrops:
   - {fileID: 6546893149686524268, guid: ccf85bffdbc965a42921c96bcbe61c50, type: 3}
-  - {fileID: 5345727438710721007, guid: ae5dedb4407b9b048a73953b02f6a30b, type: 3}
-  - {fileID: 2371019539119376703, guid: 0ce57653ba88315498203c7c04e83db2, type: 3}
   textures:
   - {fileID: 2800000, guid: c59581940a7241f41a42a2886e1cff93, type: 3}
   - {fileID: 2800000, guid: 77252af5899aec54ba672b53f5c538a4, type: 3}

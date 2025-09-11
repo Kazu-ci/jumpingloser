@@ -907,13 +907,15 @@ MonoBehaviour:
   moveSpeed: 8
   gravity: -9.81
   rotationSpeed: 720
-  dashSpeed: 10
+  dashSpeed: 15
   dashDistance: 3
-  dashCooldown: 1.5
+  dashCooldown: 1
   dashInvincibilityTime: 0.3
+  dashFreezeAtSeconds: 0.02
   hitInvincibilityTime: 0.8
+  hitEffectPrefab: {fileID: 483269617434788623, guid: 5de658852142b3a41b0ca90f373a7501, type: 3}
   groundCheck: {fileID: 8799999724265508820}
-  groundDistance: 0.4
+  groundDistance: 0.5
   groundMask:
     serializedVersion: 2
     m_Bits: 2049
@@ -961,8 +963,8 @@ MonoBehaviour:
     m_Bits: 2739
   skin: 0.03
   groundSnapDistance: 0.08
-  radiusInflation: 0.01
-  preStepLift: 0
+  radiusInflation: 0.005
+  preStepLift: 0.1
 --- !u!1001 &4736297648020079165
 PrefabInstance:
   m_ObjectHideFlags: 0

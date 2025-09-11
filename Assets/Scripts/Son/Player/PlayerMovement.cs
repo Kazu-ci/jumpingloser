@@ -72,15 +72,19 @@ public class PlayerMovement : MonoBehaviour
     public float dashSpeed = 10f;           // ダッシュ速度
     public float dashDistance = 3f;       // ダッシュ距離
     public float dashCooldown = 1.5f;     // ダッシュのクールタイム
+    private float dashCooldownTimer = -Mathf.Infinity; // ダッシュのクールタイム管理用タイマー
     public float dashInvincibilityTime = 0.3f; // ダッシュ無敵時間
-    private float dashTimer = 0f;        // ダッシュのクールタイム管理用タイマー
+    private float dashTimer = 0f;        // 無敵時間管理用タイマー
     public bool IsDashInvincible => dashTimer > 0f;
+    public float dashFreezeAtSeconds = 0.02f;
 
     [Header("被弾設定")]
     public float hitInvincibilityTime = 0.8f; // 被弾無敵時間
     private float hitTimer = 0f;         // 被弾無敵時間管理用タイマー
     public bool IsHitInvincible => hitTimer > 0f;
     public bool IsInvincible => IsDashInvincible || IsHitInvincible;
+
+    public GameObject hitEffectPrefab; // 被弾エフェクト
 
 
     // ====== 接地判定 ======
@@ -118,14 +122,15 @@ public class PlayerMovement : MonoBehaviour
     private AnimationClipPlayable movePlayable;
     private AnimationMixerPlayable actionSubMixer;
 
-    // 日本語：メインレイヤー用の追加Playable
+    // メインレイヤー用の追加Playable
     private AnimationClipPlayable fallPlayable;
     private AnimationClipPlayable hitPlayable;
     private AnimationClipPlayable deadPlayable;
-    // 日本語：アクションスロットのダミー（未接続時の穴埋め）
+    private AnimationClipPlayable dashPlayable;
+    // アクションスロットのダミー（未接続時の穴埋め）
     private AnimationClipPlayable actionPlaceholder;
 
-    // 日本語：メインレイヤーのフェード用コルーチン
+    // メインレイヤーのフェード用コルーチン
     private Coroutine mainLayerFadeCo;
 
 
@@ -139,7 +144,8 @@ public class PlayerMovement : MonoBehaviour
         Action = 2, // 攻撃/スキル
         Falling = 3, // 落下
         Hit = 4, // 被弾
-        Dead = 5  // 死亡
+        Dead = 5,  // 死亡
+        Dash = 6
     }
     [System.Serializable]
     public class StateBlendEntry
@@ -185,6 +191,8 @@ public class PlayerMovement : MonoBehaviour
     public bool IsGrounded => isGrounded;
     private Transform mainCam;
     private StateMachine<PlayerState, PlayerTrigger> _fsm;
+    private GameObject lockOnTarget = null; // ロックオン対象
+    public GameObject GetLockOnTarget => lockOnTarget;
 
     // ====== ライフサイクル ======
     private void Awake()
@@ -239,9 +247,15 @@ public class PlayerMovement : MonoBehaviour
         inputActions.Player.SwitchWeapon.performed += ctx => OnSwitchWeaponInput();
         inputActions.Player.SwitchWeapon2.performed += ctx => OnSwitchWeaponInput2();
         inputActions.Player.SwitchHitbox.performed += ctx => { isHitboxVisible = !isHitboxVisible; };
+        inputActions.Player.Dash.performed += ctx => OnDashInput();
 
         // --- UIEvents の購読：装備切替/破壊/耐久 ---
         UIEvents.OnRightWeaponSwitch += HandleRightWeaponSwitch;   // (weapons, from, to)
+
+        PlayerEvents.OnAimTargetChanged += (newTarget) =>
+        {
+            lockOnTarget = newTarget;
+        };
 
     }
 
@@ -257,6 +271,8 @@ public class PlayerMovement : MonoBehaviour
         {
             PlayerEvents.GetPlayerObject = null;
         }
+
+
     }
 
     private void Start()
@@ -275,15 +291,17 @@ public class PlayerMovement : MonoBehaviour
         fallClip.wrapMode = WrapMode.ClampForever;    // ★ 変更：Loop→ClampForever
         hitClip.wrapMode = WrapMode.ClampForever;
         dieClip.wrapMode = WrapMode.ClampForever;
+        dashClip.wrapMode = WrapMode.ClampForever;
 
         idlePlayable = AnimationClipPlayable.Create(playableGraph, idleClip);
         movePlayable = AnimationClipPlayable.Create(playableGraph, moveClip);
         fallPlayable = AnimationClipPlayable.Create(playableGraph, fallClip);
         hitPlayable = AnimationClipPlayable.Create(playableGraph, hitClip);
         deadPlayable = AnimationClipPlayable.Create(playableGraph, dieClip);
+        dashPlayable = AnimationClipPlayable.Create(playableGraph, dashClip);
 
         // 日本語：メインミキサーは6入力（Idle/Move/Action/Falling/Hit/Dead）
-        mixer = AnimationMixerPlayable.Create(playableGraph, 6);
+        mixer = AnimationMixerPlayable.Create(playableGraph, 7);
 
         // 0:Idle, 1:Move
         mixer.ConnectInput((int)MainLayerSlot.Idle, idlePlayable, 0, 1f);
@@ -298,6 +316,7 @@ public class PlayerMovement : MonoBehaviour
         mixer.ConnectInput((int)MainLayerSlot.Falling, fallPlayable, 0, 0f);
         mixer.ConnectInput((int)MainLayerSlot.Hit, hitPlayable, 0, 0f);
         mixer.ConnectInput((int)MainLayerSlot.Dead, deadPlayable, 0, 0f);
+        mixer.ConnectInput((int)MainLayerSlot.Dash, dashPlayable, 0, 0f);
 
         var playableOutput = AnimationPlayableOutput.Create(playableGraph, "Animation", playerAnimator);
         playableOutput.SetSourcePlayable(mixer);
@@ -382,7 +401,7 @@ public class PlayerMovement : MonoBehaviour
         _fsm.RegisterState(PlayerState.Falling, new PlayerFallingState(this));
         _fsm.RegisterState(PlayerState.Hit, new PlayerHitState(this));
         _fsm.RegisterState(PlayerState.Dead, new PlayerDeadState(this));
-        _fsm.RegisterState(PlayerState.Dash, new PlayerDashState(this)); // ← 無敵窓管理
+        _fsm.RegisterState(PlayerState.Dash, new PlayerDashState(this));
 
         // Locomotion
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Move, PlayerTrigger.MoveStart);
@@ -422,6 +441,8 @@ public class PlayerMovement : MonoBehaviour
         _fsm.AddTransition(PlayerState.Move, PlayerState.Dash, PlayerTrigger.DashInput);
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Dash, PlayerTrigger.DashInput);
         _fsm.AddTransition(PlayerState.Skill, PlayerState.Dash, PlayerTrigger.DashInput);
+        _fsm.AddTransition(PlayerState.Dash, PlayerState.Idle, PlayerTrigger.MoveStop);
+        _fsm.AddTransition(PlayerState.Dash, PlayerState.Move, PlayerTrigger.MoveStart);
 
         // Dead（★唯一：Hit → Dead）
         _fsm.AddTransition(PlayerState.Hit, PlayerState.Dead, PlayerTrigger.Die);
@@ -492,6 +513,10 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.Log("No usable weapon for left hand.");
         }
+    }
+    private void OnDashInput()
+    {
+        if(IsDashCooldownReady()) _fsm.ExecuteTrigger(PlayerTrigger.DashInput);
     }
 
     // ====== モデル同期（イベントドリブン） ======
@@ -583,6 +608,11 @@ public class PlayerMovement : MonoBehaviour
         {
             _fsm.ExecuteTrigger(PlayerTrigger.GetHit);
             hitTimer = hitInvincibilityTime; // 被弾無敵時間リセット
+            // 被弾エフェクト
+            if (hitEffectPrefab != null)
+            {
+                Instantiate(hitEffectPrefab, transform.position + Vector3.up * 0.2f, Quaternion.identity);
+            }
         }
     }
 
@@ -635,6 +665,7 @@ public class PlayerMovement : MonoBehaviour
             case PlayerState.Falling: return MainLayerSlot.Falling;
             case PlayerState.Hit: return MainLayerSlot.Hit;
             case PlayerState.Dead: return MainLayerSlot.Dead;
+            case PlayerState.Dash: return MainLayerSlot.Dash;
             default: return MainLayerSlot.Idle;
         }
     }
@@ -704,5 +735,82 @@ public class PlayerMovement : MonoBehaviour
             EvaluateGraphOnce(); // 即座に初期フレームへ
         }
     }
+
+    // 日本語：ダッシュ用のアニメを 0 秒から再生し直す
+    public void ResetDashClipPlayable()
+    {
+        if (dashPlayable.IsValid())
+        {
+            dashPlayable.SetTime(0.0);
+            dashPlayable.SetSpeed(1.0);
+            dashPlayable.Play();
+            EvaluateGraphOnce();
+        }
+    }
+
+    // 日本語：ダッシュの無敵を開始（ステートから呼ぶ）
+    public void StartDashInvincibility()
+    {
+        // タイマー方式：Update で減衰させる
+        dashTimer = dashInvincibilityTime;
+    }
+
+    // 日本語：ダッシュの無敵を終了（ステートから呼ぶ）
+    public void EndDashInvincibility()
+    {
+        dashTimer = 0f;
+    }
+
+    // 日本語：ダッシュのクールタイム記録（終了時に呼ぶ）
+    public void MarkDashCooldown()
+    {
+        dashCooldownTimer = Time.time;
+        Invoke(nameof(EnableDashUI), dashCooldown);
+    }
+    private void EnableDashUI()
+    {
+        UIEvents.OnDashUIChange?.Invoke(true);
+    }
+
+    // 日本語：ダッシュ可能か（入力段階のガードに使用）
+    public bool IsDashCooldownReady()
+    {
+        return Time.time >= (dashCooldownTimer + dashCooldown);
+    }
+
+    // 日本語：カメラ相対の移動入力方向。小入力なら正面を返す
+    public Vector3 ResolveDashDirectionWorld(float minInputSqr = 0.01f)
+    {
+        Vector3 dir;
+        if (this.moveInput.sqrMagnitude >= minInputSqr)
+        {
+            Vector3 camF = mainCam.forward; camF.y = 0f; camF.Normalize();
+            Vector3 camR = mainCam.right; camR.y = 0f; camR.Normalize();
+            dir = (camR * moveInput.x + camF * moveInput.y);
+            if (dir.sqrMagnitude < 1e-6f) dir = transform.forward; else dir.Normalize();
+        }
+        else
+        {
+            dir = transform.forward;
+        }
+        return dir;
+    }
+    // Dash クリップの長さを返す（未設定時はフェイルセーフ）
+    public double GetDashClipLength()
+    {
+        return (dashClip != null) ? (double)dashClip.length : 0.2;
+    }
+
+    // Dash クリップの現在時刻
+    public double GetDashPlayableTime()
+    {
+        return dashPlayable.IsValid() ? dashPlayable.GetTime() : 0.0;
+    }
+
+    // Dash クリップの時刻と速度の設定
+    public void SetDashPlayableTime(double t) { if (dashPlayable.IsValid()) { dashPlayable.SetTime(t); } }
+    public void SetDashPlayableSpeed(double s) { if (dashPlayable.IsValid()) { dashPlayable.SetSpeed(s); } }
+
+
 }
 

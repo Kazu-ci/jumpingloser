@@ -13,6 +13,9 @@ public class TempUI : MonoBehaviour
     public GameObject weaponPrefab;           // 1個の武器アイコンUIプレハブ（Imageを想定）
     public GameObject weaponList;             // 右下の空オブジェクト（全アイコンの親）
 
+    public GameObject dashEnableIcon;       // ダッシュ可能アイコン
+    public GameObject dashDisableIcon;
+
     public GameObject AimIcon;
     private GameObject lockTarget = null;
 
@@ -30,6 +33,7 @@ public class TempUI : MonoBehaviour
         UIEvents.OnWeaponDestroyed += OnWeaponDestroyed;     // ログのみ
 
         PlayerEvents.OnAimTargetChanged += SwitchLockIcon;
+        UIEvents.OnDashUIChange += SwitchDashIcon;
 
         if (AimIcon != null)
             AimIcon.SetActive(false);
@@ -42,6 +46,7 @@ public class TempUI : MonoBehaviour
         UIEvents.OnDurabilityChanged -= OnDurabilityChanged;
         UIEvents.OnWeaponDestroyed -= OnWeaponDestroyed;
         PlayerEvents.OnAimTargetChanged -= SwitchLockIcon;
+        UIEvents.OnDashUIChange -= SwitchDashIcon;
     }
 
     private void Update()
@@ -68,7 +73,13 @@ public class TempUI : MonoBehaviour
                 AimIcon.SetActive(false);
         }
     }
-
+    private void SwitchDashIcon(bool enable)
+    {
+        if(dashEnableIcon != null)
+            dashEnableIcon.SetActive(enable);
+        if (dashDisableIcon != null)
+            dashDisableIcon.SetActive(!enable);
+    }
     // ====== 初期表示（素手のみ）======
     private void TryRenderFistOnly()
     {
