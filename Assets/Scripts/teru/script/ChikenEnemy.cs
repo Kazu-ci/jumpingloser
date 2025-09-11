@@ -7,7 +7,6 @@ using static UnityEngine.UI.GridLayoutGroup;
 public class ChikenEnemy : Enemy
 {
     EStateMachine<ChikenEnemy> stateMachine;
-    [SerializeField] GameObject efe;
     [SerializeField] Collider attackCollider;
     private enum EnemyState
     {
@@ -32,12 +31,14 @@ public class ChikenEnemy : Enemy
         stateMachine.Add<HitState>((int)EnemyState.Hit);
         stateMachine.Add<DeadState>((int)EnemyState.Dead);
         stateMachine.OnStart((int)EnemyState.Idle);
+        attackCollider.enabled = false;
     }
 
     // Update is called once per frame
     protected override void Update()
     {
         base.Update();
+        if (nowHp <= 0) { stateMachine.ChangeState((int)EnemyState.Dead); }
         stateMachine.OnUpdate();
     }
     public override void OnAttackSet()
@@ -88,7 +89,7 @@ public class ChikenEnemy : Enemy
             if (firstInit)
             {
                 startPos = Owner.transform.position;
-                endPos = Owner.GetRandomNavMeshPoint(startPos,7f);
+                endPos = Owner.GetRandomNavMeshPoint(startPos,10f);
                 firstInit = false;
             }
 
@@ -157,16 +158,11 @@ public class ChikenEnemy : Enemy
         {
             Owner.enemyAnimation.SetTrigger("Attack");
             Debug.Log("Attack‚¾‚æ");
+            Owner.transform.LookAt(Owner.playerPos.transform.position);
+            Owner.navMeshAgent.isStopped = true;
         }
         public override void OnUpdate()
         {
-            //GameObject game = Instantiate(Owner.efe);
-            //game.transform.position = Owner.playerPos.transform.position;
-            //StateMachine.ChangeState((int)EnemyState.AttackInterbal);
-            /*if (Owner.GetDistance() > Owner.attackRange)
-            {
-                StateMachine.ChangeState((int)EnemyState.Patrol);
-            }*/
             if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.AttackInterbal); }
         }
         public override void OnEnd()

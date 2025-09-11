@@ -14,11 +14,12 @@ public class PanShot : MonoBehaviour
     {
         player = GameObject.Find("PlayerTest");
         playerVec = player.transform;
+        transform.LookAt(playerVec);
+        Destroy(gameObject,4f);
         //shotTime = Random.Range(30, 60);
     }
     private void Update()
     { 
-        transform.LookAt(playerVec);
         if (now > shotTime && shot)
         {
             OnShot();
@@ -31,6 +32,14 @@ public class PanShot : MonoBehaviour
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.AddForce(transform.forward * 1000);
         shot = false;
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        var comp=other.GetComponent<PlayerMovement>();
+        if (comp!=null)
+        {
+            Destroy(gameObject);
+        }
     }
 
 
