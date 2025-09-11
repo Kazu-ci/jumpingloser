@@ -59,6 +59,7 @@ public class PlayerMovement : MonoBehaviour
     [Header("ステータス")]
     public float maxHealth = 50;
     private float currentHealth = 50;
+    public float CurrentHealth => currentHealth;
 
 
     // ====== 移動設定 ======
@@ -66,6 +67,21 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 5f;           // 移動速度
     public float gravity = -9.81f;         // 重力加速度
     public float rotationSpeed = 360f;     // 回転速度（度/秒）
+
+    [Header("ダッシュ設定")]
+    public float dashSpeed = 10f;           // ダッシュ速度
+    public float dashDistance = 3f;       // ダッシュ距離
+    public float dashCooldown = 1.5f;     // ダッシュのクールタイム
+    public float dashInvincibilityTime = 0.3f; // ダッシュ無敵時間
+    private float dashTimer = 0f;        // ダッシュのクールタイム管理用タイマー
+    public bool IsDashInvincible => dashTimer > 0f;
+
+    [Header("被弾設定")]
+    public float hitInvincibilityTime = 0.8f; // 被弾無敵時間
+    private float hitTimer = 0f;         // 被弾無敵時間管理用タイマー
+    public bool IsHitInvincible => hitTimer > 0f;
+    public bool IsInvincible => IsDashInvincible || IsHitInvincible;
+
 
     // ====== 接地判定 ======
     [Header("接地判定")]
@@ -100,6 +116,7 @@ public class PlayerMovement : MonoBehaviour
     public AnimationMixerPlayable mixer;
     private AnimationClipPlayable idlePlayable;
     private AnimationClipPlayable movePlayable;
+    private AnimationMixerPlayable actionSubMixer;
 
     // 日本語：メインレイヤー用の追加Playable
     private AnimationClipPlayable fallPlayable;
@@ -111,8 +128,6 @@ public class PlayerMovement : MonoBehaviour
     // 日本語：メインレイヤーのフェード用コルーチン
     private Coroutine mainLayerFadeCo;
 
-    // 日本語：落下中に死亡が確定したフラグ（着地で死亡へ）
-    private bool pendingDie;
 
     // ================== 状態間ブレンド設定 ==================
     // 個別(from→to)のブレンド時間を上書きするエントリ
@@ -143,8 +158,11 @@ public class PlayerMovement : MonoBehaviour
     }
 
     [Header("状態間ブレンド（可変）")]
-    [Tooltip("全体の規定値（個別設定やto既定が見つからない場合のフォールバック）")]
+    [Tooltip("全体の規定値")]
     public float defaultStateCrossfade = 0.12f;
+
+    [Header("Dash/Hit割り込みブレンド")]
+    public float interruptCrossfade = 0.05f;
 
     [Tooltip("特定のfrom→toで上書きしたいブレンド時間（任意件）")]
     public List<StateBlendEntry> blendOverrides = new List<StateBlendEntry>();
@@ -224,11 +242,6 @@ public class PlayerMovement : MonoBehaviour
 
         // --- UIEvents の購読：装備切替/破壊/耐久 ---
         UIEvents.OnRightWeaponSwitch += HandleRightWeaponSwitch;   // (weapons, from, to)
-        
-
-        // --- PlayerEvents の購読 ---
-        PlayerEvents.OnWeaponBroke += PlayrWeaponBrokeEffect; // (handType)
-
 
     }
 
@@ -240,8 +253,6 @@ public class PlayerMovement : MonoBehaviour
         // 購読解除
         UIEvents.OnRightWeaponSwitch -= HandleRightWeaponSwitch;
 
-        PlayerEvents.OnWeaponBroke -= PlayrWeaponBrokeEffect;
-
         if (PlayerEvents.GetPlayerObject != null)
         {
             PlayerEvents.GetPlayerObject = null;
@@ -250,7 +261,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        //Time.timeScale = 0.3f;
         mainCam = Camera.main.transform;
 
         // --- PlayableGraph 初期化 ---
@@ -280,8 +290,9 @@ public class PlayerMovement : MonoBehaviour
         mixer.ConnectInput((int)MainLayerSlot.Move, movePlayable, 0, 0f);
 
         // 2:Action（初期はダミーを接続。攻撃/スキル時に子ミキサーへ差し替え）
-        actionPlaceholder = AnimationClipPlayable.Create(playableGraph, new AnimationClip());
-        mixer.ConnectInput((int)MainLayerSlot.Action, actionPlaceholder, 0, 0f);
+        actionSubMixer = AnimationMixerPlayable.Create(playableGraph, 2);
+        actionSubMixer.SetInputCount(2);
+        mixer.ConnectInput((int)MainLayerSlot.Action, actionSubMixer, 0, 0f);
 
         // 3:Fall, 4:Hit, 5:Dead
         mixer.ConnectInput((int)MainLayerSlot.Falling, fallPlayable, 0, 0f);
@@ -311,7 +322,7 @@ public class PlayerMovement : MonoBehaviour
         bool wasGrounded = isGrounded;
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
-        // 日本語：地上では垂直速度を小さな負値に固定し、接地安定を確保
+        // 地上では垂直速度を小さな負値に固定し、接地安定を確保
         if (isGrounded && velocity.y < 0f)
         {
             velocity.y = -4f; // ★ これにより微小な押し付けで浮遊を防止
@@ -326,7 +337,6 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded && _fsm.CurrentState == PlayerState.Falling)
         {
             _fsm.ExecuteTrigger(PlayerTrigger.Grounded);
-            if (pendingDie) { pendingDie = false; _fsm.ExecuteTrigger(PlayerTrigger.Die); }
         }
 
         // 地面かつ Idle/Move 時は移動入力で確実に遷移を駆動（保険）
@@ -341,6 +351,18 @@ public class PlayerMovement : MonoBehaviour
         // 重力/移動（重力は常時加算）
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
+        // 無敵時間更新
+        if (dashTimer > 0f)
+        {
+            dashTimer -= Time.deltaTime;
+            if (dashTimer < 0f) dashTimer = 0f;
+        }
+        if (hitTimer > 0f)
+        {
+            hitTimer -= Time.deltaTime;
+            if (hitTimer < 0f) hitTimer = 0f;
+        }
 
         // ステート更新
         bool pressedNow = attackPressedThisFrame;
@@ -360,6 +382,7 @@ public class PlayerMovement : MonoBehaviour
         _fsm.RegisterState(PlayerState.Falling, new PlayerFallingState(this));
         _fsm.RegisterState(PlayerState.Hit, new PlayerHitState(this));
         _fsm.RegisterState(PlayerState.Dead, new PlayerDeadState(this));
+        _fsm.RegisterState(PlayerState.Dash, new PlayerDashState(this)); // ← 無敵窓管理
 
         // Locomotion
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Move, PlayerTrigger.MoveStart);
@@ -370,13 +393,11 @@ public class PlayerMovement : MonoBehaviour
         _fsm.AddTransition(PlayerState.Move, PlayerState.Attack, PlayerTrigger.AttackInput);
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Skill, PlayerTrigger.SkillInput);
         _fsm.AddTransition(PlayerState.Move, PlayerState.Skill, PlayerTrigger.SkillInput);
-
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Idle, PlayerTrigger.MoveStop);
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Move, PlayerTrigger.MoveStart);
-        // 攻撃中に長押しでスキル移行を許す設計なら以下を維持
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Skill, PlayerTrigger.SkillInput);
 
-        // Falling（Dead以外の全状態→Falling）
+        // Falling（Dead 以外 → Falling）
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Falling, PlayerTrigger.NoGround);
         _fsm.AddTransition(PlayerState.Move, PlayerState.Falling, PlayerTrigger.NoGround);
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Falling, PlayerTrigger.NoGround);
@@ -386,23 +407,64 @@ public class PlayerMovement : MonoBehaviour
         // Falling → Idle
         _fsm.AddTransition(PlayerState.Falling, PlayerState.Idle, PlayerTrigger.Grounded);
 
-        // Hit（地上のみ：Falling/Dead以外→Hit）
+        // Hit（どの状態からでも被弾可能。無敵時はTakeDamage側で弾く）
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Hit, PlayerTrigger.GetHit);
         _fsm.AddTransition(PlayerState.Move, PlayerState.Hit, PlayerTrigger.GetHit);
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Hit, PlayerTrigger.GetHit);
         _fsm.AddTransition(PlayerState.Skill, PlayerState.Hit, PlayerTrigger.GetHit);
+        _fsm.AddTransition(PlayerState.Falling, PlayerState.Hit, PlayerTrigger.GetHit);
+        _fsm.AddTransition(PlayerState.Dash, PlayerState.Hit, PlayerTrigger.GetHit);
+        _fsm.AddTransition(PlayerState.Hit, PlayerState.Idle, PlayerTrigger.MoveStop);
+        _fsm.AddTransition(PlayerState.Hit, PlayerState.Move, PlayerTrigger.MoveStart);
 
-        // Dead（どこからでも → Dead）
-        _fsm.AddTransition(PlayerState.Idle, PlayerState.Dead, PlayerTrigger.Die);
-        _fsm.AddTransition(PlayerState.Move, PlayerState.Dead, PlayerTrigger.Die);
-        _fsm.AddTransition(PlayerState.Attack, PlayerState.Dead, PlayerTrigger.Die);
-        _fsm.AddTransition(PlayerState.Skill, PlayerState.Dead, PlayerTrigger.Die);
-        _fsm.AddTransition(PlayerState.Falling, PlayerState.Dead, PlayerTrigger.Die);
+        // Dash（任意の状態からダッシュ可。実処理はDashステート）
+        _fsm.AddTransition(PlayerState.Idle, PlayerState.Dash, PlayerTrigger.DashInput);
+        _fsm.AddTransition(PlayerState.Move, PlayerState.Dash, PlayerTrigger.DashInput);
+        _fsm.AddTransition(PlayerState.Attack, PlayerState.Dash, PlayerTrigger.DashInput);
+        _fsm.AddTransition(PlayerState.Skill, PlayerState.Dash, PlayerTrigger.DashInput);
+
+        // Dead（★唯一：Hit → Dead）
         _fsm.AddTransition(PlayerState.Hit, PlayerState.Dead, PlayerTrigger.Die);
     }
 
     // ====== 入力ハンドラ ======
+    public void HandleMovement(float deltaTime)
+    {
+        float inputX = moveInput.x;
+        float inputZ = moveInput.y;
 
+        Vector3 camForward = mainCam.forward; camForward.y = 0f; camForward.Normalize();
+        Vector3 camRight = mainCam.right; camRight.y = 0f; camRight.Normalize();
+
+        Vector3 moveDir = camRight * inputX + camForward * inputZ;
+        moveDir = (moveDir.sqrMagnitude > 1e-4f) ? moveDir.normalized : Vector3.zero;
+
+        if (moveDir.sqrMagnitude > 0f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * deltaTime);
+            controller.Move(moveDir * moveSpeed * deltaTime);
+        }
+    }
+    public void CheckMoveInput()
+    {
+        // 旧 Input 系を残している場合の互換チェック（必要なら削除）
+        float inputX = Input.GetAxisRaw("Horizontal");
+        float inputZ = Input.GetAxisRaw("Vertical");
+        if (Mathf.Abs(inputX) > 0.1f || Mathf.Abs(inputZ) > 0.1f)
+        {
+            _fsm.ExecuteTrigger(PlayerTrigger.MoveStart);
+        }
+    }
+    public void CheckMoveStop()
+    {
+        float inputX = Input.GetAxisRaw("Horizontal");
+        float inputZ = Input.GetAxisRaw("Vertical");
+        if (Mathf.Abs(inputX) < 0.1f && Mathf.Abs(inputZ) < 0.1f)
+        {
+            _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
+        }
+    }
     private void OnSwitchWeaponInput()
     {
         // 右手優先の切替。攻撃中は不可
@@ -426,7 +488,7 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
         // --- 直接インベントリに命じる。装備・モデル同期はイベントで反映 ---
-        if (!weaponInventory.TrySwitchLeft())
+        if (!weaponInventory.TrySwitchRight(-1))
         {
             Debug.Log("No usable weapon for left hand.");
         }
@@ -434,14 +496,7 @@ public class PlayerMovement : MonoBehaviour
 
     // ====== モデル同期（イベントドリブン） ======
 
-    private void PlayrWeaponBrokeEffect(HandType handType)
-    {
-        if (wpBrokeEffect != null)
-        {
-            GameObject box = (handType == HandType.Main) ? weaponBoxR : weaponBoxL;
-            Instantiate(wpBrokeEffect, box.transform.position, Quaternion.identity);
-        }
-    }
+
 
     // 右手の切替イベント
     private void HandleRightWeaponSwitch(List<WeaponInstance> list, int from, int to)
@@ -476,56 +531,10 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ====== ユーティリティ ======
-    public void HandleMovement(float deltaTime)
-    {
-        float inputX = moveInput.x;
-        float inputZ = moveInput.y;
 
-        Vector3 camForward = mainCam.forward; camForward.y = 0f; camForward.Normalize();
-        Vector3 camRight = mainCam.right; camRight.y = 0f; camRight.Normalize();
-
-        Vector3 moveDir = camRight * inputX + camForward * inputZ;
-        moveDir = (moveDir.sqrMagnitude > 1e-4f) ? moveDir.normalized : Vector3.zero;
-
-        if (moveDir.sqrMagnitude > 0f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(moveDir);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * deltaTime);
-            controller.Move(moveDir * moveSpeed * deltaTime);
-        }
-    }
-
-    public void CheckMoveInput()
-    {
-        // 旧 Input 系を残している場合の互換チェック（必要なら削除）
-        float inputX = Input.GetAxisRaw("Horizontal");
-        float inputZ = Input.GetAxisRaw("Vertical");
-        if (Mathf.Abs(inputX) > 0.1f || Mathf.Abs(inputZ) > 0.1f)
-        {
-            _fsm.ExecuteTrigger(PlayerTrigger.MoveStart);
-        }
-    }
-
-    public void CheckMoveStop()
-    {
-        float inputX = Input.GetAxisRaw("Horizontal");
-        float inputZ = Input.GetAxisRaw("Vertical");
-        if (Mathf.Abs(inputX) < 0.1f && Mathf.Abs(inputZ) < 0.1f)
-        {
-            _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
-        }
-    }
     public void HandleFalling()
     {
         _fsm.ExecuteTrigger(PlayerTrigger.NoGround);
-    }
-
-    public void EnsureMixerInputCount(int requiredCount)
-    {
-        if (mixer.GetInputCount() < requiredCount)
-        {
-            mixer.SetInputCount(requiredCount);
-        }
     }
 
     public WeaponInstance GetMainWeapon()
@@ -539,8 +548,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
 
-
-    // === 物拾い（現状は単純に所持へ追加）===
+    // === 物拾い ===
     public void PickUpWeapon(WeaponItem weapon)
     {
         if (weapon == null) return;
@@ -564,29 +572,18 @@ public class PlayerMovement : MonoBehaviour
         if (damage.damageAmount <= 0) return;
         if (_fsm.CurrentState == PlayerState.Dead) return; // 死亡後は無視
 
+        // 無敵中は被弾を無効化
+        if (IsInvincible) return;
+
         currentHealth = Mathf.Max(0, currentHealth - damage.damageAmount);
+        Debug.Log($"Player took {damage.damageAmount} damage. Current HP: {currentHealth}/{maxHealth}");
 
-        if (currentHealth <= 0)
-        {
-            // 空中なら着地後に死亡へ、地上なら即死亡へ
-            if (!isGrounded)
-            {
-                pendingDie = true;
-                _fsm.ExecuteTrigger(PlayerTrigger.NoGround);
-            }
-            else
-            {
-                _fsm.ExecuteTrigger(PlayerTrigger.Die);
-            }
-            return;
-        }
-
-        // 地上であれば被弾を優先
-        if (isGrounded)
+        // 死亡判定は被弾モーションの終盤で行う（ここでは即Deadにしない）
+        if (_fsm.CurrentState != PlayerState.Hit)
         {
             _fsm.ExecuteTrigger(PlayerTrigger.GetHit);
+            hitTimer = hitInvincibilityTime; // 被弾無敵時間リセット
         }
-        // 空中被弾はFallingで処理（死亡のみ遅延フラグ）
     }
 
     // ====== アニメーション制御 ======
@@ -642,9 +639,12 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // 日本語：ブレンド時間の解決（1.個別from to > 2.to既定 > 3.全体既定）
+    // ブレンド時間の解決（1.個別from to > 2.to既定 > 3.全体既定）
     public float ResolveBlendDuration(PlayerState from, PlayerState to)
     {
+
+        if (to == PlayerState.Hit || to == PlayerState.Dash)
+            return Mathf.Max(0f, interruptCrossfade);
         // 1) 個別オーバーライド検索
         for (int i = 0; i < blendOverrides.Count; ++i)
         {
@@ -661,7 +661,7 @@ public class PlayerMovement : MonoBehaviour
         return Mathf.Max(0f, defaultStateCrossfade);
     }
 
-    // 日本語：論理状態へブレンド（呼び出し側はto状態だけ渡せばよい）
+    // 論理状態へブレンド（呼び出し側はto状態だけ渡せばよい）
     public void BlendToState(PlayerState toState)
     {
         var slot = MapStateToSlot(toState);
@@ -674,22 +674,35 @@ public class PlayerMovement : MonoBehaviour
         lastBlendState = toState;
     }
 
-    public void SnapToMainSlot(MainLayerSlot target)
+    public AnimationMixerPlayable GetActionSubMixer() => actionSubMixer;
+    public void EvaluateGraphOnce() { if (playableGraph.IsValid()) playableGraph.Evaluate(0f); }
+    public bool HasMoveInput() => moveInput.sqrMagnitude > 0.01f;
+    public void ExecuteTriggerExternal(PlayerTrigger t)
     {
-        if (mainLayerFadeCo != null) StopCoroutine(mainLayerFadeCo);
-        int n = mixer.GetInputCount();
-        for (int i = 0; i < n; ++i)
-            mixer.SetInputWeight(i, i == (int)target ? 1f : 0f);
-
-        playableGraph.Evaluate(0f);
+        _fsm.ExecuteTrigger(t);
+    }
+    // Hit クリップの Playable を 0 秒から再生し直す
+    public void ResetHitClipPlayable()
+    {
+        if (hitPlayable.IsValid())
+        {
+            hitPlayable.SetTime(0.0);
+            hitPlayable.SetSpeed(1.0);
+            hitPlayable.Play();
+            EvaluateGraphOnce(); // 0秒戻しの見た目を即反映
+        }
     }
 
-    public void ReconnectActionPlaceholder()
+    // Dead クリップの Playable を 0 秒から再生し直す
+    public void ResetDeadClipPlayable()
     {
-        int slot = (int)MainLayerSlot.Action;
-        EnsureMixerInputCount(6);
-        mixer.DisconnectInput(slot);
-        mixer.ConnectInput(slot, actionPlaceholder, 0, 0f);
+        if (deadPlayable.IsValid())
+        {
+            deadPlayable.SetTime(0.0);
+            deadPlayable.SetSpeed(1.0);
+            deadPlayable.Play();
+            EvaluateGraphOnce(); // 即座に初期フレームへ
+        }
     }
 }
 

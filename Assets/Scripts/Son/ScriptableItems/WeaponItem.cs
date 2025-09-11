@@ -44,9 +44,12 @@ public class ComboAction
     public float hitCheckTime = 0.2f;
 
     [Header("突進動作")]
-    public Vector3 lungeDistance = Vector3.zero; // 突進距離
-    public float lungeSpeed = 10f; // 突進速度
-    public float lungeTime = 0.1f; // 突進時間
+    [Tooltip("突進する直線距離（0はなし）")]
+    public float lungeDistance = 0f;
+    [Tooltip("突進速度（m/s）")]
+    public float lungeSpeed = 10f;
+    [Tooltip("突進開始時間")]
+    public float lungeTime = 0.1f;
 
     [Header("アニメーション速度補正")]
     public float animationSpeed = 1.0f; // アニメーション再生速度補正
