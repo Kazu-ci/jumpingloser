@@ -8,7 +8,7 @@ using static UnityEngine.UI.GridLayoutGroup;
 public class BossEnemy : Enemy
 {
     EStateMachine<BossEnemy> stateMachine;
-    [SerializeField] GameObject efe;
+    [SerializeField] GameObject[] mobEnemy;
     [SerializeField] Collider attackCollider;
     [SerializeField] float rushSpeed;
     [SerializeField] float stiffnessTime;
@@ -47,6 +47,7 @@ public class BossEnemy : Enemy
     protected override void Update()
     {
         base.Update();
+        if (nowHp <= 0) { stateMachine.ChangeState((int)EnemyState.Dead); }
         stateMachine.OnUpdate();
     }
     public override void OnAttackSet()
@@ -63,19 +64,18 @@ public class BossEnemy : Enemy
         float cDis;
         public override void OnStart()
         {
+            Owner.enemyAnimation.SetTrigger("Idle");
             Debug.Log("Idleだよ");
             cDis = Owner.lookPlayerDir;
         }
         public override void OnUpdate()
         {
-            float playerDis = Owner.GetDistance();
-            var playerDir = Owner.playerPos.transform.position - Owner.transform.position;
-            var angle = Vector3.Angle(Owner.transform.forward, playerDir);
-            if (playerDis <= cDis && angle <= Owner.angle) { StateMachine.ChangeState((int)EnemyState.Chase); }
+            StateMachine.ChangeState((int)EnemyState.Chase);
         }
         public override void OnEnd()
         {
             Debug.Log("Idleは終わった");
+            Owner.enemyAnimation.ResetTrigger("Idle");
         }
     }
     
@@ -84,6 +84,7 @@ public class BossEnemy : Enemy
         NavMeshAgent navMeshAgent;
         public override void OnStart()
         {
+            Owner.enemyAnimation.SetTrigger("Run");
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
             Debug.Log("Chaseだよ");
@@ -102,6 +103,7 @@ public class BossEnemy : Enemy
         public override void OnEnd()
         {
             Debug.Log("Chaseは終わった");
+            Owner.enemyAnimation.ResetTrigger("Run");
         }
     }
     private class VigilanceState : EStateMachine<BossEnemy>.StateBase
@@ -116,6 +118,7 @@ public class BossEnemy : Enemy
         private float roamTimer;
         public override void OnStart()
         {
+            Owner.enemyAnimation.SetTrigger("Run");
             time = 0;
             mTime = Random.Range(4, 6);
             PickNewRoamPosition();
@@ -160,7 +163,7 @@ public class BossEnemy : Enemy
         }
         public override void OnEnd()
         {
-            
+            Owner.enemyAnimation.ResetTrigger("Run");
         }
         void PickNewRoamPosition()
         {
@@ -177,6 +180,7 @@ public class BossEnemy : Enemy
     {
         public override void OnStart()
         {
+            Owner.enemyAnimation.SetTrigger("Combo");
             Owner.navMeshAgent.isStopped = true;   
         }
         public override void OnUpdate()
@@ -199,13 +203,14 @@ public class BossEnemy : Enemy
         }
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Combo");
         }
     }
     private class RotateState : EStateMachine<BossEnemy>.StateBase
     {
         public override void OnStart()
         {
-
+            Owner.enemyAnimation.SetTrigger("Rotate");
         }
         public override void OnUpdate()
         {
@@ -226,14 +231,23 @@ public class BossEnemy : Enemy
         }
         public override void OnEnd()
         {
-
+            Owner.enemyAnimation.ResetTrigger("Rotate");
         }
     }
     private class SumonState : EStateMachine<BossEnemy>.StateBase
     {
         public override void OnStart()
         {
-
+            Owner.enemyAnimation.SetTrigger("Sumon");
+            for (int i = 0; i < Owner.mobEnemy.Length; i++)
+            {
+                if (Owner.mobEnemy[i] == null) continue; // nullチェック
+                float angle = Random.Range(-90, 90);
+                Quaternion rot = Quaternion.Euler(0, angle, 0);
+                Vector3 dir = rot * Owner.transform.forward;
+                Vector3 spawnPos = Owner.transform.position + dir.normalized * 5;
+                Instantiate(Owner.mobEnemy[i], spawnPos, Quaternion.identity);
+            }
         }
         public override void OnUpdate()
         {
@@ -256,7 +270,7 @@ public class BossEnemy : Enemy
         }
         public override void OnEnd()
         {
-
+            Owner.enemyAnimation.ResetTrigger("Sumon");
         }
     }
     private class RushState : EStateMachine<BossEnemy>.StateBase
@@ -267,8 +281,7 @@ public class BossEnemy : Enemy
 
         public override void OnStart()
         {
-            Debug.Log("Attack開始");
-            Owner.enemyAnimation.SetTrigger("Attack");
+            Owner.enemyAnimation.SetTrigger("Dush");
             Owner.navMeshAgent.isStopped = true;
 
             // プレイヤーの位置＋オフセットで目的地を設定
@@ -302,6 +315,7 @@ public class BossEnemy : Enemy
 
         public override void OnEnd()
         {
+            Owner.enemyAnimation.ResetTrigger("Dush");
         }
 
     }
@@ -310,6 +324,7 @@ public class BossEnemy : Enemy
         float time;
         public override void OnStart()
         {
+            Owner.enemyAnimation.SetTrigger("Idle");
             time = 0;
         }
         public override void OnUpdate()
@@ -318,11 +333,13 @@ public class BossEnemy : Enemy
             {
                 if (Probability(50)){ StateMachine.ChangeState((int)EnemyState.Vigilance);}
                 if (Probability(50)) { StateMachine.ChangeState((int)EnemyState.Chase); }
+                time = 0;
             }
+            time += Time.deltaTime;
         }
         public override void OnEnd()
         {
-
+            Owner.enemyAnimation.ResetTrigger("Idle");
         }
     }
 
@@ -330,7 +347,7 @@ public class BossEnemy : Enemy
     {
         public override void OnStart()
         {
-            Debug.Log("Hitだよ");
+            Owner.enemyAnimation.SetTrigger("Damage");
         }
         public override void OnUpdate()
         {
@@ -338,14 +355,14 @@ public class BossEnemy : Enemy
         }
         public override void OnEnd()
         {
-            Debug.Log("Hitは終わり");
+            Owner.enemyAnimation.ResetTrigger("Damage");
         }
     }
     private class DeadState : EStateMachine<BossEnemy>.StateBase
     {
         public override void OnStart()
         {
-            Debug.Log("Deadだよ");
+            Owner.enemyAnimation.SetTrigger("Dead");
         }
         public override void OnUpdate()
         {
@@ -356,7 +373,7 @@ public class BossEnemy : Enemy
         }
         public override void OnEnd()
         {
-            Debug.Log("Deadは終わり");
+            Owner.enemyAnimation.ResetTrigger("Dead");
         }
     }
     

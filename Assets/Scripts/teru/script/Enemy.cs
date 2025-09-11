@@ -106,7 +106,7 @@ public class Enemy : MonoBehaviour
     }
     public Vector3 GetRandomNavMeshPoint(Vector3 center, float radius)
     {
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 50; i++)
         {
             Vector3 rand = center + new Vector3(
                 Random.Range(-radius, radius),
@@ -119,6 +119,7 @@ public class Enemy : MonoBehaviour
             if (NavMesh.SamplePosition(rand, out hit, radius, NavMesh.AllAreas))
                 return hit.position;
         }
+
         return center;
     }
     protected void ChangeTexture(int index)

@@ -39,6 +39,7 @@ public class PanEnemy : Enemy
     protected override void Update()
     {
         base.Update();
+        if (nowHp <= 0) { stateMachine.ChangeState((int)EnemyState.Dead); }
         stateMachine.OnUpdate();
     }
     public override void OnAttackSet()
@@ -55,7 +56,6 @@ public class PanEnemy : Enemy
         {
             Owner.ChangeTexture(0);
             Owner.enemyAnimation.SetTrigger("Idle");
-            Debug.Log("Idleだよ");
             cDis = Owner.lookPlayerDir;
         }
         public override void OnUpdate()
@@ -68,7 +68,6 @@ public class PanEnemy : Enemy
         }
         public override void OnEnd()
         {
-            Debug.Log("Idleは終わった");
             Owner.enemyAnimation.ResetTrigger("Idle");
         }
     }
@@ -92,7 +91,6 @@ public class PanEnemy : Enemy
                 firstInit = false;
             }
             cDis = Owner.lookPlayerDir;
-            Debug.Log("Patrolだよ");
         }
         public override void OnUpdate()
         {
@@ -119,7 +117,6 @@ public class PanEnemy : Enemy
         public override void OnEnd()
         {
             Owner.enemyAnimation.ResetTrigger("Walk");
-            Debug.Log("Patrolは終わった");
         }
     }
     private class ChaseState : EStateMachine<PanEnemy>.StateBase
@@ -131,10 +128,10 @@ public class PanEnemy : Enemy
             Owner.enemyAnimation.SetTrigger("Walk");
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
-            Debug.Log("Chaseだよ");
         }
         public override void OnUpdate()
         {
+            Owner.transform.LookAt(Owner.playerPos.transform.position);
             if (Owner.GetDistance() <= Owner.attackRange)
             {
                 StateMachine.ChangeState((int)EnemyState.Attack);
@@ -147,7 +144,6 @@ public class PanEnemy : Enemy
         public override void OnEnd()
         {
             Owner.enemyAnimation.ResetTrigger("Walk");
-            Debug.Log("Chaseは終わった");
         }
     }
     private class AttackState : EStateMachine<PanEnemy>.StateBase
@@ -156,22 +152,14 @@ public class PanEnemy : Enemy
         {
             Owner.ChangeTexture(1);
             Owner.enemyAnimation.SetTrigger("Attack");
-            Debug.Log("Attackだよ");
         }
         public override void OnUpdate()
         {
+            Owner.transform.LookAt(Owner.playerPos.transform.position);
             if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.AttackInterbal); }
-            //GameObject game = Instantiate(Owner.efe);
-            //game.transform.position = Owner.playerPos.transform.position;
-            //StateMachine.ChangeState((int)EnemyState.AttackInterbal);
-            /*if (Owner.GetDistance() > Owner.attackRange)
-            {
-                StateMachine.ChangeState((int)EnemyState.Patrol);
-            }*/
         }
         public override void OnEnd()
         {
-            Debug.Log("Attackは終わった");
             Owner.enemyAnimation.ResetTrigger("Attack");
         }
     }
@@ -182,7 +170,6 @@ public class PanEnemy : Enemy
         {
             Owner.ChangeTexture(1);
             Owner.enemyAnimation.SetTrigger("Idle");
-            Debug.Log("AttackInterbalだよ");
         }
         public override void OnUpdate()
         {
@@ -192,7 +179,6 @@ public class PanEnemy : Enemy
         public override void OnEnd()
         {
             Owner.enemyAnimation.ResetTrigger("Idle");
-            Debug.Log("AttackInterbalは終わり");
         }
     }
     private class HitState : EStateMachine<PanEnemy>.StateBase
@@ -200,7 +186,6 @@ public class PanEnemy : Enemy
         public override void OnStart()
         {
             Owner.ChangeTexture(2);
-            Debug.Log("Hitだよ");
         }
         public override void OnUpdate()
         {
