@@ -97,9 +97,15 @@ public class PlayerWeaponInventory
     }
 
     // ==== 装備切替 ====
-    public bool TrySwitchRight()
+    public bool TrySwitchRight(int index = 1)
     {
-        // 右手は左手を除外しない
+        int next = -1;
+        if (weapons.Count > 0) next = FindNextUsable(mainIndex, exclude: -1, index);
+        SetHandIndex(HandType.Main, next);
+
+        if (next == -1) return false;
+        return true;
+        /*// 右手は左手を除外しない
         //int next = FindNextUsable(mainIndex, exclude: -1);
         int next = -1;
         if (weapons.Count > 0) next = (mainIndex + 1) % (weapons.Count);
@@ -113,7 +119,7 @@ public class PlayerWeaponInventory
             int newSub = FindNextUsable(subIndex, exclude: mainIndex, -1);
             SetHandIndex(HandType.Sub, newSub);
         }
-        return true;
+        return true;*/
     }
 
     public bool TrySwitchLeft()

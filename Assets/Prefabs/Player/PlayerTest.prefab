@@ -290,7 +290,7 @@ Camera:
   m_AllowMSAA: 1
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
-  m_OcclusionCulling: 1
+  m_OcclusionCulling: 0
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
 --- !u!81 &1572215272890632154
@@ -909,6 +909,9 @@ MonoBehaviour:
   rotationSpeed: 720
   dashSpeed: 10
   dashDistance: 3
+  dashCooldown: 1.5
+  dashInvincibilityTime: 0.3
+  hitInvincibilityTime: 0.8
   groundCheck: {fileID: 8799999724265508820}
   groundDistance: 0.4
   groundMask:
@@ -934,6 +937,7 @@ MonoBehaviour:
   hitClip: {fileID: -5840618108478607940, guid: 3abd3ba48449b4a4c8717668f577b497, type: 3}
   dieClip: {fileID: -2742837773590489959, guid: 74db02ed338647143b1b6b274a988632, type: 3}
   defaultStateCrossfade: 0.12
+  interruptCrossfade: 0.05
   blendOverrides: []
   toStateDefaults: []
   lastBlendState: 0

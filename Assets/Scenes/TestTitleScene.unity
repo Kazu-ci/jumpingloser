@@ -1483,7 +1483,7 @@ MonoBehaviour:
   - state: 1
     name: TestTitleScene
   - state: 2
-    name: AssetTestDemoScene
+    name: NormalStage1_Forest
   - state: 5
     name: TestResultScene
 --- !u!224 &1758271272
