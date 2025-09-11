@@ -1,3 +1,5 @@
+using Unity.VisualScripting;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Rendering;
@@ -29,6 +31,7 @@ public class Enemy : MonoBehaviour
     protected float distance;
     protected NavMeshAgent navMeshAgent;
     protected AnimatorStateInfo info;
+    protected bool animetionEnd;
 
 
     protected GameObject TestTarget;
@@ -44,6 +47,7 @@ public class Enemy : MonoBehaviour
     protected virtual void Update()
     {
         info = enemyAnimation.GetCurrentAnimatorStateInfo(0);
+        animetionEnd = !info.loop && info.normalizedTime >= 0.8f;
     }
 
     protected virtual void UpdateTestTarget()
@@ -94,8 +98,7 @@ public class Enemy : MonoBehaviour
     }
     protected bool AnimationEnd()
     {
-        if (info.normalizedTime >= 0.8f) { return true; }
-        else { return false; }
+        return animetionEnd;
     }
     public int GetDamage()
     {
@@ -103,7 +106,7 @@ public class Enemy : MonoBehaviour
     }
     public Vector3 GetRandomNavMeshPoint(Vector3 center, float radius)
     {
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 50; i++)
         {
             Vector3 rand = center + new Vector3(
                 Random.Range(-radius, radius),
@@ -116,6 +119,7 @@ public class Enemy : MonoBehaviour
             if (NavMesh.SamplePosition(rand, out hit, radius, NavMesh.AllAreas))
                 return hit.position;
         }
+
         return center;
     }
     protected void ChangeTexture(int index)
@@ -129,6 +133,23 @@ public class Enemy : MonoBehaviour
             {
                 mat.mainTexture = newTexture;
             }
+        }
+    }
+    
+    public static bool Probability(float fPersent)//確立判定用メソッド
+    {
+        float fProbabilityRate = UnityEngine.Random.value * 100;
+        if (fPersent == 100f && fProbabilityRate == fPersent)
+        {
+            return true;
+        }
+        else if (fPersent > fProbabilityRate)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 

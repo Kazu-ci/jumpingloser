@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class EStateMachine<TOwner>
 {
@@ -19,7 +20,8 @@ public class EStateMachine<TOwner>
     private StateBase _currentState; // 現在のステート
     private StateBase _prevState;    // 前のステート
     private readonly Dictionary<int, StateBase> _states = new Dictionary<int, StateBase>(); // 全てのステート定義
-
+    public StateBase CurrentState => _currentState;
+    public virtual void OnCollision(Collision collision) { }
     /// <summary>
     /// コンストラクタ
     /// </summary>

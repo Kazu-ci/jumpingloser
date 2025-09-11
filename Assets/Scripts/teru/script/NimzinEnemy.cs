@@ -8,6 +8,7 @@ public class NinzinEnemy : Enemy
 {
     EStateMachine<NinzinEnemy> stateMachine;
     [SerializeField] GameObject efe;
+    [SerializeField] Collider attackCollider;
     private enum EnemyState
     {
         Idle,
@@ -31,13 +32,23 @@ public class NinzinEnemy : Enemy
         stateMachine.Add<HitState>((int)EnemyState.Hit);
         stateMachine.Add<DeadState>((int)EnemyState.Dead);
         stateMachine.OnStart((int)EnemyState.Idle);
+        attackCollider.enabled = false;
     }
 
     // Update is called once per frame
     protected override void Update()
     {
         base.Update();
+        if (nowHp <= 0) { stateMachine.ChangeState((int)EnemyState.Dead); }
         stateMachine.OnUpdate();
+    }
+    public override void OnAttackSet()
+    {
+        attackCollider.enabled = true;
+    }
+    public override void OnAttackEnd()
+    {
+        attackCollider.enabled = false;
     }
     private class IdleState : EStateMachine<NinzinEnemy>.StateBase
     {
@@ -45,7 +56,6 @@ public class NinzinEnemy : Enemy
         public override void OnStart()
         {
             Owner.ChangeTexture(0);
-            Debug.Log("Idleだよ");
             Owner.enemyAnimation.SetTrigger("Idle");
             cDis = Owner.lookPlayerDir;
         }
@@ -58,7 +68,6 @@ public class NinzinEnemy : Enemy
         public override void OnEnd()
         {
             Owner.enemyAnimation.ResetTrigger("Idle");
-            Debug.Log("Idleは終わった");
         }
     }
     private class PatrolState : EStateMachine<NinzinEnemy>.StateBase
@@ -81,7 +90,6 @@ public class NinzinEnemy : Enemy
                 firstInit = false;
             }
             cDis = Owner.lookPlayerDir;
-            Debug.Log("Patrolだよ");
         }
         public override void OnUpdate()
         {
@@ -106,7 +114,6 @@ public class NinzinEnemy : Enemy
         }
         public override void OnEnd()
         {
-            Debug.Log("Patrolは終わった");
             Owner.enemyAnimation.ResetTrigger("Walk");
         }
     }
@@ -119,7 +126,6 @@ public class NinzinEnemy : Enemy
             Owner.enemyAnimation.SetTrigger("Walk");
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
-            Debug.Log("Chaseだよ");
         }
         public override void OnUpdate()
         {
@@ -136,7 +142,6 @@ public class NinzinEnemy : Enemy
         public override void OnEnd()
         {
             Owner.enemyAnimation.ResetTrigger("Walk");
-            Debug.Log("Chaseは終わった");
         }
     }
     private class AttackState : EStateMachine<NinzinEnemy>.StateBase
@@ -144,24 +149,17 @@ public class NinzinEnemy : Enemy
         public override void OnStart()
         {
             Owner.ChangeTexture(1);
-            Debug.Log("Attackだよ");
             Owner.enemyAnimation.SetTrigger("Attack");
+            Owner.transform.LookAt(Owner.playerPos.transform.position);
             Owner.navMeshAgent.isStopped = true;
         }
         public override void OnUpdate()
         {
-            //GameObject game = Instantiate(Owner.efe);
-            //game.transform.position = Owner.playerPos.transform.position;
             if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.AttackInterbal); }
-            /*if (Owner.GetDistance() > Owner.attackRange)
-            {
-                StateMachine.ChangeState((int)EnemyState.Patrol);
-            }*/
         }
         public override void OnEnd()
         {
             Owner.enemyAnimation.ResetTrigger("Attack");
-            Debug.Log("Attackは終わった");
         }
     }
     private class AttackInterbalState : EStateMachine<NinzinEnemy>.StateBase
@@ -171,7 +169,6 @@ public class NinzinEnemy : Enemy
         {
             Owner.ChangeTexture(1);
             Owner.enemyAnimation.SetTrigger("Idle");
-            Debug.Log("AttackInterbalだよ");
         }
         public override void OnUpdate()
         {
@@ -181,7 +178,6 @@ public class NinzinEnemy : Enemy
         public override void OnEnd()
         {
             Owner.enemyAnimation.ResetTrigger("Idle");
-            Debug.Log("AttackInterbalは終わり");
         }
     }
     private class HitState : EStateMachine<NinzinEnemy>.StateBase
