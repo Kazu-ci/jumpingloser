@@ -88,6 +88,7 @@ public class ThirdPersonCamera : MonoBehaviour
         inputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
         inputActions.Player.Lock.performed += _ => lockPressedThisFrame = true;
 
+
         // 初期ピボット
         followPivot = target != null ? target.position : transform.position;
 

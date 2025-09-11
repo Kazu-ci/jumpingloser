@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Buket
   modelPrefab: {fileID: 840819371027446578, guid: 1ec7646a5a0a00440ba5853c885e2350, type: 3}
-  icon: {fileID: 21300000, guid: 0e19bf499acb4fd459b91da1071456d0, type: 3}
+  icon: {fileID: 21300000, guid: 79b57e028d57bce49aba18fd0df4569d, type: 3}
   weaponType: 2
   mainWeaponCombo:
   - name: BuketAttack01
@@ -29,7 +29,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 4}
     hitCheckTime: 0.2
-    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -48,7 +48,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -67,7 +67,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -86,7 +86,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 4}
     hitCheckTime: 0.2
-    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -105,7 +105,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 0.5}
     hitBoxSize: {x: 4, y: 4, z: 6}
     hitCheckTime: 0.2
-    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -125,7 +125,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: 0, z: 0}
     hitBoxSize: {x: 0, y: 0, z: 0}
     hitCheckTime: 0
-    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -145,7 +145,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: 0, z: 0}
     hitBoxSize: {x: 0, y: 0, z: 0}
     hitCheckTime: 0
-    lungeDistance: {x: 0, y: 0, z: 0}
+    lungeDistance: 0
     lungeSpeed: 0
     lungeTime: 0
     animationSpeed: 0
