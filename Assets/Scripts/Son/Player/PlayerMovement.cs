@@ -67,6 +67,11 @@ public class PlayerMovement : MonoBehaviour
     public float gravity = -9.81f;         // 重力加速度
     public float rotationSpeed = 360f;     // 回転速度（度/秒）
 
+    [Header("ダッシュ設定")]
+    public float dashSpeed = 10f;           // ダッシュ速度
+    public float dashDistance = 3f;       // ダッシュ距離
+
+
     // ====== 接地判定 ======
     [Header("接地判定")]
     public Transform groundCheck;
@@ -100,6 +105,7 @@ public class PlayerMovement : MonoBehaviour
     public AnimationMixerPlayable mixer;
     private AnimationClipPlayable idlePlayable;
     private AnimationClipPlayable movePlayable;
+    private AnimationMixerPlayable actionSubMixer;
 
     // 日本語：メインレイヤー用の追加Playable
     private AnimationClipPlayable fallPlayable;
@@ -224,7 +230,7 @@ public class PlayerMovement : MonoBehaviour
 
         // --- UIEvents の購読：装備切替/破壊/耐久 ---
         UIEvents.OnRightWeaponSwitch += HandleRightWeaponSwitch;   // (weapons, from, to)
-        
+
 
         // --- PlayerEvents の購読 ---
         PlayerEvents.OnWeaponBroke += PlayrWeaponBrokeEffect; // (handType)
@@ -250,7 +256,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        //Time.timeScale = 0.3f;
         mainCam = Camera.main.transform;
 
         // --- PlayableGraph 初期化 ---
@@ -280,8 +285,9 @@ public class PlayerMovement : MonoBehaviour
         mixer.ConnectInput((int)MainLayerSlot.Move, movePlayable, 0, 0f);
 
         // 2:Action（初期はダミーを接続。攻撃/スキル時に子ミキサーへ差し替え）
-        actionPlaceholder = AnimationClipPlayable.Create(playableGraph, new AnimationClip());
-        mixer.ConnectInput((int)MainLayerSlot.Action, actionPlaceholder, 0, 0f);
+        actionSubMixer = AnimationMixerPlayable.Create(playableGraph, 2);
+        actionSubMixer.SetInputCount(2);
+        mixer.ConnectInput((int)MainLayerSlot.Action, actionSubMixer, 0, 0f);
 
         // 3:Fall, 4:Hit, 5:Dead
         mixer.ConnectInput((int)MainLayerSlot.Falling, fallPlayable, 0, 0f);
@@ -402,7 +408,43 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ====== 入力ハンドラ ======
+    public void HandleMovement(float deltaTime)
+    {
+        float inputX = moveInput.x;
+        float inputZ = moveInput.y;
 
+        Vector3 camForward = mainCam.forward; camForward.y = 0f; camForward.Normalize();
+        Vector3 camRight = mainCam.right; camRight.y = 0f; camRight.Normalize();
+
+        Vector3 moveDir = camRight * inputX + camForward * inputZ;
+        moveDir = (moveDir.sqrMagnitude > 1e-4f) ? moveDir.normalized : Vector3.zero;
+
+        if (moveDir.sqrMagnitude > 0f)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * deltaTime);
+            controller.Move(moveDir * moveSpeed * deltaTime);
+        }
+    }
+    public void CheckMoveInput()
+    {
+        // 旧 Input 系を残している場合の互換チェック（必要なら削除）
+        float inputX = Input.GetAxisRaw("Horizontal");
+        float inputZ = Input.GetAxisRaw("Vertical");
+        if (Mathf.Abs(inputX) > 0.1f || Mathf.Abs(inputZ) > 0.1f)
+        {
+            _fsm.ExecuteTrigger(PlayerTrigger.MoveStart);
+        }
+    }
+    public void CheckMoveStop()
+    {
+        float inputX = Input.GetAxisRaw("Horizontal");
+        float inputZ = Input.GetAxisRaw("Vertical");
+        if (Mathf.Abs(inputX) < 0.1f && Mathf.Abs(inputZ) < 0.1f)
+        {
+            _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
+        }
+    }
     private void OnSwitchWeaponInput()
     {
         // 右手優先の切替。攻撃中は不可
@@ -476,56 +518,10 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // ====== ユーティリティ ======
-    public void HandleMovement(float deltaTime)
-    {
-        float inputX = moveInput.x;
-        float inputZ = moveInput.y;
 
-        Vector3 camForward = mainCam.forward; camForward.y = 0f; camForward.Normalize();
-        Vector3 camRight = mainCam.right; camRight.y = 0f; camRight.Normalize();
-
-        Vector3 moveDir = camRight * inputX + camForward * inputZ;
-        moveDir = (moveDir.sqrMagnitude > 1e-4f) ? moveDir.normalized : Vector3.zero;
-
-        if (moveDir.sqrMagnitude > 0f)
-        {
-            Quaternion targetRot = Quaternion.LookRotation(moveDir);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, rotationSpeed * deltaTime);
-            controller.Move(moveDir * moveSpeed * deltaTime);
-        }
-    }
-
-    public void CheckMoveInput()
-    {
-        // 旧 Input 系を残している場合の互換チェック（必要なら削除）
-        float inputX = Input.GetAxisRaw("Horizontal");
-        float inputZ = Input.GetAxisRaw("Vertical");
-        if (Mathf.Abs(inputX) > 0.1f || Mathf.Abs(inputZ) > 0.1f)
-        {
-            _fsm.ExecuteTrigger(PlayerTrigger.MoveStart);
-        }
-    }
-
-    public void CheckMoveStop()
-    {
-        float inputX = Input.GetAxisRaw("Horizontal");
-        float inputZ = Input.GetAxisRaw("Vertical");
-        if (Mathf.Abs(inputX) < 0.1f && Mathf.Abs(inputZ) < 0.1f)
-        {
-            _fsm.ExecuteTrigger(PlayerTrigger.MoveStop);
-        }
-    }
     public void HandleFalling()
     {
         _fsm.ExecuteTrigger(PlayerTrigger.NoGround);
-    }
-
-    public void EnsureMixerInputCount(int requiredCount)
-    {
-        if (mixer.GetInputCount() < requiredCount)
-        {
-            mixer.SetInputCount(requiredCount);
-        }
     }
 
     public WeaponInstance GetMainWeapon()
@@ -539,8 +535,7 @@ public class PlayerMovement : MonoBehaviour
     }
 
 
-
-    // === 物拾い（現状は単純に所持へ追加）===
+    // === 物拾い ===
     public void PickUpWeapon(WeaponItem weapon)
     {
         if (weapon == null) return;
@@ -565,6 +560,7 @@ public class PlayerMovement : MonoBehaviour
         if (_fsm.CurrentState == PlayerState.Dead) return; // 死亡後は無視
 
         currentHealth = Mathf.Max(0, currentHealth - damage.damageAmount);
+        Debug.Log($"Player took {damage.damageAmount} damage. Current HP: {currentHealth}/{maxHealth}");
 
         if (currentHealth <= 0)
         {
@@ -674,22 +670,8 @@ public class PlayerMovement : MonoBehaviour
         lastBlendState = toState;
     }
 
-    public void SnapToMainSlot(MainLayerSlot target)
-    {
-        if (mainLayerFadeCo != null) StopCoroutine(mainLayerFadeCo);
-        int n = mixer.GetInputCount();
-        for (int i = 0; i < n; ++i)
-            mixer.SetInputWeight(i, i == (int)target ? 1f : 0f);
-
-        playableGraph.Evaluate(0f);
-    }
-
-    public void ReconnectActionPlaceholder()
-    {
-        int slot = (int)MainLayerSlot.Action;
-        EnsureMixerInputCount(6);
-        mixer.DisconnectInput(slot);
-        mixer.ConnectInput(slot, actionPlaceholder, 0, 0f);
-    }
+    public AnimationMixerPlayable GetActionSubMixer() => actionSubMixer;
+    public void EvaluateGraphOnce() { if (playableGraph.IsValid()) playableGraph.Evaluate(0f); }
+    public bool HasMoveInput() => moveInput.sqrMagnitude > 0.01f;
 }
 

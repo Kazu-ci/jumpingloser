@@ -13,6 +13,9 @@ public class TempUI : MonoBehaviour
     public GameObject weaponPrefab;           // 1個の武器アイコンUIプレハブ（Imageを想定）
     public GameObject weaponList;             // 右下の空オブジェクト（全アイコンの親）
 
+    public GameObject AimIcon;
+    private GameObject lockTarget = null;
+
     private Coroutine slideCo;
 
     // 右手現在インデックス
@@ -26,6 +29,10 @@ public class TempUI : MonoBehaviour
         UIEvents.OnDurabilityChanged += OnDurabilityChanged;   // 手元の耐久UI反映
         UIEvents.OnWeaponDestroyed += OnWeaponDestroyed;     // ログのみ
 
+        PlayerEvents.OnAimTargetChanged += SwitchLockIcon;
+
+        if (AimIcon != null)
+            AimIcon.SetActive(false);
         TryRenderFistOnly();
     }
 
@@ -34,6 +41,32 @@ public class TempUI : MonoBehaviour
         UIEvents.OnRightWeaponSwitch -= ChangeRightWeapon;
         UIEvents.OnDurabilityChanged -= OnDurabilityChanged;
         UIEvents.OnWeaponDestroyed -= OnWeaponDestroyed;
+        PlayerEvents.OnAimTargetChanged -= SwitchLockIcon;
+    }
+
+    private void Update()
+    {
+        if(lockTarget != null && AimIcon != null)
+        {
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(lockTarget.transform.position + Vector3.up * -0f);
+            AimIcon.transform.position = screenPos;
+        }
+
+    }
+    // ロックオンアイコン表示
+    private void SwitchLockIcon(GameObject target)
+    {
+        lockTarget = target;
+        if(lockTarget != null)
+        {
+            if (AimIcon != null)
+                AimIcon.SetActive(true);
+        }
+        else
+        {
+            if (AimIcon != null)
+                AimIcon.SetActive(false);
+        }
     }
 
     // ====== 初期表示（素手のみ）======

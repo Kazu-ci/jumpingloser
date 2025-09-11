@@ -35,5 +35,6 @@ public class EventBus
         public static Action<PlayerAudioPart,AudioClip> PlayClipByPart;
 
         public static Action<HandType> OnWeaponBroke;
+        public static Action<GameObject> OnAimTargetChanged;
     }
 }

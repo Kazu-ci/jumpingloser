@@ -475,6 +475,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2965493039545569246}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3668538585615690273
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8042998459283004411}
+  - component: {fileID: 380613407157764672}
+  m_Layer: 7
+  m_Name: CameraAimTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8042998459283004411
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3668538585615690273}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.5, y: 1.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2965493039545569246}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &380613407157764672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3668538585615690273}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf76a6157d143084ab8ddfec58646562, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 2965493039545569246}
+  cameraRef: {fileID: 4878914922205672502}
+  backDistance: 0
+  shoulderOffset: 0
+  height: 1.5
+  positionSmooth: 12
+  rotationSmooth: 12
+  alignYawToCamera: 0
+  autoDetachFromPlayer: 1
 --- !u!1 &3977350728137865912
 GameObject:
   m_ObjectHideFlags: 0
@@ -698,16 +751,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 5664649289779628460}
+  aimTarget: {fileID: 8042998459283004411}
   rotationSpeed: {x: 500, y: 300}
   pitchClamp: {x: -30, y: 85}
   defaultDistance: 8
   minDistance: 1.2
-  smoothSpeed: 100
   collisionMask:
     serializedVersion: 2
     m_Bits: 2049
   mouseSensitivityMultiplier: 0.3
   gamepadSensitivityMultiplier: 1
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 4096
+  maxLockDistance: 25
+  lockFovAngle: 60
+  switchInputThreshold: 0.3
+  switchCooldown: 0.35
+  pivotLerpSpeed_Normal: 8
+  pivotLerpSpeed_Locked: 3
+  smoothSpeed_Normal: 8
+  smoothSpeed_Locked: 3
+  lockSwitchRotateSpeed: 6
+  autoDetachFromPlayer: 1
+  switchMoveBlendTime: 0.15
 --- !u!1 &7043423743674533400
 GameObject:
   m_ObjectHideFlags: 0
@@ -767,6 +834,7 @@ GameObject:
   - component: {fileID: 2965493039545569246}
   - component: {fileID: 5379002012255520392}
   - component: {fileID: 3407381904622499522}
+  - component: {fileID: 8569725607060307526}
   m_Layer: 7
   m_Name: PlayerTest
   m_TagString: Player
@@ -789,6 +857,7 @@ Transform:
   m_Children:
   - {fileID: 3128954789841751097}
   - {fileID: 5664649289779628460}
+  - {fileID: 8042998459283004411}
   - {fileID: 8799999724265508820}
   - {fileID: 4878914922205672502}
   - {fileID: 112857789823177122}
@@ -838,6 +907,8 @@ MonoBehaviour:
   moveSpeed: 8
   gravity: -9.81
   rotationSpeed: 720
+  dashSpeed: 10
+  dashDistance: 3
   groundCheck: {fileID: 8799999724265508820}
   groundDistance: 0.4
   groundMask:
@@ -865,7 +936,29 @@ MonoBehaviour:
   defaultStateCrossfade: 0.12
   blendOverrides: []
   toStateDefaults: []
+  lastBlendState: 0
   audioManager: {fileID: 5637540522521544949}
+--- !u!114 &8569725607060307526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7053117810255261270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 014d218868f320b4bb0b654a41a4bb39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  facingSource: {fileID: 2965493039545569246}
+  controller: {fileID: 5379002012255520392}
+  environmentMask:
+    serializedVersion: 2
+    m_Bits: 2739
+  skin: 0.03
+  groundSnapDistance: 0.08
+  radiusInflation: 0.01
+  preStepLift: 0
 --- !u!1001 &4736297648020079165
 PrefabInstance:
   m_ObjectHideFlags: 0
