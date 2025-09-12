@@ -2,6 +2,9 @@ using NUnit.Framework;
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using static LungeManager;
+using Unity.Burst.Intrinsics;
+using Unity.VisualScripting;
 
 public class EventBus
 {
@@ -28,6 +31,8 @@ public class EventBus
         public static Action<int, int> OnPlayerHpChange;
         public static Action OnShowGameOverUI;
         public static Action OnShowStageClearUI;
+
+        public static Action<bool> OnDashUIChange;
     }
     public static class PlayerEvents
     {
@@ -36,5 +41,8 @@ public class EventBus
 
         //public static Action<HandType> OnWeaponBroke;
         public static Action<GameObject> OnAimTargetChanged;
+
+        public static System.Func<LungeAim, Vector3, Vector3, float, float, AnimationCurve,bool> LungeByDistance;
+        public static System.Func<LungeAim, Vector3, Vector3, float, float, AnimationCurve,bool> LungeByTime;
     }
 }
