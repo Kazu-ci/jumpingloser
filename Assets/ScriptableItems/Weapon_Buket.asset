@@ -29,7 +29,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 4}
     hitCheckTime: 0.2
-    lungeDistance: 0
+    lungeDistance: 2
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -48,7 +48,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: 0
+    lungeDistance: 1
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -67,8 +67,8 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: 0
-    lungeSpeed: 10
+    lungeDistance: 3
+    lungeSpeed: 15
     lungeTime: 0.1
     animationSpeed: 1
     attackPrefab: {fileID: 0}
@@ -86,8 +86,8 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 4}
     hitCheckTime: 0.2
-    lungeDistance: 0
-    lungeSpeed: 10
+    lungeDistance: 3
+    lungeSpeed: 15
     lungeTime: 0.1
     animationSpeed: 1
     attackPrefab: {fileID: 0}

@@ -67,6 +67,10 @@ public class PlayerDashState : IState
         );
         _lungeIssued = true;
         UIEvents.OnDashUIChange?.Invoke(false);
+        if(_player.dashSound != null)
+        {
+            _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.feet, _player.dashSound);
+        }
     }
 
     public void OnExit()

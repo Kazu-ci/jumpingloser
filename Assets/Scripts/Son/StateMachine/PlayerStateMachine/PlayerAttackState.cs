@@ -36,6 +36,11 @@ public class PlayerAttackState : IState
     private static readonly System.Collections.Generic.HashSet<Enemy> uniqueEnemyHits
         = new System.Collections.Generic.HashSet<Enemy>();
 
+    private bool lungeInvoked;                  // この段で突進をもう呼んだか
+    private const float LUNGE_INPUT_MIN = 0.2f; // 「十分な入力」とみなす強さ（0.2）※必要なら Inspector 化してもよい
+    private readonly AnimationCurve defaultLungeCurve = null; // 必要なら後で差し替え
+
+
     private WeaponInstance weapon;
 
     public PlayerAttackState(PlayerMovement player) { _player = player; }
@@ -83,6 +88,7 @@ public class PlayerAttackState : IState
         _player.BlendToMainSlot(PlayerMovement.MainLayerSlot.Action, enterDur);
 
         if (currentAction.swingSFX) _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.RHand, currentAction.swingSFX);
+        lungeInvoked = false;
     }
 
     public void OnExit()
@@ -170,6 +176,12 @@ public class PlayerAttackState : IState
             DoAttackHitCheck();
             hasCheckedHit = true;
         }
+        // ==== ★ 突進のトリガ（1回だけ / 時刻到達で実行） ====
+        if (!lungeInvoked && currentAction.lungeDistance > 0f && elapsedTime >= currentAction.lungeTime)
+        {
+            DoLungeForCurrentAction();
+            lungeInvoked = true;
+        }
 
         // 段間切替（連撃）：chainEndTime 到達で次段へ
         if ( queuedNext && HasNextCombo() && elapsedTime >= chainEndTime)
@@ -214,6 +226,7 @@ public class PlayerAttackState : IState
         hasCheckedHit = false;
         hasSpawnedAttackVFX = false;
         queuedNext = false;
+        lungeInvoked = false;
         activeSlot = nextSlot;
 
         if (currentAction.swingSFX)
@@ -414,6 +427,59 @@ public class PlayerAttackState : IState
         var obj = new GameObject("AttackHitBoxVisualizer");
         var vis = obj.AddComponent<AttackHitBoxVisualizer>();
         vis.Init(center, size, rot, time, color);
+    }
+    // === 突進実行（優先度: 入力方向 > ロックオン対象 > 現在正面） ===
+    private void DoLungeForCurrentAction()
+    {
+        float distance = Mathf.Max(0f, currentAction.lungeDistance);
+        if (distance <= 0f) return; // 0 は「突進しない」
+
+        float speed = Mathf.Max(0.01f, currentAction.lungeSpeed);
+        AnimationCurve curve = defaultLungeCurve; // 必要なら currentAction に追加して使い分け可能
+
+        // 1) 強い移動入力があるか？
+        Vector3 dir;
+        bool hasStrongInput = _player.TryGetMoveDirectionWorld(LUNGE_INPUT_MIN * LUNGE_INPUT_MIN, out dir);
+        if (hasStrongInput)
+        {
+            // 入力方向へ即時回頭 → 前方突進（CustomDir 指定）
+            _player.RotateYawOverTime(dir, 0f); // 即時スナップ
+            EventBus.PlayerEvents.LungeByDistance?.Invoke(
+                LungeManager.LungeAim.CustomDir,
+                Vector3.zero,     // ToTarget 未使用
+                dir,              // カスタム方向
+                speed,
+                distance,
+                curve
+            );
+            return;
+        }
+
+        // 2) ロックオン対象があるか？
+        if (_player.TryGetLockOnHorizontalDirection(out dir))
+        {
+            // 敵方向へ即時回頭 → 前方突進
+            _player.RotateYawOverTime(dir, 0f);
+            EventBus.PlayerEvents.LungeByDistance?.Invoke(
+                LungeManager.LungeAim.CustomDir,
+                Vector3.zero,
+                dir,
+                speed,
+                distance,
+                curve
+            );
+            return;
+        }
+
+        // 3) どちらも無い → 回頭せず現在の正面へ
+        EventBus.PlayerEvents.LungeByDistance?.Invoke(
+            LungeManager.LungeAim.Forward,
+            Vector3.zero,
+            Vector3.zero, // 未使用
+            speed,
+            distance,
+            curve
+        );
     }
 }
 

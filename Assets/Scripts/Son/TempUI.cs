@@ -16,6 +16,9 @@ public class TempUI : MonoBehaviour
     public GameObject dashEnableIcon;       // ダッシュ可能アイコン
     public GameObject dashDisableIcon;
 
+    public GameObject HPUIFront;       // HPUI前景
+    public float HPUILength = 500f; // HPUIの長さ
+
     public GameObject AimIcon;
     private GameObject lockTarget = null;
 
@@ -34,6 +37,7 @@ public class TempUI : MonoBehaviour
 
         PlayerEvents.OnAimTargetChanged += SwitchLockIcon;
         UIEvents.OnDashUIChange += SwitchDashIcon;
+        UIEvents.OnPlayerHpChange += SetHpBar;
 
         if (AimIcon != null)
             AimIcon.SetActive(false);
@@ -79,6 +83,18 @@ public class TempUI : MonoBehaviour
             dashEnableIcon.SetActive(enable);
         if (dashDisableIcon != null)
             dashDisableIcon.SetActive(!enable);
+    }
+    private void SetHpBar(int amount, int max)
+    {
+        if (HPUIFront != null)
+        {
+            var rt = HPUIFront.transform as RectTransform;
+            if (rt != null)
+            {
+                float len = HPUILength * ((float)amount / (float)max);
+                rt.sizeDelta = new Vector2(len, rt.sizeDelta.y);
+            }
+        }
     }
     // ====== 初期表示（素手のみ）======
     private void TryRenderFistOnly()

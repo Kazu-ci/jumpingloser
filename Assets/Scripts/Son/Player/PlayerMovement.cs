@@ -77,6 +77,7 @@ public class PlayerMovement : MonoBehaviour
     private float dashTimer = 0f;        // 無敵時間管理用タイマー
     public bool IsDashInvincible => dashTimer > 0f;
     public float dashFreezeAtSeconds = 0.02f;
+    public AudioClip dashSound;
 
     [Header("被弾設定")]
     public float hitInvincibilityTime = 0.8f; // 被弾無敵時間
@@ -193,6 +194,7 @@ public class PlayerMovement : MonoBehaviour
     private StateMachine<PlayerState, PlayerTrigger> _fsm;
     private GameObject lockOnTarget = null; // ロックオン対象
     public GameObject GetLockOnTarget => lockOnTarget;
+    private Coroutine rotateYawCo; // 現在進行中の水平回転コルーチン
 
     // ====== ライフサイクル ======
     private void Awake()
@@ -327,6 +329,7 @@ public class PlayerMovement : MonoBehaviour
 
         // --- ライフ初期化 ---
         currentHealth = maxHealth;
+        UIEvents.OnPlayerHpChange?.Invoke((int)currentHealth, (int)maxHealth);
     }
 
     private void OnDestroy()
@@ -602,6 +605,7 @@ public class PlayerMovement : MonoBehaviour
 
         currentHealth = Mathf.Max(0, currentHealth - damage.damageAmount);
         Debug.Log($"Player took {damage.damageAmount} damage. Current HP: {currentHealth}/{maxHealth}");
+        UIEvents.OnPlayerHpChange?.Invoke((int)currentHealth, (int)maxHealth);
 
         // 死亡判定は被弾モーションの終盤で行う（ここでは即Deadにしない）
         if (_fsm.CurrentState != PlayerState.Hit)
@@ -810,7 +814,110 @@ public class PlayerMovement : MonoBehaviour
     // Dash クリップの時刻と速度の設定
     public void SetDashPlayableTime(double t) { if (dashPlayable.IsValid()) { dashPlayable.SetTime(t); } }
     public void SetDashPlayableSpeed(double s) { if (dashPlayable.IsValid()) { dashPlayable.SetSpeed(s); } }
+    /// <summary>
+    /// 指定の「水平方向」へ、指定時間でプレイヤーの向きを回転させる
+    /// - XZ平面ベクトルを使用 (Y成分は無視)
+    /// - 回転中に再度呼ばれた場合、前の回転を停止して新しい回転を開始
+    /// </summary>
+    /// <param name="horizontalDir">水平方向 (XZ平面)。例: ロックオン対象 - 自分 のベクトル</param>
+    /// <param name="durationSec">回転に要する秒数。0以下なら即時回転</param>
+    public void RotateYawOverTime(Vector3 horizontalDir, float durationSec)
+    {
+        // --- 水平化 (Y成分を0にして、XZ平面に射影) ---
+        horizontalDir.y = 0f;
+        if (horizontalDir.sqrMagnitude < 1e-6f)
+        {
+            // 無効な方向 (ゼロベクトル) 何もしない
+            return;
+        }
+        horizontalDir.Normalize();
 
+        // 目標ヨー角を算出
+        float targetYaw = Quaternion.LookRotation(horizontalDir, Vector3.up).eulerAngles.y;
 
+        // 進行中の回転があれば停止
+        if (rotateYawCo != null)
+        {
+            StopCoroutine(rotateYawCo);
+            rotateYawCo = null;
+        }
+
+        // 時間0以下
+        if (durationSec <= 0f)
+        {
+            var e = transform.rotation.eulerAngles;
+            transform.rotation = Quaternion.Euler(0f, targetYaw, 0f);
+            return;
+        }
+
+        // コルーチンでスムーズ回転
+        rotateYawCo = StartCoroutine(CoRotateYawTo(targetYaw, durationSec));
+    }
+
+    /// <summary>
+    /// 内部用: ヨー角へ時間ブレンド回転
+    /// - 既存の回転から目標ヨー角へ LerpAngle 補間
+    /// - 経過中に新規回転が来たら StopCoroutine される前提
+    /// </summary>
+    private System.Collections.IEnumerator CoRotateYawTo(float targetYaw, float durationSec)
+    {
+        // ヨー角
+        float startYaw = transform.rotation.eulerAngles.y;
+        float t = 0f;
+
+        // LerpAngle
+        while (t < durationSec)
+        {
+            t += Time.deltaTime;
+            float p = Mathf.Clamp01(t / durationSec);
+            float currentYaw = Mathf.LerpAngle(startYaw, targetYaw, p);
+            transform.rotation = Quaternion.Euler(0f, currentYaw, 0f);
+            yield return null;
+        }
+
+        // 最終スナップ
+        transform.rotation = Quaternion.Euler(0f, targetYaw, 0f);
+        rotateYawCo = null;
+    }
+
+    /// <summary>
+    /// 現在ロックオン中の敵に対する「水平方向 (XZ)」を取得する
+    /// - ロックオン対象が無い / 近すぎる場合は false を返す
+    /// </summary>
+    /// <param name="dirXZ">正規化済みの XZ 方向ベクトル (Y=0)</param>
+    public bool TryGetLockOnHorizontalDirection(out Vector3 dirXZ)
+    {
+        dirXZ = Vector3.zero;
+
+        if (lockOnTarget == null) return false;
+
+        // 水平化
+        Vector3 v = lockOnTarget.transform.position - transform.position;
+        v.y = 0f;
+
+        if (v.sqrMagnitude < 1e-6f) return false;
+
+        dirXZ = v.normalized;
+        return true;
+    }
+    // === 移動入力の有無とワールド方向を取得 ===
+    // ・minInputSqr は「入力の二乗長」のしきい値（例: 0.2f の強さ → 0.04f を渡す）
+    // ・true を返すとき dir は正規化済みのワールド水平方向（カメラ相対）
+    // ・false のとき dir は transform.forward（保険値）
+    public bool TryGetMoveDirectionWorld(float minInputSqr, out Vector3 dir)
+    {
+        // カメラ相対で算出（ResolveDashDirectionWorld と同等の座標系）
+        if (this.moveInput.sqrMagnitude >= minInputSqr)
+        {
+            Vector3 camF = mainCam.forward; camF.y = 0f; camF.Normalize();
+            Vector3 camR = mainCam.right; camR.y = 0f; camR.Normalize();
+            dir = (camR * moveInput.x + camF * moveInput.y);
+            if (dir.sqrMagnitude < 1e-6f) { dir = transform.forward; return false; }
+            dir.Normalize();
+            return true;
+        }
+        dir = transform.forward;
+        return false;
+    }
 }
 
