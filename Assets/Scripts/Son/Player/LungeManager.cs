@@ -37,6 +37,8 @@ public class LungeManager : MonoBehaviour
     [Tooltip("段差補助：必要ならスイープ前に一時的に上げる量（CC.stepOffset と併用可）")]
     public float preStepLift = 0.0f; // 0 でCCに任せる
 
+
+
     // ==== ランタイム移動状態 ====
     private bool isLunging;
     private Vector3 moveDir = Vector3.zero;  // 正規化方向（水平）
@@ -71,6 +73,18 @@ public class LungeManager : MonoBehaviour
     {
         if (!facingSource) facingSource = transform;
         if (!controller) controller = GetComponent<CharacterController>();
+    }
+
+    private void OnEnable()
+    {
+        EventBus.PlayerEvents.LungeByDistance += StartLungeByDistance;
+        EventBus.PlayerEvents.LungeByTime += StartLungeByTime;
+    }
+    private void OnDisable()
+    {
+        EventBus.PlayerEvents.LungeByDistance -= StartLungeByDistance;
+        EventBus.PlayerEvents.LungeByTime -= StartLungeByTime;
+        ForceCancel(false);
     }
 
     // ======================================================================

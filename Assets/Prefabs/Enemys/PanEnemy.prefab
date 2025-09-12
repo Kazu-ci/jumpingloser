@@ -169,7 +169,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1023ff6bdb9648441bca58c772b5f79a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponDrops: []
+  weaponDrops:
+  - {fileID: 2371019539119376703, guid: 0ce57653ba88315498203c7c04e83db2, type: 3}
   textures:
   - {fileID: 2800000, guid: 94b05b7dc95aafa45a3294b851f65507, type: 3}
   - {fileID: 2800000, guid: 3134e3cef375e9b4ca3a5b795299eee5, type: 3}
