@@ -27,7 +27,7 @@ MonoBehaviour:
     endNormalizedTime: 0.4
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
-    hitBoxSize: {x: 3, y: 3, z: 4}
+    hitBoxSize: {x: 3, y: 3, z: 6}
     hitCheckTime: 0.2
     lungeDistance: 2
     lungeSpeed: 10
@@ -45,8 +45,8 @@ MonoBehaviour:
     inputWindowEnd: 0.4
     endNormalizedTime: 0.4
     blendToNext: 0.12
-    hitBoxCenter: {x: 0, y: -0.5, z: 1}
-    hitBoxSize: {x: 3, y: 3, z: 3}
+    hitBoxCenter: {x: 0, y: 1, z: 1}
+    hitBoxSize: {x: 4, y: 6, z: 3.5}
     hitCheckTime: 0.2
     lungeDistance: 1
     lungeSpeed: 10
@@ -64,8 +64,8 @@ MonoBehaviour:
     inputWindowEnd: 0.4
     endNormalizedTime: 0.4
     blendToNext: 0.12
-    hitBoxCenter: {x: 0, y: -0.5, z: 1}
-    hitBoxSize: {x: 3, y: 3, z: 3}
+    hitBoxCenter: {x: 0.5, y: -0.5, z: 1}
+    hitBoxSize: {x: 3, y: 3, z: 6}
     hitCheckTime: 0.2
     lungeDistance: 3
     lungeSpeed: 15
@@ -83,8 +83,8 @@ MonoBehaviour:
     inputWindowEnd: 0.4
     endNormalizedTime: 0.4
     blendToNext: 0.12
-    hitBoxCenter: {x: 0, y: -0.5, z: 1}
-    hitBoxSize: {x: 3, y: 3, z: 4}
+    hitBoxCenter: {x: 1, y: -0.5, z: 1}
+    hitBoxSize: {x: 4, y: 3, z: 4}
     hitCheckTime: 0.2
     lungeDistance: 3
     lungeSpeed: 15
@@ -98,14 +98,14 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 2
     swingSFX: {fileID: 8300000, guid: 3d4fe76e9c3d78b41a1dabc864b88f78, type: 3}
-    inputWindowStart: 0.3
-    inputWindowEnd: 0.8
+    inputWindowStart: 0
+    inputWindowEnd: 0
     endNormalizedTime: 0.8
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 0.5}
-    hitBoxSize: {x: 4, y: 4, z: 6}
+    hitBoxSize: {x: 5, y: 4, z: 6}
     hitCheckTime: 0.2
-    lungeDistance: 0
+    lungeDistance: 0.1
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1

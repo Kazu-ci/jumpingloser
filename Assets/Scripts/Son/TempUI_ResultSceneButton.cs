@@ -13,6 +13,6 @@ public class TempUI_ResultSceneButton : MonoBehaviour
     }
     public void OnTestMapClick() 
     {
-        SceneManager.LoadScene("Map1_temple");
+        SceneManager.LoadScene("SampleScene 1");
     }
 }

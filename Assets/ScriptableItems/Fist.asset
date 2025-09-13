@@ -15,21 +15,25 @@ MonoBehaviour:
   weaponName: Fist
   modelPrefab: {fileID: 0}
   icon: {fileID: 21300000, guid: 986b6879190a00b449d055f8be7c6f36, type: 3}
-  crackDropPrefab: {fileID: 0}
-  numberOfCracks: 3
+  weaponType: 0
   mainWeaponCombo:
   - name: FistATK
     animation: {fileID: -2568379345036023936, guid: ea2c6122544ceb145be8d96cb185f1f6, type: 3}
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 6647a7f35968aa0419f0befba95e63bc, type: 3}
-    inputWindowStart: 0.3
-    inputWindowEnd: 0.8
+    inputWindowStart: 0
+    inputWindowEnd: 0
     endNormalizedTime: 0.9
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 2}
     hitCheckTime: 0.2
+    lungeDistance: 0
+    lungeSpeed: 10
+    lungeTime: 0.1
+    animationSpeed: 1
+    attackPrefab: {fileID: 0}
     attackVFXPrefab: {fileID: 6773056508968745887, guid: 706c02c7a196ffd4eae115c4bb094205, type: 3}
     attackVFXTime: 0.3
   subWeaponAttack: []
@@ -38,5 +42,6 @@ MonoBehaviour:
   attackPower: 1
   attackRange: 2
   attackSpeed: 1
+  addDurabilityOnPickup: 20
   hitSFX: {fileID: 0}
   hitVFXPrefab: {fileID: 8778328243042707411, guid: 374aa05c79e9e4d4f8b03441dc2cc978, type: 3}
