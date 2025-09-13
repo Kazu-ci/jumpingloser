@@ -22,19 +22,19 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 1215e8eab5a07fb46b37ea34440668a7, type: 3}
-    inputWindowStart: 0.3
-    inputWindowEnd: 0.8
+    inputWindowStart: 0.2
+    inputWindowEnd: 0.6
     endNormalizedTime: 0.8
     blendToNext: 0.12
-    hitBoxCenter: {x: 0, y: -0.5, z: 1}
-    hitBoxSize: {x: 3, y: 3, z: 2}
+    hitBoxCenter: {x: -1, y: -0.5, z: 1}
+    hitBoxSize: {x: 4, y: 3, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: 0
+    lungeDistance: 0.1
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
     attackPrefab: {fileID: 0}
-    attackVFXPrefab: {fileID: 0}
+    attackVFXPrefab: {fileID: 7713136804960580192, guid: f77129470fb04834b9ec4134f66437f8, type: 3}
     attackVFXTime: 0.05
   - name: Attack2
     animation: {fileID: 3878471701507660605, guid: 8c8b08780b136fd46b62591e3a99a076, type: 3}
@@ -48,7 +48,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 2}
     hitCheckTime: 0.2
-    lungeDistance: 0
+    lungeDistance: 0.1
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -67,7 +67,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: 0
+    lungeDistance: 0.1
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -86,7 +86,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 4, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: 0
+    lungeDistance: 0.1
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -98,15 +98,15 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 18a92cf2f0abd7d429e293a05c006c3d, type: 3}
-    inputWindowStart: 0.3
-    inputWindowEnd: 0.8
+    inputWindowStart: 0
+    inputWindowEnd: 0
     endNormalizedTime: 0.8
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 4, z: 4}
     hitCheckTime: 0.5
-    lungeDistance: 0
-    lungeSpeed: 10
+    lungeDistance: 5
+    lungeSpeed: 15
     lungeTime: 0.1
     animationSpeed: 1
     attackPrefab: {fileID: 0}
