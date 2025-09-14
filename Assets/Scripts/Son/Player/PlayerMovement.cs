@@ -51,10 +51,20 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector] public bool attackHeld;                // 押しっぱなしフラグ
     [HideInInspector] public bool attackPressedThisFrame;    // そのフレームに押下されたか
 
-    [Header("攻撃入力（長押し判定）")]
-    [Tooltip("この秒数以上ならスキルとして扱う")]
-    public float skillHoldThreshold = 0.35f;   // 例：0.35秒
-    private double attackPressStartTime = -1.0; // 押下時刻（Time.timeAsDouble）
+    
+
+    // ====== 攻撃入力 ======
+    [Header("攻撃入力")]
+    [Tooltip("短押長さ")]
+    public float shortPressMax = 0.15f;
+    [Tooltip("スキルの長押し")]
+    public float skillHoldTime = 1.0f;
+    //public float skillHoldThreshold = 0.35f;
+    
+    // 内部フラグ
+    private bool holdUIShown = false;     // 長押しUI表示中か
+    private bool skillTriggered = false;
+    private double attackPressStartTime = -1.0;
 
     [Header("ステータス")]
     public float maxHealth = 50;
@@ -215,37 +225,53 @@ public class PlayerMovement : MonoBehaviour
         inputActions.Player.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         inputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
 
-        // 攻撃キー：押下時は時刻を記録、離した瞬間に短押し/長押しを分岐する
+        // 攻撃キー
         inputActions.Player.Attack.performed += ctx =>
         {
-            //押しっぱ開始。ここでは発動しない（確定は離した瞬間）
+            // 押下開始
             attackHeld = true;
-            attackPressedThisFrame = false;                  // このフレームでの先行受付はしない
-            attackPressStartTime = Time.timeAsDouble;        // 押下時刻を記録
+            attackPressedThisFrame = false;
+            attackPressStartTime = Time.timeAsDouble;
+            holdUIShown = false;
+            skillTriggered = false;
         };
 
+        // 攻撃キー離した瞬間に判定
         inputActions.Player.Attack.canceled += ctx =>
         {
-            //ボタンを離した。押下継続時間で通常攻撃/スキルを分岐
             attackHeld = false;
+
             double held = (attackPressStartTime < 0.0) ? 0.0 : (Time.timeAsDouble - attackPressStartTime);
             attackPressStartTime = -1.0;
 
-            // 死亡/落下など上位優先状態では無視
+            // 死亡などは無視
             if (_fsm.CurrentState == PlayerState.Dead) return;
 
-            if (held >= skillHoldThreshold)
+            // Skill未発火で離した場合のみ、短押し判定を行う
+            if (!skillTriggered)
             {
-                //長押し→スキル入力トリガー
-                WeaponInstance wp = GetMainWeapon();
-                //if(wp!=null)_fsm.ExecuteTrigger(PlayerTrigger.SkillInput);
+                if (held <= shortPressMax)
+                {
+                    // 短押しコンボ攻撃
+                    attackPressedThisFrame = true;
+                    _fsm.ExecuteTrigger(PlayerTrigger.AttackInput);
+                }
+                else
+                {
+                    if (holdUIShown) UIEvents.OnAttackHoldUI?.Invoke(false);
+                }
             }
             else
             {
-                attackPressedThisFrame = true;
-                _fsm.ExecuteTrigger(PlayerTrigger.AttackInput);
+                // Skillは既に発火済み：UIの後片付け
+                UIEvents.OnAttackHoldUI?.Invoke(false);
             }
+
+            // 状態をクリア
+            holdUIShown = false;
+            skillTriggered = false;
         };
+
         inputActions.Player.SwitchWeapon.performed += ctx => OnSwitchWeaponInput();
         inputActions.Player.SwitchWeapon2.performed += ctx => OnSwitchWeaponInput2();
         inputActions.Player.SwitchHitbox.performed += ctx => { isHitboxVisible = !isHitboxVisible; };
@@ -385,7 +411,35 @@ public class PlayerMovement : MonoBehaviour
             hitTimer -= Time.deltaTime;
             if (hitTimer < 0f) hitTimer = 0f;
         }
+        // === 長押し監視 ===
+        if (attackHeld && attackPressStartTime >= 0.0)
+        {
+            double held = Time.timeAsDouble - attackPressStartTime;
 
+            // (1) 長押しUIの起動
+            if (held > shortPressMax && !holdUIShown)
+            {
+                UIEvents.OnAttackHoldUI?.Invoke(true);   // 進捗UIなどを表示開始
+                holdUIShown = true;
+            }
+
+            // (2) 進捗通知
+            if (holdUIShown)
+            {
+                float p = Mathf.Clamp01((float)((held - shortPressMax) / Mathf.Max(0.0001f, (skillHoldTime - shortPressMax))));
+                UIEvents.OnAttackHoldProgress?.Invoke(p);
+            }
+
+            // (3) Skillしきい値到達
+            if (!skillTriggered && held >= skillHoldTime)
+            {
+                skillTriggered = true;
+                UIEvents.OnAttackHoldCommitted?.Invoke();
+                                                            // === スキル入力（状態遷移） ===
+                _fsm.ExecuteTrigger(PlayerTrigger.SkillInput);
+                UIEvents.OnAttackHoldUI?.Invoke(false);
+            }
+        }
         // ステート更新
         bool pressedNow = attackPressedThisFrame;
         _fsm.Update(Time.deltaTime);
@@ -418,6 +472,9 @@ public class PlayerMovement : MonoBehaviour
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Idle, PlayerTrigger.MoveStop);
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Move, PlayerTrigger.MoveStart);
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Skill, PlayerTrigger.SkillInput);
+        _fsm.AddTransition(PlayerState.Skill, PlayerState.Idle, PlayerTrigger.MoveStop);
+        _fsm.AddTransition(PlayerState.Skill, PlayerState.Move, PlayerTrigger.MoveStart);
+        _fsm.AddTransition(PlayerState.Skill, PlayerState.Attack, PlayerTrigger.AttackInput);
 
         // Falling（Dead 以外 → Falling）
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Falling, PlayerTrigger.NoGround);
@@ -901,9 +958,7 @@ public class PlayerMovement : MonoBehaviour
         return true;
     }
     // === 移動入力の有無とワールド方向を取得 ===
-    // ・minInputSqr は「入力の二乗長」のしきい値（例: 0.2f の強さ → 0.04f を渡す）
-    // ・true を返すとき dir は正規化済みのワールド水平方向（カメラ相対）
-    // ・false のとき dir は transform.forward（保険値）
+
     public bool TryGetMoveDirectionWorld(float minInputSqr, out Vector3 dir)
     {
         // カメラ相対で算出（ResolveDashDirectionWorld と同等の座標系）

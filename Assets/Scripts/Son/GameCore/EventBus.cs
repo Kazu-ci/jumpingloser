@@ -34,6 +34,11 @@ public class EventBus
 
         public static Action<bool> OnDashUIChange;
         public static Action<Transform> OnAimPointChanged;
+
+        // 攻撃ボタン長押しUI
+        public static Action<bool> OnAttackHoldUI;         // true=表示 / false=非表示
+        public static Action<float> OnAttackHoldProgress;  // 進捗表示
+        public static Action OnAttackHoldCommitted;
     }
     public static class PlayerEvents
     {
