@@ -88,7 +88,6 @@ public class ThirdPersonCamera : MonoBehaviour
         inputActions.Player.Look.canceled += ctx => lookInput = Vector2.zero;
         inputActions.Player.Lock.performed += _ => lockPressedThisFrame = true;
 
-
         // 初期ピボット
         followPivot = target != null ? target.position : transform.position;
 
@@ -263,7 +262,9 @@ public class ThirdPersonCamera : MonoBehaviour
             lockedEnemy = best;
             needsSmoothRotate = true;
 
+            // イベント送出
             PlayerEvents.OnAimTargetChanged?.Invoke(lockedEnemy.gameObject);
+            UIEvents.OnAimPointChanged?.Invoke(ResolveAimPointTransform(lockedEnemy));
         }
     }
 
@@ -275,7 +276,9 @@ public class ThirdPersonCamera : MonoBehaviour
         lockedEnemy = null;
         needsSmoothRotate = false;
 
+        // イベント送出
         PlayerEvents.OnAimTargetChanged?.Invoke(null);
+        UIEvents.OnAimPointChanged?.Invoke(null);
     }
 
     // 左右切替
@@ -309,7 +312,6 @@ public class ThirdPersonCamera : MonoBehaviour
         {
             lockedEnemy = next;
             needsSmoothRotate = true;
-            PlayerEvents.OnAimTargetChanged?.Invoke(lockedEnemy.gameObject);
 
             // 位置ブレンド開始
             switchMoveActive = true;
@@ -317,8 +319,11 @@ public class ThirdPersonCamera : MonoBehaviour
             switchMoveRemain = switchMoveTotal;
             camPosOnSwitch = cam.position;
 
-            // SmoothDamp の履歴速度を切る
             currentVelocity = Vector3.zero;
+
+            // イベント送出
+            PlayerEvents.OnAimTargetChanged?.Invoke(lockedEnemy.gameObject);
+            UIEvents.OnAimPointChanged?.Invoke(ResolveAimPointTransform(lockedEnemy));
         }
     }
 
@@ -386,7 +391,7 @@ public class ThirdPersonCamera : MonoBehaviour
         return true;
     }
 
-    // 狙い点
+    // 狙い点のワールド座標
     private Vector3 GetAimPoint(Transform t)
     {
         var ap = t.GetComponentInChildren<AimPointMarker>();
@@ -397,5 +402,13 @@ public class ThirdPersonCamera : MonoBehaviour
 
         return t.position + Vector3.up * 1.0f;
     }
-}
 
+    // UI 用に渡すトランスフォーム
+    private Transform ResolveAimPointTransform(Transform t)
+    {
+        if (t == null) return null;
+        var ap = t.GetComponentInChildren<AimPointMarker>();
+        if (ap != null) return ap.transform;
+        return t;
+    }
+}

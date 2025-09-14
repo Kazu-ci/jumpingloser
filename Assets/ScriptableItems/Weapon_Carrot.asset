@@ -29,9 +29,9 @@ MonoBehaviour:
     hitBoxCenter: {x: -1, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 3, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: 0.1
+    lungeDistance: 0
     lungeSpeed: 10
-    lungeTime: 0.1
+    lungeTime: 0.02
     animationSpeed: 1
     attackPrefab: {fileID: 0}
     attackVFXPrefab: {fileID: 7713136804960580192, guid: f77129470fb04834b9ec4134f66437f8, type: 3}
@@ -48,7 +48,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 2}
     hitCheckTime: 0.2
-    lungeDistance: 0.1
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -67,7 +67,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: 0.1
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -86,7 +86,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 4, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: 0.1
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1

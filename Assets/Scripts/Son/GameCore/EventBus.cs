@@ -33,13 +33,18 @@ public class EventBus
         public static Action OnShowStageClearUI;
 
         public static Action<bool> OnDashUIChange;
+        public static Action<Transform> OnAimPointChanged;
+
+        // 攻撃ボタン長押しUI
+        public static Action<bool> OnAttackHoldUI;         // true=表示 / false=非表示
+        public static Action<float> OnAttackHoldProgress;  // 進捗表示
+        public static Action OnAttackHoldCommitted;
     }
     public static class PlayerEvents
     {
         public static Func<GameObject> GetPlayerObject;
         public static Action<PlayerAudioPart,AudioClip> PlayClipByPart;
 
-        //public static Action<HandType> OnWeaponBroke;
         public static Action<GameObject> OnAimTargetChanged;
 
         public static System.Func<LungeAim, Vector3, Vector3, float, float, AnimationCurve,bool> LungeByDistance;

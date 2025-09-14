@@ -29,7 +29,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0.5, y: 1, z: 1}
     hitBoxSize: {x: 5, y: 5, z: 5}
     hitCheckTime: 0.2
-    lungeDistance: 0.01
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -48,7 +48,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0.5, y: 0, z: 1}
     hitBoxSize: {x: 4, y: 4, z: 4}
     hitCheckTime: 0.2
-    lungeDistance: 0.01
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -67,7 +67,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: 0, z: 1}
     hitBoxSize: {x: 5, y: 5, z: 5}
     hitCheckTime: 0.2
-    lungeDistance: 0.01
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -86,7 +86,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: 0, z: 1}
     hitBoxSize: {x: 5, y: 5, z: 5}
     hitCheckTime: 0.2
-    lungeDistance: 0.01
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -105,7 +105,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 5, y: 5, z: 3}
     hitCheckTime: 0.2
-    lungeDistance: 0.01
+    lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
