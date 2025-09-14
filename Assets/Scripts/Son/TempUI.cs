@@ -13,14 +13,24 @@ public class TempUI : MonoBehaviour
     public GameObject weaponPrefab;           // 1個の武器アイコンUIプレハブ（Imageを想定）
     public GameObject weaponList;             // 右下の空オブジェクト（全アイコンの親）
 
+    [Header("ダッシュUI")]
     public GameObject dashEnableIcon;       // ダッシュ可能アイコン
     public GameObject dashDisableIcon;
 
+    [Header("HPUI")]
     public GameObject HPUIFront;       // HPUI前景
     public float HPUILength = 500f; // HPUIの長さ
 
+    [Header("ロックオンUI")]
     public GameObject AimIcon;
-    private GameObject lockTarget = null;
+    private Transform lockTarget = null;
+
+    [Header("Menu UI")]
+    public GameObject mapObj;
+    public GameObject tutorial;
+    private bool isMenuOpen = false;
+
+    public InputSystem_Actions inputActions;
 
     private Coroutine slideCo;
 
@@ -35,9 +45,16 @@ public class TempUI : MonoBehaviour
         UIEvents.OnDurabilityChanged += OnDurabilityChanged;   // 手元の耐久UI反映
         UIEvents.OnWeaponDestroyed += OnWeaponDestroyed;     // ログのみ
 
-        PlayerEvents.OnAimTargetChanged += SwitchLockIcon;
+        UIEvents.OnAimPointChanged += SwitchLockIcon;
         UIEvents.OnDashUIChange += SwitchDashIcon;
         UIEvents.OnPlayerHpChange += SetHpBar;
+
+        if (inputActions == null)
+        {
+            inputActions = new InputSystem_Actions();
+            inputActions.UI.Enable();
+            inputActions.UI.Menu.performed += ctx => SwitchMenu();
+        }
 
         if (AimIcon != null)
             AimIcon.SetActive(false);
@@ -49,7 +66,7 @@ public class TempUI : MonoBehaviour
         UIEvents.OnRightWeaponSwitch -= ChangeRightWeapon;
         UIEvents.OnDurabilityChanged -= OnDurabilityChanged;
         UIEvents.OnWeaponDestroyed -= OnWeaponDestroyed;
-        PlayerEvents.OnAimTargetChanged -= SwitchLockIcon;
+        UIEvents.OnAimPointChanged -= SwitchLockIcon;
         UIEvents.OnDashUIChange -= SwitchDashIcon;
     }
 
@@ -57,13 +74,36 @@ public class TempUI : MonoBehaviour
     {
         if(lockTarget != null && AimIcon != null)
         {
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(lockTarget.transform.position + Vector3.up * -0f);
+            Vector3 screenPos = Camera.main.WorldToScreenPoint(lockTarget.position + Vector3.up * -0f);
             AimIcon.transform.position = screenPos;
         }
 
     }
+
+    private void SwitchMenu()
+    {
+        if(!isMenuOpen)
+        {
+            if (mapObj != null)
+                mapObj.SetActive(true);
+            if (tutorial != null)
+                tutorial.SetActive(true);
+            isMenuOpen = true;
+            SystemEvents.OnGamePause?.Invoke();
+        }
+        else
+        {
+            if (mapObj != null)
+                mapObj.SetActive(false);
+            if (tutorial != null)
+                tutorial.SetActive(false);
+            isMenuOpen = false;
+            SystemEvents.OnGameResume?.Invoke();
+        }
+
+    }
     // ロックオンアイコン表示
-    private void SwitchLockIcon(GameObject target)
+    private void SwitchLockIcon(Transform target)
     {
         lockTarget = target;
         if(lockTarget != null)

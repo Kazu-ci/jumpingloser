@@ -7,6 +7,7 @@ public enum GameState
     Startup,     // アプリ起動直後の軽量初期化
     Title,       // タイトル画面
     Preloading,  // ゲームプレイ用アセット読み込み
+    Preloading2, // ゲームプレイ用アセット読み込み2
     Playing,     // プレイ中（サブ状態機が動く）
     Paused,      // ポーズ（HUD 非表示 + 操作停止）
     Result       // リザルト画面
@@ -19,6 +20,7 @@ public enum GameTrigger
 {
     ToTitle,
     StartGame,
+    EnterStage2,
     FinishLoading,
     Pause,
     Resume,
@@ -105,6 +107,13 @@ public class GameManager : MonoBehaviour
             enterRoutine: EnterPreloadingRoutine
             );
         _stateMachine.SetupState(
+            GameState.Preloading2,
+            onEnter: null,
+            onExit: () => { preGameState = GameState.Preloading2; },
+            enterRoutine: EnterPreloadingRoutine
+            );
+
+        _stateMachine.SetupState(
             GameState.Playing,
             onEnter: () => {
                 CurrentState = getCurrentState;
@@ -147,15 +156,18 @@ public class GameManager : MonoBehaviour
         // Preloading
         _stateMachine.AddTransition(GameState.Preloading, GameState.Playing, GameTrigger.FinishLoading);
 
+        // Preloading2
+        _stateMachine.AddTransition(GameState.Preloading2, GameState.Playing, GameTrigger.FinishLoading);
+
         // Playing
         _stateMachine.AddTransition(GameState.Playing, GameState.Paused, GameTrigger.Pause);
         _stateMachine.AddTransition(GameState.Playing, GameState.Result, GameTrigger.GameOver);
-        //_stateMachine.AddTransition(GameState.Playing, GameState.Preloading, GameTrigger.StartGame);
+        _stateMachine.AddTransition(GameState.Playing, GameState.Preloading2, GameTrigger.EnterStage2);
 
         // Paused
         _stateMachine.AddTransition(GameState.Paused, GameState.Playing, GameTrigger.Resume);
-        _stateMachine.AddTransition(GameState.Paused, GameState.Result, GameTrigger.GameOver);
-        _stateMachine.AddTransition(GameState.Paused, GameState.Title, GameTrigger.ToTitle);
+        //_stateMachine.AddTransition(GameState.Paused, GameState.Result, GameTrigger.GameOver);
+        //_stateMachine.AddTransition(GameState.Paused, GameState.Title, GameTrigger.ToTitle);
 
         // Result
         _stateMachine.AddTransition(GameState.Result, GameState.Title, GameTrigger.ToTitle);
@@ -170,7 +182,7 @@ public class GameManager : MonoBehaviour
     {
         CurrentState = getCurrentState;
         _sceneLoadedFlag = false;
-        SystemEvents.OnGameStateChange?.Invoke(GameState.Preloading);
+        SystemEvents.OnGameStateChange?.Invoke(CurrentState);
 
         while (!_sceneLoadedFlag)
             yield return null;
@@ -193,6 +205,7 @@ public class GameManager : MonoBehaviour
     /// タイトル画面のスタートボタンから呼ばれる。
     /// </summary>
     public void StartGame() => _stateMachine.ExecuteTrigger(GameTrigger.StartGame);
+    public void EnterStage2() => _stateMachine.ExecuteTrigger(GameTrigger.EnterStage2);
     public void PauseGame() => _stateMachine.ExecuteTrigger(GameTrigger.Pause);
     public void ResumeGame() => _stateMachine.ExecuteTrigger(GameTrigger.Resume);
     public void GameOver() => _stateMachine.ExecuteTrigger(GameTrigger.GameOver);
