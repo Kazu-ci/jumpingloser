@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 523dfa3ef933a3646ba34e5a7c966b2b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 191107
+  packageName: Stylized Ruins
+  packageVersion: 1.0
+  assetPath: Assets/NatureRuins/Demo/Grash.terrainlayer
+  uploadId: 422004

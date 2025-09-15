@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: f0627cd944cf1974f9bd4e7e713ec73b
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 287353
+  packageName: Grasslands - Stylized Nature
+  packageVersion: 1.0
+  assetPath: Assets/Raygeas/Shared Assets/Shaders/Built-In/Mountains.shader
+  uploadId: 670112

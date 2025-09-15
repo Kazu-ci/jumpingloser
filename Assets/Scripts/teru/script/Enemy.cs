@@ -45,8 +45,7 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
-        info = enemyAnimation.GetCurrentAnimatorStateInfo(0);
-        animetionEnd = !info.loop && info.normalizedTime >= 0.8f;
+        playerPos=EventBus.PlayerEvents.GetPlayerObject?.Invoke();
     }
 
     protected virtual void UpdateTestTarget()
@@ -67,16 +66,17 @@ public class Enemy : MonoBehaviour
     }
     public virtual void OnAttackSet(){  }
     public virtual void OnAttackEnd() { }
+    public virtual void OnSumon() { }
     public virtual int TakeDamage(DamageData dmg)
     {
         nowHp -= (int)dmg.damageAmount;
-        if (nowHp <= 0)
-        {
-            OnDead();
-        }
+        //if (nowHp <= 0)
+        //{
+        //    OnDead();
+        //}
         return (int)dmg.damageAmount;
     }
-    protected virtual void OnDead()
+    public virtual void OnDead()
     {
         if (_isDead) return;
         _isDead = true;
@@ -85,7 +85,10 @@ public class Enemy : MonoBehaviour
     }
     protected float GetDistance()
     {
-        return Vector3.Distance(playerPos.transform.position,transform.position);
+        Vector3 offset = playerPos.transform.position - transform.position;
+        offset.y = 0; 
+        return offset.magnitude;
+        
     }
     void DropWeapon()
     {
@@ -95,9 +98,21 @@ public class Enemy : MonoBehaviour
         Instantiate(weaponDrops[index], transform.position, Quaternion.identity);
 
     }
-    protected bool AnimationEnd()
+    protected bool AnimationEnd(string stateName)
     {
-        return animetionEnd;
+        // 現在のステート情報を取得
+        AnimatorStateInfo stateInfo = enemyAnimation.GetCurrentAnimatorStateInfo(0);
+
+        // ステート名をハッシュ化して比較
+        int stateHash = Animator.StringToHash("Base Layer." + stateName);
+
+        // 該当ステートでかつ normalizedTime >=1 なら終了とみなす
+        if (stateInfo.fullPathHash == stateHash && stateInfo.normalizedTime >= 1f)
+        {
+            return true;
+        }
+
+        return false;
     }
     public int GetDamage()
     {

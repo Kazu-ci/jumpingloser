@@ -2,6 +2,7 @@ using System.Xml;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections.Generic;
 using System.Collections; 
 using static UnityEngine.UI.GridLayoutGroup;
 
@@ -9,9 +10,10 @@ public class BossEnemy : Enemy
 {
     EStateMachine<BossEnemy> stateMachine;
     [SerializeField] GameObject[] mobEnemy;
-    [SerializeField] Collider attackCollider;
+    [SerializeField] List<Collider> attackColliders;
     [SerializeField] float rushSpeed;
     [SerializeField] float stiffnessTime;
+    private Dictionary<string, Collider> stateToCollider;
     private enum EnemyState
     {
         Idle,
@@ -24,6 +26,20 @@ public class BossEnemy : Enemy
         Stiffness,
         Hit,
         Dead
+    }
+    void Awake()
+    {
+        // ステート名とコライダーを紐付け
+        stateToCollider = new Dictionary<string, Collider>
+        {
+            { "Combo", attackColliders[0] },
+            { "Rotate", attackColliders[1] },
+            { "Rush", attackColliders[2] }
+        };
+        foreach (var c in attackColliders)
+        {
+            if (c != null) c.enabled = false;
+        }
     }
     void Start()
     {
@@ -49,15 +65,35 @@ public class BossEnemy : Enemy
         base.Update();
         if (nowHp <= 0) { stateMachine.ChangeState((int)EnemyState.Dead); }
         stateMachine.OnUpdate();
+        Debug.Log(stateMachine.CurrentState.ToString());
     }
     public override void OnAttackSet()
     {
-        attackCollider.enabled = true;
+        attackColliders.ForEach(c => c.enabled = false);
+
+        var state = enemyAnimation.GetCurrentAnimatorStateInfo(0);
+        if (stateToCollider.TryGetValue(state.IsName("Combo") ? "Combo" :
+                                        state.IsName("Rotate") ? "Rotate" :
+                                        state.IsName("Rush") ? "Rush" : "",
+                                        out var col))
+        {
+            col.enabled = true;
+        }
     }
-    public override void OnAttackEnd()
+    public override void OnAttackEnd() => attackColliders.ForEach(c => c.enabled = false);
+    public override void OnSumon()
     {
-        attackCollider.enabled = false;
+        for (int i = 0; i < mobEnemy.Length; i++)
+        {
+            if (mobEnemy[i] == null) continue; // nullチェック
+            float angle = Random.Range(-90, 90);
+            Quaternion rot = Quaternion.Euler(0, angle, 0);
+            Vector3 dir = rot * transform.forward;
+            Vector3 spawnPos = transform.position + dir.normalized * 5;
+            Instantiate(mobEnemy[i], spawnPos, Quaternion.identity);
+        }
     }
+
 
     private class IdleState : EStateMachine<BossEnemy>.StateBase
     {
@@ -65,7 +101,6 @@ public class BossEnemy : Enemy
         public override void OnStart()
         {
             Owner.enemyAnimation.SetTrigger("Idle");
-            Debug.Log("Idleだよ");
             cDis = Owner.lookPlayerDir;
         }
         public override void OnUpdate()
@@ -74,7 +109,6 @@ public class BossEnemy : Enemy
         }
         public override void OnEnd()
         {
-            Debug.Log("Idleは終わった");
             Owner.enemyAnimation.ResetTrigger("Idle");
         }
     }
@@ -84,10 +118,9 @@ public class BossEnemy : Enemy
         NavMeshAgent navMeshAgent;
         public override void OnStart()
         {
-            Owner.enemyAnimation.SetTrigger("Run");
+            Owner.enemyAnimation.SetTrigger("Idle");
             navMeshAgent = Owner.navMeshAgent;
             navMeshAgent.isStopped = false;
-            Debug.Log("Chaseだよ");
         }
         public override void OnUpdate()
         {
@@ -95,6 +128,7 @@ public class BossEnemy : Enemy
             navMeshAgent.SetDestination(playerPos);
             if (Owner.GetDistance() <= Owner.attackRange)
             {
+                Debug.Log("oppai");
                 navMeshAgent.isStopped = true;
                 if (Probability(70)) { StateMachine.ChangeState((int)EnemyState.Combo); }
                 if (Probability(30)) { StateMachine.ChangeState((int)EnemyState.Rotate); }
@@ -102,8 +136,7 @@ public class BossEnemy : Enemy
         }
         public override void OnEnd()
         {
-            Debug.Log("Chaseは終わった");
-            Owner.enemyAnimation.ResetTrigger("Run");
+            Owner.enemyAnimation.ResetTrigger("Idle");
         }
     }
     private class VigilanceState : EStateMachine<BossEnemy>.StateBase
@@ -118,7 +151,8 @@ public class BossEnemy : Enemy
         private float roamTimer;
         public override void OnStart()
         {
-            Owner.enemyAnimation.SetTrigger("Run");
+            Owner.navMeshAgent.isStopped = false;
+            Owner.enemyAnimation.SetTrigger("Idle");
             time = 0;
             mTime = Random.Range(4, 6);
             PickNewRoamPosition();
@@ -163,12 +197,11 @@ public class BossEnemy : Enemy
         }
         public override void OnEnd()
         {
-            Owner.enemyAnimation.ResetTrigger("Run");
+            Owner.enemyAnimation.ResetTrigger("Idle");
         }
         void PickNewRoamPosition()
         {
             roamTimer = roamChangeInterval;
-            // プレイヤー周囲の円内でランダム座標を選ぶ
             float angle = Random.Range(0f, Mathf.PI * 2f);
             float r = Random.Range(0f, roamRadius);
             Vector3 offset = new Vector3(Mathf.Cos(angle) * r, 0, Mathf.Sin(angle) * r);
@@ -180,12 +213,13 @@ public class BossEnemy : Enemy
     {
         public override void OnStart()
         {
+            Owner.transform.LookAt(Owner.playerPos.transform.position);
             Owner.enemyAnimation.SetTrigger("Combo");
             Owner.navMeshAgent.isStopped = true;   
         }
         public override void OnUpdate()
         {
-            if (Owner.AnimationEnd())
+            if (Owner.AnimationEnd("Combo"))
             {
                 if (Owner.GetDistance() <= Owner.attackRange)
                 {
@@ -210,48 +244,42 @@ public class BossEnemy : Enemy
     {
         public override void OnStart()
         {
-            Owner.enemyAnimation.SetTrigger("Rotate");
+            Owner.navMeshAgent.isStopped = true;
+            Owner.enemyAnimation.SetTrigger("Combo");
         }
         public override void OnUpdate()
         {
-            if ((Owner.animetionEnd ))
+            if ((Owner.AnimationEnd("Combo") ))
             {
                 if (Owner.GetDistance() <= Owner.attackRange)
                 {
-                    if (Probability(50)) { StateMachine.ChangeState((int)EnemyState.Vigilance); }
+                    if (Probability(30)) { StateMachine.ChangeState((int)EnemyState.Combo); }
                     if(Probability(20)) { StateMachine.ChangeState((int)EnemyState.Rush); }
-                    if(Probability(30)) { StateMachine.ChangeState((int)EnemyState.Combo); }
+                    if(Probability(50)) { StateMachine.ChangeState((int)EnemyState.Vigilance); }
                 }
                 else
                 {
-                    if (Probability(50)) { StateMachine.ChangeState((int)EnemyState.Chase); }
                     if (Probability(50)) { StateMachine.ChangeState((int)EnemyState.Rush); }
+                    if (Probability(50)) { StateMachine.ChangeState((int)EnemyState.Chase); }
                 }
             }
         }
         public override void OnEnd()
         {
-            Owner.enemyAnimation.ResetTrigger("Rotate");
+            Owner.enemyAnimation.ResetTrigger("Combo");
         }
     }
     private class SumonState : EStateMachine<BossEnemy>.StateBase
     {
         public override void OnStart()
         {
+            Owner.navMeshAgent.isStopped = true;
             Owner.enemyAnimation.SetTrigger("Sumon");
-            for (int i = 0; i < Owner.mobEnemy.Length; i++)
-            {
-                if (Owner.mobEnemy[i] == null) continue; // nullチェック
-                float angle = Random.Range(-90, 90);
-                Quaternion rot = Quaternion.Euler(0, angle, 0);
-                Vector3 dir = rot * Owner.transform.forward;
-                Vector3 spawnPos = Owner.transform.position + dir.normalized * 5;
-                Instantiate(Owner.mobEnemy[i], spawnPos, Quaternion.identity);
-            }
+            
         }
         public override void OnUpdate()
         {
-            if (Owner.animetionEnd)
+            if (Owner.AnimationEnd("Sumon"))
             {
                 if (Probability(20)) { StateMachine.ChangeState((int)EnemyState.Vigilance); }
                 if (Probability(80))
@@ -281,7 +309,8 @@ public class BossEnemy : Enemy
 
         public override void OnStart()
         {
-            Owner.enemyAnimation.SetTrigger("Dush");
+            Owner.transform.LookAt(Owner.playerPos.transform.position);
+            Owner.enemyAnimation.SetTrigger("Rush");
             Owner.navMeshAgent.isStopped = true;
 
             // プレイヤーの位置＋オフセットで目的地を設定
@@ -296,7 +325,7 @@ public class BossEnemy : Enemy
                 targetPos,
                 Owner.rushSpeed * Time.deltaTime
             );
-            Ray ray = new Ray(Owner.transform.position + Vector3.up * 0.5f, Owner.transform.forward);
+            Ray ray = new Ray(Owner.transform.position + Vector3.up * 3f, Owner.transform.forward);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, rayDistance))
             {
@@ -307,15 +336,16 @@ public class BossEnemy : Enemy
                     return;
                 }
             }
-            if (Vector3.Distance(Owner.transform.position, targetPos) < 0.1f)
+            if (Owner.AnimationEnd("Rush"))
             {
-                StateMachine.ChangeState((int)EnemyState.Vigilance);
+                if (Vector3.Distance(Owner.transform.position, targetPos) < 0.1f){StateMachine.ChangeState((int)EnemyState.Vigilance);}
+                else { StateMachine.ChangeState((int)EnemyState.Chase); }
             }
         }
 
         public override void OnEnd()
         {
-            Owner.enemyAnimation.ResetTrigger("Dush");
+            Owner.enemyAnimation.ResetTrigger("Rush");
         }
 
     }
@@ -324,6 +354,7 @@ public class BossEnemy : Enemy
         float time;
         public override void OnStart()
         {
+            Owner.navMeshAgent.isStopped = true;
             Owner.enemyAnimation.SetTrigger("Idle");
             time = 0;
         }
@@ -351,7 +382,7 @@ public class BossEnemy : Enemy
         }
         public override void OnUpdate()
         {
-            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle); }
+            if (Owner.AnimationEnd("")) { StateMachine.ChangeState((int)EnemyState.Idle); }
         }
         public override void OnEnd()
         {
@@ -366,7 +397,7 @@ public class BossEnemy : Enemy
         }
         public override void OnUpdate()
         {
-            if (Owner.AnimationEnd())
+            if (Owner.AnimationEnd("Dead"))
             {
                 Owner.OnDead();
             }

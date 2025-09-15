@@ -156,7 +156,7 @@ public class PanEnemy : Enemy
         public override void OnUpdate()
         {
             Owner.transform.LookAt(Owner.playerPos.transform.position);
-            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.AttackInterbal); }
+            if (Owner.AnimationEnd("Attack")) { StateMachine.ChangeState((int)EnemyState.AttackInterbal); }
         }
         public override void OnEnd()
         {
@@ -189,7 +189,7 @@ public class PanEnemy : Enemy
         }
         public override void OnUpdate()
         {
-            if (Owner.AnimationEnd()) { StateMachine.ChangeState((int)EnemyState.Idle); }
+            if (Owner.AnimationEnd("")) { StateMachine.ChangeState((int)EnemyState.Idle); }
         }
         public override void OnEnd()
         {
@@ -205,7 +205,7 @@ public class PanEnemy : Enemy
         }
         public override void OnUpdate()
         {
-            if (Owner.AnimationEnd())
+            if (Owner.AnimationEnd("Dead"))
             {
                 Owner.OnDead();
             }
