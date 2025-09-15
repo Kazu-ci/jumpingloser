@@ -39,7 +39,8 @@ public class PlayerAttackState : IState
     private bool lungeInvoked;                  // この段で突進をもう呼んだか
     private const float LUNGE_INPUT_MIN = 0.2f; // 「十分な入力」とみなす強さ（0.2）※必要なら Inspector 化してもよい
     private readonly AnimationCurve defaultLungeCurve = null; // 必要なら後で差し替え
-
+    private const float AUTO_LUNGE_FIND_RADIUS = 10f;
+    private static readonly Collider[] sphereBuffer = new Collider[64];
 
     private WeaponInstance weapon;
 
@@ -163,6 +164,13 @@ public class PlayerAttackState : IState
             mainExitStarted = true;
         }
 
+        // ==== ★ 突進のトリガ（1回だけ / 時刻到達で実行） ====
+        if (!lungeInvoked && elapsedTime >= currentAction.lungeTime)
+        {
+            DoLungeForCurrentAction();
+            lungeInvoked = true;
+        }
+
         // 攻撃VFX（時刻到達で一回）
         if (!hasSpawnedAttackVFX && currentAction.attackVFXPrefab != null && elapsedTime >= currentAction.attackVFXTime)
         {
@@ -176,12 +184,7 @@ public class PlayerAttackState : IState
             DoAttackHitCheck();
             hasCheckedHit = true;
         }
-        // ==== ★ 突進のトリガ（1回だけ / 時刻到達で実行） ====
-        if (!lungeInvoked && currentAction.lungeDistance > 0f && elapsedTime >= currentAction.lungeTime)
-        {
-            DoLungeForCurrentAction();
-            lungeInvoked = true;
-        }
+        
 
         // 段間切替（連撃）：chainEndTime 到達で次段へ
         if ( queuedNext && HasNextCombo() && elapsedTime >= chainEndTime)
@@ -432,54 +435,106 @@ public class PlayerAttackState : IState
     private void DoLungeForCurrentAction()
     {
         float distance = Mathf.Max(0f, currentAction.lungeDistance);
-        if (distance <= 0f) return; // 0 は「突進しない」
-
         float speed = Mathf.Max(0.01f, currentAction.lungeSpeed);
-        AnimationCurve curve = defaultLungeCurve; // 必要なら currentAction に追加して使い分け可能
+        AnimationCurve curve = defaultLungeCurve; // 段ごとに持たせるなら currentAction.lungeCurve
 
-        // 1) 強い移動入力があるか？
+        // --- 目標方向の決定（回頭だけでも行う） ---
         Vector3 dir;
-        bool hasStrongInput = _player.TryGetMoveDirectionWorld(LUNGE_INPUT_MIN * LUNGE_INPUT_MIN, out dir);
-        if (hasStrongInput)
+        bool hasDirection = false;
+
+        // 1) 強い移動入力
+        if (_player.TryGetMoveDirectionWorld(LUNGE_INPUT_MIN * LUNGE_INPUT_MIN, out dir))
         {
-            // 入力方向へ即時回頭 → 前方突進（CustomDir 指定）
-            _player.RotateYawOverTime(dir, 0f); // 即時スナップ
-            EventBus.PlayerEvents.LungeByDistance?.Invoke(
-                LungeManager.LungeAim.CustomDir,
-                Vector3.zero,     // ToTarget 未使用
-                dir,              // カスタム方向
-                speed,
-                distance,
-                curve
-            );
-            return;
+            hasDirection = true;
+        }
+        // 2) ロックオン対象
+        else if (_player.TryGetLockOnHorizontalDirection(out dir))
+        {
+            hasDirection = true;
+        }
+        // 3) 自動索敵：半径内の最近敵
+        else if (TryFindNearestEnemyDirXZ(AUTO_LUNGE_FIND_RADIUS, out dir))
+        {
+            hasDirection = true;
         }
 
-        // 2) ロックオン対象があるか？
-        if (_player.TryGetLockOnHorizontalDirection(out dir))
+        // --- 回頭（方向が得られた場合のみ） ---
+        if (hasDirection)
         {
-            // 敵方向へ即時回頭 → 前方突進
+            // 即時スナップ回頭：演出上、突進開始フレームで向きを合わせる
             _player.RotateYawOverTime(dir, 0f);
-            EventBus.PlayerEvents.LungeByDistance?.Invoke(
-                LungeManager.LungeAim.CustomDir,
-                Vector3.zero,
-                dir,
-                speed,
-                distance,
-                curve
-            );
-            return;
         }
 
-        // 3) どちらも無い → 回頭せず現在の正面へ
-        EventBus.PlayerEvents.LungeByDistance?.Invoke(
-            LungeManager.LungeAim.Forward,
-            Vector3.zero,
-            Vector3.zero, // 未使用
-            speed,
-            distance,
-            curve
-        );
+        // --- 突進の実行（距離>0 のときだけ） ---
+        if (distance > 0f)
+        {
+            if (hasDirection)
+            {
+                // 求めた方向へ直進
+                EventBus.PlayerEvents.LungeByDistance?.Invoke(
+                    LungeManager.LungeAim.CustomDir,
+                    Vector3.zero,
+                    dir,
+                    speed,
+                    distance,
+                    curve
+                );
+            }
+            else
+            {
+                // 有効な対象が無い → 回頭せず現在の正面へ
+                EventBus.PlayerEvents.LungeByDistance?.Invoke(
+                    LungeManager.LungeAim.Forward,
+                    Vector3.zero,
+                    Vector3.zero,
+                    speed,
+                    distance,
+                    curve
+                );
+            }
+        }
+    }
+
+    private bool TryFindNearestEnemyDirXZ(float radius, out Vector3 dirXZ)
+    {
+        dirXZ = Vector3.zero;
+        int count = Physics.OverlapSphereNonAlloc(_player.transform.position, radius, sphereBuffer, ~0, QueryTriggerInteraction.Ignore);
+
+        float bestSqr = float.PositiveInfinity;
+        Enemy bestEnemy = null;
+
+        for (int i = 0; i < count; ++i)
+        {
+            var col = sphereBuffer[i];
+            if (!col) continue;
+
+            var enemy = col.GetComponentInParent<Enemy>();
+            if (!enemy) continue;
+
+            Vector3 v = enemy.transform.position - _player.transform.position;
+            v.y = 0f;
+            float d2 = v.sqrMagnitude;
+            if (d2 < 1e-6f) continue; // 同一点/極近の安全弁
+
+            if (d2 < bestSqr)
+            {
+                bestSqr = d2;
+                bestEnemy = enemy;
+            }
+        }
+
+        // バッファをクリア
+        for (int i = 0; i < count; ++i) sphereBuffer[i] = null;
+
+        if (bestEnemy != null)
+        {
+            dirXZ = bestEnemy.transform.position - _player.transform.position;
+            dirXZ.y = 0f;
+            if (dirXZ.sqrMagnitude < 1e-6f) return false;
+            dirXZ.Normalize();
+            return true;
+        }
+        return false;
     }
 }
 

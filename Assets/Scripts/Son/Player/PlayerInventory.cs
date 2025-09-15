@@ -16,7 +16,7 @@ public class WeaponInstance
     public WeaponInstance(WeaponItem weapon)
     {
         template = weapon;
-        currentDurability = (int)(weapon.maxDurability / 2);
+        currentDurability = 1;
     }
 
     public void Use(float cost)

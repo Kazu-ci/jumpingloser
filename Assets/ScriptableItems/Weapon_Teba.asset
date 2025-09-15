@@ -98,8 +98,8 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 9715264c622e55a41a4b7dcdd0b25d63, type: 3}
-    inputWindowStart: 0.3
-    inputWindowEnd: 0.8
+    inputWindowStart: 0
+    inputWindowEnd: 0
     endNormalizedTime: 0.8
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}

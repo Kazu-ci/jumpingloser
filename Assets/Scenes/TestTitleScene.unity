@@ -1184,8 +1184,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4292927712
+  m_fontColor: {r: 0.8792453, g: 0.8792453, b: 0.8792453, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1484,7 +1484,7 @@ MonoBehaviour:
     name: TestTitleScene
   - state: 2
     name: NormalStage1_Forest
-  - state: 5
+  - state: 6
     name: TestResultScene
 --- !u!224 &1758271272
 RectTransform:
@@ -1525,7 +1525,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1832621978
 RectTransform:
   m_ObjectHideFlags: 0
