@@ -42,6 +42,9 @@ public class PlayerAttackState : IState
     private const float AUTO_LUNGE_FIND_RADIUS = 10f;
     private static readonly Collider[] sphereBuffer = new Collider[64];
 
+    private bool hasSpawnedAttackPrefab;
+    private bool weaponHiddenForThisAction;
+
     private WeaponInstance weapon;
 
     public PlayerAttackState(PlayerMovement player) { _player = player; }
@@ -83,6 +86,8 @@ public class PlayerAttackState : IState
         elapsedTime = 0.0;
         hasCheckedHit = false;
         hasSpawnedAttackVFX = false;
+        hasSpawnedAttackPrefab = false;
+        weaponHiddenForThisAction = false;
 
         // メイン層を Action へフェード（攻撃は全身を占有）
         float enterDur = _player.ResolveBlendDuration(_player.lastBlendState, PlayerState.Attack);
@@ -100,6 +105,11 @@ public class PlayerAttackState : IState
         {
             actionMixer.SetInputWeight(0, 0f);
             actionMixer.SetInputWeight(1, 0f);
+        }
+        if (weaponHiddenForThisAction)
+        {
+            _player.ShowMainHandModel();
+            weaponHiddenForThisAction = false;
         }
 
         // 末尾付近だけ Idle/Move 先行フェードの保険
@@ -131,7 +141,7 @@ public class PlayerAttackState : IState
         // 入力窓内：押しっぱ／バッファで次段を予約
         if (!queuedNext && IsInInputWindow(norm, currentAction))
         {
-            if (_player.attackHeld || inputBufferedTimer > 0f)
+            if (_player.attackPressedThisFrame || inputBufferedTimer > 0f)
             {
                 queuedNext = true;
                 inputBufferedTimer = 0f;
@@ -181,13 +191,14 @@ public class PlayerAttackState : IState
         // ヒット判定（時刻指定）
         if (!hasCheckedHit && currentAction.hitCheckTime >= 0f && elapsedTime >= currentAction.hitCheckTime)
         {
+            TrySpawnAttackPrefabNow();
             DoAttackHitCheck();
             hasCheckedHit = true;
         }
-        
+
 
         // 段間切替（連撃）：chainEndTime 到達で次段へ
-        if ( queuedNext && HasNextCombo() && elapsedTime >= chainEndTime)
+        if (queuedNext && HasNextCombo() && elapsedTime >= chainEndTime)
         {
             CrossfadeToNext();
             return;
@@ -196,7 +207,7 @@ public class PlayerAttackState : IState
         // 整段終了：FSM を Locomotion 側へ
         if (elapsedTime >= clipEndTime)
         {
-            if ( queuedNext && HasNextCombo()) CrossfadeToNext();
+            if (queuedNext && HasNextCombo()) CrossfadeToNext();
             else _player.ToIdle();
         }
     }
@@ -227,10 +238,17 @@ public class PlayerAttackState : IState
         actionDuration = currentAction.animation.length;
         elapsedTime = 0.0;
         hasCheckedHit = false;
-        hasSpawnedAttackVFX = false;
         queuedNext = false;
         lungeInvoked = false;
+        hasSpawnedAttackVFX = false;
+        hasSpawnedAttackPrefab = false;
         activeSlot = nextSlot;
+
+        if (weaponHiddenForThisAction)
+        {
+            _player.ShowMainHandModel();
+            weaponHiddenForThisAction = false;
+        }
 
         if (currentAction.swingSFX)
         {
@@ -418,6 +436,26 @@ public class PlayerAttackState : IState
         }
     }
 
+    // 攻撃Prefabを生成（ヒットボックス中心）
+    private void TrySpawnAttackPrefabNow()
+    {
+        if (hasSpawnedAttackPrefab) return;
+        if (currentAction == null || currentAction.attackPrefab == null) return;
+
+        // 生成位置：ヒットボックス中心（ローカル→ワールド）
+        Vector3 spawnPos = _player.transform.TransformPoint(currentAction.hitBoxCenter);
+        Quaternion spawnRot = _player.transform.rotation;
+
+        Object.Instantiate(currentAction.attackPrefab, spawnPos, spawnRot);
+        hasSpawnedAttackPrefab = true;
+
+        // ★ 右手武器を一時的に隠す（見た目のみ）
+        if (!weaponHiddenForThisAction)
+        {
+            _player.HideMainHandModel();
+            weaponHiddenForThisAction = true;
+        }
+    }
     private void SpawnHitVFXAt(Vector3 pos)
     {
         var prefab = weapon?.template?.hitVFXPrefab;

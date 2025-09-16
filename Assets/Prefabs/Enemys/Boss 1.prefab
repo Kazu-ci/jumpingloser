@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3520585640598820951}
   - component: {fileID: 1430898213733591652}
   m_Layer: 12
-  m_Name: Boss
+  m_Name: Boss 1
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -347,6 +347,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -6179372807155935962, guid: 3a604184ba436e14b954564c57f982c7, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 25fee8b03f2ab504888312ff7027747a, type: 2}
     - target: {fileID: 919132149155446097, guid: 3a604184ba436e14b954564c57f982c7, type: 3}
       propertyPath: m_Name
       value: knife_weakcombo_v2

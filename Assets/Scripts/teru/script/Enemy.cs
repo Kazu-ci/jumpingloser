@@ -1,7 +1,9 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Rendering;
+[Serializable]
 public struct DamageData
 {
     public float damageAmount; // ダメージ量
@@ -94,7 +96,7 @@ public class Enemy : MonoBehaviour
     {
         // 配列が空ならドロップしない
         if (weaponDrops == null || weaponDrops.Length == 0) return;
-        int index = Random.Range(0, weaponDrops.Length); // ランダム選択
+        int index = UnityEngine.Random.Range(0, weaponDrops.Length); // ランダム選択
         Instantiate(weaponDrops[index], transform.position, Quaternion.identity);
 
     }
@@ -123,9 +125,9 @@ public class Enemy : MonoBehaviour
         for (int i = 0; i < 50; i++)
         {
             Vector3 rand = center + new Vector3(
-                Random.Range(-radius, radius),
+                UnityEngine.Random.Range(-radius, radius),
                 0,
-                Random.Range(-radius, radius)
+                UnityEngine.Random.Range(-radius, radius)
             );
             rand.y = center.y; // 高さを固定
 

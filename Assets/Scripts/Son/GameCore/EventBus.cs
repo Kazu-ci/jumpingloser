@@ -27,6 +27,7 @@ public class EventBus
 
         // ‘Ï‹v“x•ÏXiè / Œ»İ index / Œ»İ‘Ï‹v / Å‘å‘Ï‹vj
         public static Action<HandType, int, int, int> OnDurabilityChanged;
+        public static Action OnWeaponUseFailed;
 
         public static Action<int, int> OnPlayerHpChange;
         public static Action OnShowGameOverUI;
