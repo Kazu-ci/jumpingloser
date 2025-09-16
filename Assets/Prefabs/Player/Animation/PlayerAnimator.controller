@@ -95,7 +95,7 @@ AnimatorStateMachine:
     m_Position: {x: 270, y: -190, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -455970106640874088}
-    m_Position: {x: 510, y: -90, z: 0}
+    m_Position: {x: 780, y: -230, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 5667763645541761147}
     m_Position: {x: 270, y: -90, z: 0}
@@ -131,7 +131,19 @@ AnimatorStateMachine:
     m_Position: {x: 519.35864, y: 427.18073, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 2855720683454693853}
-    m_Position: {x: 530, y: 60, z: 0}
+    m_Position: {x: 520, y: 80, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: -1013413609759623446}
+    m_Position: {x: 780, y: -170, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: -2611156935430457302}
+    m_Position: {x: 780, y: -120, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 37933003272646780}
+    m_Position: {x: 780, y: -70, z: 0}
+  - serializedVersion: 1
+    m_State: {fileID: 3165754181363029701}
+    m_Position: {x: 780, y: -20, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions:
@@ -164,6 +176,58 @@ AnimatorState:
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: -1834131061766230352, guid: bd47813839e615b4f8ddf655142bab29, type: 3}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
+--- !u!1102 &-2611156935430457302
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 004_Greatsword_FastCri
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 8672263195707164059, guid: dc3608c8e5ee67b43beb18b0f490cd1f, type: 3}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
+--- !u!1102 &-1013413609759623446
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 003_Greatsword_FastAttack
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 3878471701507660605, guid: 8c8b08780b136fd46b62591e3a99a076, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -243,6 +307,32 @@ AnimatorController:
     m_IKPass: 0
     m_SyncedLayerAffectsTiming: 0
     m_Controller: {fileID: 9100000}
+--- !u!1102 &37933003272646780
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 005_Greatsword_FastCri
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: 7969338187987883900, guid: 01cb076390f1e7543af18bcea9ecb93c, type: 3}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
 --- !u!1102 &223568451353923742
 AnimatorState:
   serializedVersion: 6
@@ -316,6 +406,32 @@ AnimatorState:
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: -5840618108478607940, guid: 3abd3ba48449b4a4c8717668f577b497, type: 3}
+  m_Tag: 
+  m_SpeedParameter: 
+  m_MirrorParameter: 
+  m_CycleOffsetParameter: 
+  m_TimeParameter: 
+--- !u!1102 &3165754181363029701
+AnimatorState:
+  serializedVersion: 6
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: 032_Greatsword_PowerSmash
+  m_Speed: 1
+  m_CycleOffset: 0
+  m_Transitions: []
+  m_StateMachineBehaviours: []
+  m_Position: {x: 50, y: 50, z: 0}
+  m_IKOnFeet: 0
+  m_WriteDefaultValues: 1
+  m_Mirror: 0
+  m_SpeedParameterActive: 0
+  m_MirrorParameterActive: 0
+  m_CycleOffsetParameterActive: 0
+  m_TimeParameterActive: 0
+  m_Motion: {fileID: -904864237794195412, guid: cff2332bf6ef4cf4789f5b198a8b8507, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

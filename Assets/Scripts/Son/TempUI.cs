@@ -8,10 +8,13 @@ using System.Collections;
 public class TempUI : MonoBehaviour
 {
     [Header("右手UI（サンプル）")]
-    public TextMeshProUGUI weaponDurableText; // 現在右手装備の耐久だけ表示
+    // ※ 旧: public TextMeshProUGUI weaponDurableText; // テキスト表示は廃止
     public float weaponIconLength = 100f;     // 隣のアイコンまでのローカルX距離
     public GameObject weaponPrefab;           // 1個の武器アイコンUIプレハブ（Imageを想定）
     public GameObject weaponList;             // 右下の空オブジェクト（全アイコンの親）
+
+    public Sprite weaponDurMaxImg;            // 耐久MAX時のスプライト
+    public Sprite weaponDurCurImg;            // 耐久通常時のスプライト
 
     [Header("ダッシュUI")]
     public GameObject dashEnableIcon;       // ダッシュ可能アイコン
@@ -19,7 +22,7 @@ public class TempUI : MonoBehaviour
 
     [Header("HPUI")]
     public GameObject HPUIFront;       // HPUI前景
-    public float HPUILength = 500f; // HPUIの長さ
+    public float HPUILength = 500f;    // HPUIの長さ
 
     [Header("ロックオンUI")]
     public GameObject AimIcon;
@@ -34,20 +37,28 @@ public class TempUI : MonoBehaviour
 
     private Coroutine slideCo;
 
-    // 右手現在インデックス
+    // 右手現在インデックス（中央位置の計算にのみ使用）
     private int currentRightIndex = -1;
-    // 直近の所持武器リスト
+
+    // 直近の所持武器リスト参照
     private List<WeaponInstance> lastWeaponsRef;
+
+    // 生成した武器アイコンの参照（index -> アイコン）
+    // ・素手(-1)は保持しない（耐久表示が不要のため）
+    private readonly Dictionary<int, TempUI_WeaponIcon> rightIconByIndex = new Dictionary<int, TempUI_WeaponIcon>(16);
 
     private void OnEnable()
     {
         UIEvents.OnRightWeaponSwitch += ChangeRightWeapon;
-        UIEvents.OnDurabilityChanged += OnDurabilityChanged;   // 手元の耐久UI反映
-        UIEvents.OnWeaponDestroyed += OnWeaponDestroyed;     // ログのみ
+        UIEvents.OnDurabilityChanged += OnDurabilityChanged;   // 個別武器の耐久UI反映
+        //UIEvents.OnWeaponDestroyed += OnWeaponDestroyed;     // 必要なら演出トリガ
 
         UIEvents.OnAimPointChanged += SwitchLockIcon;
         UIEvents.OnDashUIChange += SwitchDashIcon;
         UIEvents.OnPlayerHpChange += SetHpBar;
+
+        UIEvents.OnAttackHoldProgress += OnAttacHolding;
+        UIEvents.OnAttackHoldUI += OnAttackHoldChange;
 
         if (inputActions == null)
         {
@@ -58,72 +69,78 @@ public class TempUI : MonoBehaviour
 
         if (AimIcon != null)
             AimIcon.SetActive(false);
-        TryRenderFistOnly();
+        ClearRightIcons();
     }
 
     private void OnDisable()
     {
         UIEvents.OnRightWeaponSwitch -= ChangeRightWeapon;
         UIEvents.OnDurabilityChanged -= OnDurabilityChanged;
-        UIEvents.OnWeaponDestroyed -= OnWeaponDestroyed;
+        //UIEvents.OnWeaponDestroyed -= OnWeaponDestroyed;
         UIEvents.OnAimPointChanged -= SwitchLockIcon;
         UIEvents.OnDashUIChange -= SwitchDashIcon;
+
+        UIEvents.OnPlayerHpChange -= SetHpBar;
+        UIEvents.OnAttackHoldProgress -= OnAttacHolding;
+        UIEvents.OnAttackHoldUI -= OnAttackHoldChange;
+
+        if (inputActions != null)
+        {
+            inputActions.UI.Menu.performed -= ctx => SwitchMenu();
+            inputActions.UI.Disable();
+            inputActions = null;
+        }
+        if (slideCo != null) StopCoroutine(slideCo);
+        if (isMenuOpen)
+        {
+            SystemEvents.OnGameResume?.Invoke();
+            isMenuOpen = false;
+        }
+        
     }
 
     private void Update()
     {
-        if(lockTarget != null && AimIcon != null)
+        // --- ロックオンアイコンのスクリーン追従 ---
+        if (lockTarget != null && AimIcon != null)
         {
             Vector3 screenPos = Camera.main.WorldToScreenPoint(lockTarget.position + Vector3.up * -0f);
             AimIcon.transform.position = screenPos;
         }
-
     }
 
     private void SwitchMenu()
     {
-        if(!isMenuOpen)
+        if (!isMenuOpen)
         {
-            if (mapObj != null)
-                mapObj.SetActive(true);
-            if (tutorial != null)
-                tutorial.SetActive(true);
+            if (mapObj != null) mapObj.SetActive(true);
+            if (tutorial != null) tutorial.SetActive(true);
             isMenuOpen = true;
             SystemEvents.OnGamePause?.Invoke();
         }
         else
         {
-            if (mapObj != null)
-                mapObj.SetActive(false);
-            if (tutorial != null)
-                tutorial.SetActive(false);
+            if (mapObj != null) mapObj.SetActive(false);
+            if (tutorial != null) tutorial.SetActive(false);
             isMenuOpen = false;
             SystemEvents.OnGameResume?.Invoke();
         }
-
     }
-    // ロックオンアイコン表示
+
+    // ===== ロックオンアイコン表示 =====
     private void SwitchLockIcon(Transform target)
     {
         lockTarget = target;
-        if(lockTarget != null)
-        {
-            if (AimIcon != null)
-                AimIcon.SetActive(true);
-        }
-        else
-        {
-            if (AimIcon != null)
-                AimIcon.SetActive(false);
-        }
+        if (AimIcon != null)
+            AimIcon.SetActive(lockTarget != null);
     }
+
     private void SwitchDashIcon(bool enable)
     {
-        if(dashEnableIcon != null)
-            dashEnableIcon.SetActive(enable);
-        if (dashDisableIcon != null)
-            dashDisableIcon.SetActive(!enable);
+        if (dashEnableIcon != null) dashEnableIcon.SetActive(enable);
+        if (dashDisableIcon != null) dashDisableIcon.SetActive(!enable);
     }
+
     private void SetHpBar(int amount, int max)
     {
         if (HPUIFront != null)
@@ -136,7 +153,24 @@ public class TempUI : MonoBehaviour
             }
         }
     }
-    // ====== 初期表示（素手のみ）======
+    private void OnAttacHolding(float amount)
+    {
+        var weapon = rightIconByIndex.TryGetValue(currentRightIndex, out var icon) ? icon : null;
+        if(weapon == null || weapon.skillImgObj == null) return;
+        weapon.skillImgObj.enabled = true;
+        weapon.skillImgObj.fillAmount = amount;
+    }
+        
+    private void OnAttackHoldChange(bool isHolding)
+    {
+        var weapon = rightIconByIndex.TryGetValue(currentRightIndex, out var icon) ? icon : null;
+        if (weapon == null || weapon.skillImgObj == null) return;
+        weapon.skillImgObj.enabled = isHolding;
+        if (!isHolding)
+            weapon.skillImgObj.fillAmount = 0f;
+    }
+
+    // ===== 初期表示（素手のみ）=====
     private void TryRenderFistOnly()
     {
         if (weaponList == null || weaponPrefab == null) return;
@@ -144,9 +178,10 @@ public class TempUI : MonoBehaviour
         var listRT = weaponList.transform as RectTransform;
         if (listRT == null) return;
 
-        // 既存アイコンクリア（安全のため）
+        // 既存アイコンクリア
         for (int i = listRT.childCount - 1; i >= 0; --i)
             Destroy(listRT.GetChild(i).gameObject);
+        rightIconByIndex.Clear();
 
         // 素手アイコン（index = -1）
         var go = Instantiate(weaponPrefab, weaponList.transform);
@@ -158,15 +193,23 @@ public class TempUI : MonoBehaviour
             rt.anchoredPosition = new Vector2(0f, 0f);
         }
 
-        // 耐久は「∞」
-        if (weaponDurableText != null)
-            weaponDurableText.text = "∞";
+        // 素手は耐久表示なし：TempUI_WeaponIcon が付いているならゲージを非表示
+        var fistIcon = go.GetComponent<TempUI_WeaponIcon>();
+        if (fistIcon != null && fistIcon.durImgObj != null)
+        {
+            fistIcon.durImgObj.fillAmount = 0f;
+            fistIcon.durImgObj.enabled = false;
+        }
+        if (fistIcon != null && fistIcon.skillImgObj != null)
+        {
+            fistIcon.skillImgObj.fillAmount = 0f;
+        }
 
         // 現在右手インデックス = 素手
         currentRightIndex = -1;
     }
 
-    // ====== 切替ハンドラ（右手サンプル）======
+    // ===== 切替ハンドラ（右手）=====
     private void ChangeRightWeapon(List<WeaponInstance> weapons, int from, int to)
     {
         // --- 参照ガード ---
@@ -178,34 +221,24 @@ public class TempUI : MonoBehaviour
         RectTransform listRT = weaponList.transform as RectTransform;
         if (listRT == null) { Debug.LogWarning("TempUI: weaponList is not RectTransform"); return; }
 
-        // 既存アイコンクリア
+        // 既存アイコン全削除
         for (int i = listRT.childCount - 1; i >= 0; --i)
             Destroy(listRT.GetChild(i).gameObject);
+        rightIconByIndex.Clear();
 
-        // 子スライド用の収集テーブル
+        // 空の場合は何も出さず終了
+        if (weapons == null || weapons.Count == 0)
+        {
+            currentRightIndex = -1;
+            return;
+        }
+
+        // スライド用収集
         var childRTs = new List<RectTransform>();
         var fromXs = new List<float>();
         var toXs = new List<float>();
 
-        // --- 素手アイコン（virtual index = -1）---
-        if (weapons == null || weapons.Count == 0 || to < 0) // 素手や空のみ
-        {
-            GameObject go = Instantiate(weaponPrefab, weaponList.transform);
-            go.name = "Icon_-1_Fist";
-            RectTransform rt = go.transform as RectTransform;
-            if (rt != null)
-            {
-                float sx = IndexToLinear(-1, from) * weaponIconLength; // start x
-                float ex = IndexToLinear(-1, to) * weaponIconLength;   // end   x
-                rt.anchoredPosition = new Vector2(sx, 0f);
-
-                childRTs.Add(rt);
-                fromXs.Add(sx);
-                toXs.Add(ex);
-            }
-        }
-
-        // --- 武器アイコン生成 ---
+        // --- 武器アイコン群（index: 0..Count-1）---
         for (int i = 0; i < weapons.Count; i++)
         {
             GameObject go = Instantiate(weaponPrefab, weaponList.transform);
@@ -213,6 +246,7 @@ public class TempUI : MonoBehaviour
             RectTransform rt = go.transform as RectTransform;
             if (rt != null)
             {
+                // ★ 中央は center = from / to をそのまま使用する（素手オフセット無し）
                 float sx = IndexToLinear(i, from) * weaponIconLength;
                 float ex = IndexToLinear(i, to) * weaponIconLength;
                 rt.anchoredPosition = new Vector2(sx, 0f);
@@ -222,60 +256,85 @@ public class TempUI : MonoBehaviour
                 toXs.Add(ex);
             }
 
+            // メインのアイコン画像
             var img = go.GetComponent<Image>();
             var spr = weapons[i]?.template?.icon;
             if (img != null) img.sprite = spr;
+
+            // 耐久/スキルUIの初期化
+            var weaponIcon = go.GetComponent<TempUI_WeaponIcon>();
+            if (weaponIcon != null)
+            {
+                // --- 耐久バー初期化 ---
+                if (weaponIcon.durImgObj != null)
+                {
+                    int cur = Mathf.Max(0, weapons[i].currentDurability);
+                    int max = Mathf.Max(1, weapons[i].template.maxDurability);
+                    float ratio = (float)cur / (float)max;
+
+                    weaponIcon.durImgObj.fillAmount = ratio;
+                    weaponIcon.durImgObj.enabled = true;
+                    weaponIcon.durImgObj.sprite = (cur >= max) ? weaponDurMaxImg : weaponDurCurImg;
+                }
+
+                // --- スキルゲージ初期化（0%） ---
+                if (weaponIcon.skillImgObj != null)
+                    weaponIcon.skillImgObj.fillAmount = 0f;
+
+                // インデックス→アイコン参照
+                rightIconByIndex[i] = weaponIcon;
+            }
         }
 
-        // 耐久表示（from を中心）
-        UpdateRightDurabilityByIndex(weapons, from);
-
-        // --- 子オブジェクトをスライド（親は動かさない）---
+        // --- 子オブジェクトをスライド（親は固定）---
         if (slideCo != null) StopCoroutine(slideCo);
         slideCo = StartCoroutine(SlideChildrenX(childRTs, fromXs, toXs, 0.2f, () =>
         {
             currentRightIndex = to;
-            if (to < 0)
-            {
-                if (weaponDurableText != null) weaponDurableText.text = "∞";
-            }
-            else
-            {
-                UpdateRightDurabilityByIndex(weapons, to);
-            }
+            RefreshAllRightDurability(); // 念のため同期
         }));
     }
 
-    // ====== 耐久変化（右手）======
+    // ===== 個別耐久変化（右手）=====
     private void OnDurabilityChanged(HandType hand, int index, int current, int max)
     {
-        // 右手で、かつ UI が追跡中のインデックスのときのみ更新
+        // ・右手のみ反映
         if (hand != HandType.Main) return;
-        if (index != currentRightIndex) return;
-        if (weaponDurableText == null) return;
 
-        // 右手の装備が変わっていないなら数値だけ更新
-        weaponDurableText.text = $"{current}/{max}";
+        // ・生成済みの該当インデックスのアイコンがあれば更新
+        if (rightIconByIndex.TryGetValue(index, out var icon) && icon != null && icon.durImgObj != null)
+        {
+            // --- fillAmount を耐久割合に更新 ---
+            int safeMax = Mathf.Max(1, max);
+            int safeCur = Mathf.Clamp(current, 0, safeMax);
+            float ratio = (float)safeCur / (float)safeMax;
+
+            icon.durImgObj.fillAmount = ratio;
+            icon.durImgObj.enabled = true;
+            icon.durImgObj.sprite = (safeCur >= safeMax) ? weaponDurMaxImg : weaponDurCurImg;
+        }
+        // ・見つからない場合は全体更新でフォールバック（例えばスロット構成変化直後）
+        else
+        {
+            RefreshAllRightDurability();
+        }
     }
 
-    // ====== 破壊通知（ログのみ）======
+    // ===== 破壊通知（必要なら演出用）=====
     private void OnWeaponDestroyed(int removedIndex, WeaponItem item)
     {
-        // ・RemoveAtAndRecover 内で SetHandIndex が動くため、
-        // ・ここでは演出トリガ等を入れてもよい（点滅/SE等）。
+        // ・ここでは演出トリガ等を入れてもよい（点滅/SE等）
         Debug.Log($"TempUI: Weapon destroyed @index={removedIndex} ({item?.weaponName})");
     }
 
-    // ====== インデックス→直線位置への変換 ======
+    // ===== インデックス→直線位置への変換 =====
     private int IndexToLinear(int idx, int centerIndex)
     {
-        // ・centerIndex を 0 として相対化し、X 位置 = linear * weaponIconLength。
-        int linear = (idx < 0) ? 0 : (idx + 1);
-        int center = (centerIndex < 0) ? 0 : (centerIndex + 1);
-        return linear - center;
+        // 例：centerIndex=2 の場合、idx=2 が 0（中央）、idx=1 が -1、idx=3 が +1
+        return idx - centerIndex;
     }
 
-    // ====== コルーチン：スライド ======
+    // ===== コルーチン：スライド =====
     private IEnumerator SlideChildrenX(
         List<RectTransform> items,
         List<float> fromXs,
@@ -283,14 +342,13 @@ public class TempUI : MonoBehaviour
         float duration,
         System.Action onDone = null)
     {
-        // ・全てローカルUI座標（anchoredPosition）で処理。
-        // ・TimeScale=0 でも動かすため unscaledDeltaTime を使用。
         int count = Mathf.Min(items.Count, Mathf.Min(fromXs.Count, toXs.Count));
         if (count <= 0) { onDone?.Invoke(); yield break; }
 
         float t = 0f;
         while (t < duration)
         {
+            // --- Time.timeScale=0 でも動作させるため unscaledDeltaTime を使用 ---
             t += Time.unscaledDeltaTime;
             float k = Mathf.Clamp01(t / duration);
 
@@ -306,7 +364,7 @@ public class TempUI : MonoBehaviour
             yield return null;
         }
 
-        // 終端で誤差を吸収
+        // --- 終端で位置誤差を吸収 ---
         for (int i = 0; i < count; i++)
         {
             var rt = items[i];
@@ -318,20 +376,40 @@ public class TempUI : MonoBehaviour
         onDone?.Invoke();
     }
 
-    // ====== 右手の耐久テキスト ======
-    private void UpdateRightDurabilityByIndex(List<WeaponInstance> weapons, int idx)
+    // ===== 全アイコンの耐久を所持データから再同期 =====
+    private void RefreshAllRightDurability()
     {
-        if (weaponDurableText == null) return;
+        // ・所持リストが無ければ何もしない
+        if (lastWeaponsRef == null) return;
 
-        if (idx >= 0 && idx < (weapons?.Count ?? 0) && weapons[idx] != null)
+        for (int i = 0; i < lastWeaponsRef.Count; i++)
         {
-            var w = weapons[idx];
-            weaponDurableText.text = $"{w.currentDurability}/{w.template.maxDurability}";
+            if (!rightIconByIndex.TryGetValue(i, out var icon) || icon == null || icon.durImgObj == null)
+                continue;
+
+            int cur = Mathf.Max(0, lastWeaponsRef[i].currentDurability);
+            int max = Mathf.Max(1, lastWeaponsRef[i].template.maxDurability);
+            float ratio = (float)cur / (float)max;
+
+            icon.durImgObj.fillAmount = ratio;
+            icon.durImgObj.enabled = true;
+            icon.durImgObj.sprite = (cur >= max) ? weaponDurMaxImg : weaponDurCurImg;
         }
-        else
-        {
-            // 素手など
-            weaponDurableText.text = "∞";
-        }
+    }
+    private void ClearRightIcons()
+    {
+        if (weaponList == null) return;
+
+        // 子を全破棄
+        var listRT = weaponList.transform as RectTransform;
+        if (listRT == null) return;
+
+        for (int i = listRT.childCount - 1; i >= 0; --i)
+            Destroy(listRT.GetChild(i).gameObject);
+
+        rightIconByIndex.Clear();
+
+        // 現在インデックス
+        currentRightIndex = -1;
     }
 }

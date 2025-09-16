@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Carrot
   modelPrefab: {fileID: 8296909117549551263, guid: e74f0586a76a4bb4494c13b156c06d66, type: 3}
-  icon: {fileID: 21300000, guid: cbc9fa1540e3a8048af2f02463bbf6a1, type: 3}
+  icon: {fileID: 21300000, guid: f0e380c1a4b89564f8bd773d4de163a1, type: 3}
   weaponType: 1
   mainWeaponCombo:
   - name: Attack1
@@ -46,15 +46,15 @@ MonoBehaviour:
     endNormalizedTime: 0.8
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
-    hitBoxSize: {x: 3, y: 3, z: 2}
+    hitBoxSize: {x: 4, y: 3, z: 5}
     hitCheckTime: 0.2
     attackPrefab: {fileID: 0}
     lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
-    attackVFXPrefab: {fileID: 0}
-    attackVFXTime: 0.2
+    attackVFXPrefab: {fileID: 1678250504075985088, guid: 8db0cbe11da4190459fe60034176b930, type: 3}
+    attackVFXTime: 0.1
   - name: Attack3
     animation: {fileID: 8672263195707164059, guid: dc3608c8e5ee67b43beb18b0f490cd1f, type: 3}
     durabilityCost: 0
@@ -68,12 +68,12 @@ MonoBehaviour:
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
     attackPrefab: {fileID: 0}
-    lungeDistance: 0
-    lungeSpeed: 10
-    lungeTime: 0.1
+    lungeDistance: 3
+    lungeSpeed: 30
+    lungeTime: 0
     animationSpeed: 1
-    attackVFXPrefab: {fileID: 0}
-    attackVFXTime: 0.2
+    attackVFXPrefab: {fileID: 8238357779737108029, guid: 909dfd2e7e957df4787c8a09fb1b01e0, type: 3}
+    attackVFXTime: 0.1
   - name: Attack4
     animation: {fileID: 7969338187987883900, guid: 01cb076390f1e7543af18bcea9ecb93c, type: 3}
     durabilityCost: 0
@@ -84,15 +84,15 @@ MonoBehaviour:
     endNormalizedTime: 0.8
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
-    hitBoxSize: {x: 4, y: 4, z: 3}
+    hitBoxSize: {x: 4, y: 4, z: 5}
     hitCheckTime: 0.2
     attackPrefab: {fileID: 0}
     lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
-    attackVFXPrefab: {fileID: 0}
-    attackVFXTime: 0.2
+    attackVFXPrefab: {fileID: 2001805166738606468, guid: 68e0ae97ec795a34e8849809eb5d0c2f, type: 3}
+    attackVFXTime: 0.1
   - name: Attack5
     animation: {fileID: -904864237794195412, guid: cff2332bf6ef4cf4789f5b198a8b8507, type: 3}
     durabilityCost: 0
