@@ -640,15 +640,15 @@ public class PlayerMovement : MonoBehaviour
         weaponInventory.AddWeapon(weapon);
         Debug.Log("PickUp: " + weapon.weaponName);
 
-        // 初回装備の自動化（右手が空なら右手に装備 etc）
+        // 初回装備の自動化（右手が空なら右手に装備）
         if (weaponInventory.GetWeapon(HandType.Main) == null)
         {
             weaponInventory.TrySwitchRight(); // イベントで右手モデルが生成される
         }
-        else if (weaponInventory.GetWeapon(HandType.Sub) == null)
+        /*else if (weaponInventory.GetWeapon(HandType.Sub) == null)
         {
             weaponInventory.TrySwitchLeft(); // イベントで左手モデルが生成される
-        }
+        }*/
     }
 
     // === ダメージ・回復 ===

@@ -19,11 +19,14 @@ public class WeaponInstance
         currentDurability = 1;
     }
 
-    public void Use(float cost)
+    public bool Use(int cost)
     {
+        if (currentDurability < cost) return false;
         currentDurability -= Mathf.CeilToInt(cost);
         currentDurability = Mathf.Max(0, currentDurability);
         currentDurability = Mathf.Min(currentDurability, template.maxDurability);
+
+        return true;
     }
 
     public bool IsBroken => currentDurability <= 0;
@@ -105,31 +108,6 @@ public class PlayerWeaponInventory
 
         if (next == -1) return false;
         return true;
-        /*// 右手は左手を除外しない
-        //int next = FindNextUsable(mainIndex, exclude: -1);
-        int next = -1;
-        if (weapons.Count > 0) next = (mainIndex + 1) % (weapons.Count);
-
-        SetHandIndex(HandType.Main, next);
-        if (next == -1) return false;
-
-        // 右手と左手が同じになったら、左手を逃がす（右手優先）
-        if (subIndex == mainIndex)
-        {
-            int newSub = FindNextUsable(subIndex, exclude: mainIndex, -1);
-            SetHandIndex(HandType.Sub, newSub);
-        }
-        return true;*/
-    }
-
-    public bool TrySwitchLeft()
-    {
-        // 左手は右手使用中の武器をスキップ
-        int next = FindNextUsable(subIndex, exclude: mainIndex, -1);
-
-        SetHandIndex(HandType.Sub, next);
-        if (next == -1) return false;
-        return true;
     }
 
     public void Unequip(HandType hand)
@@ -158,82 +136,27 @@ public class PlayerWeaponInventory
         
     }
 
-    // インベントリから removeIndex を削除し、手持ちを自動回復
-   /* public void RemoveAtAndRecover(int removeIndex)
-    {
-        if (removeIndex < 0 || removeIndex >= weapons.Count) return;
-
-        WeaponInstance removed = weapons[removeIndex];
-        WeaponInstance mainRef = (mainIndex >= 0 && mainIndex < weapons.Count) ? weapons[mainIndex] : null;
-        WeaponInstance subRef = (subIndex >= 0 && subIndex < weapons.Count) ? weapons[subIndex] : null;
-
-        bool wasMain = (removed != null && mainRef == removed);
-        bool wasSub = (removed != null && subRef == removed);
-
-        // --- 総線: 破壊イベント（削除前 index と WeaponItem）---
-        UIEvents.OnWeaponDestroyed?.Invoke(removeIndex, removed?.template);
-
-        weapons.RemoveAt(removeIndex);
-
-        if (weapons.Count == 0)
-        {
-            SetHandIndex(HandType.Main, -1);
-            SetHandIndex(HandType.Sub, -1);
-            return;
-        }
-
-        // 参照で再マップ
-        mainIndex = (mainRef != null) ? weapons.IndexOf(mainRef) : -1;
-        subIndex = (subRef != null) ? weapons.IndexOf(subRef) : -1;
-
-        if (wasMain)
-        {
-            if (!TrySwitchRight())
-            {
-                SetHandIndex(HandType.Main, -1);
-            }
-        }
-
-        if (wasSub)
-        {
-            if (!TrySwitchLeft())
-            {
-                SetHandIndex(HandType.Sub, -1);
-            }
-        }
-
-        // 念のため最終同一チェック（右手優先で左手を逃がす）
-        if (mainIndex >= 0 && subIndex == mainIndex)
-        {
-            int newSub = FindNextUsable(subIndex, exclude: mainIndex, -1);
-            SetHandIndex(HandType.Sub, newSub);
-        }
-    }*/
-
     // ==== 耐久消費（破壊時は自動 Remove & Recover）====
     // 仕様変更：武器壊せずに耐久0で放置できるよう
-    public void ConsumeDurability(HandType hand, float cost)
+    public bool ConsumeDurability(HandType hand, int cost)
     {
         int idx = GetHandIndex(hand);
-        if (!IsUsableIndex(idx)) return;
+        bool res = true;
+        if (!IsUsableIndex(idx)) res = false;
 
         WeaponInstance inst = weapons[idx];
-        int before = inst.currentDurability;
-        //if (before < cost && cost > 0) return;
-        inst.Use(cost);
+        if(res) res = inst.Use(cost);
 
         // --- 耐久度更新イベント ---
-        UIEvents.OnDurabilityChanged?.Invoke(
+        if (res)
+        {
+            UIEvents.OnDurabilityChanged?.Invoke(
             hand, idx, inst.currentDurability, inst.template.maxDurability
         );
+        } 
+        else { UIEvents.OnWeaponUseFailed?.Invoke(); }
 
-        /*if (inst.IsBroken)
-        {
-            // 破壊 → 削除 & 自動切替（右手優先ルールを内部で実行）
-            RemoveAtAndRecover(idx);
-            // --- 破壊イベント ---
-            PlayerEvents.OnWeaponBroke?.Invoke(hand);
-        }*/
+        return res;
     }
 
     public WeaponInstance GetWeapon(HandType hand)
