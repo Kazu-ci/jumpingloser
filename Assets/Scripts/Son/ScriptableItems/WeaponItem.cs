@@ -42,6 +42,8 @@ public class ComboAction
     public Vector3 hitBoxSize = new Vector3(1.0f, 1.0f, 1.0f);   // ヒットボックスのサイズ
     [Header("ヒット判定タイミング（秒）0未満なら手動")]
     public float hitCheckTime = 0.2f;
+    [Header("攻撃プレハブ")]
+    public GameObject attackPrefab; // 攻撃判定用のプレハブ（nullならヒットボックスのみ）
 
     [Header("突進動作")]
     [Tooltip("突進する直線距離（0はなし）")]
@@ -53,9 +55,6 @@ public class ComboAction
 
     [Header("アニメーション速度補正")]
     public float animationSpeed = 1.0f; // アニメーション再生速度補正
-
-    [Header("攻撃判定プレハブ")]
-    public GameObject attackPrefab; // 攻撃判定用のプレハブ（nullならヒットボックスのみ）
 
     [Header("エフェクト")]
     public GameObject attackVFXPrefab; // ヒット時のエフェクトプレハブ

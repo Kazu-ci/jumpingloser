@@ -70,6 +70,10 @@ public class BommerangAttack : MonoBehaviour
                 Destroy(gameObject);
             }
         }
+        else
+        {
+            Debug.Log("BommerangAttack: No damageable component found on " + other.name);
+        }
     }
 
     // === ƒ_ƒ[ƒWî•ñ‚Ìİ’è ===

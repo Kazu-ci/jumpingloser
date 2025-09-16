@@ -548,27 +548,24 @@ public class PlayerMovement : MonoBehaviour
     }
     private void OnSwitchWeaponInput()
     {
-        // 右手優先の切替。攻撃中は不可
-        if (_fsm.CurrentState == PlayerState.Attack)
+        if (_fsm.CurrentState == PlayerState.Attack || _fsm.CurrentState == PlayerState.Skill)
         {
-            Debug.Log("Cannot switch weapon while attacking!");
+            Debug.Log("Cannot switch weapon while attacking or during skill!");
             return;
         }
-        // --- 直接インベントリに命じる。装備・モデル同期はイベントで反映 ---
         if (!weaponInventory.TrySwitchRight())
         {
             Debug.Log("No usable weapon for right hand.");
         }
     }
+
     private void OnSwitchWeaponInput2()
     {
-        // 攻撃中は不可
-        if (_fsm.CurrentState == PlayerState.Attack)
+        if (_fsm.CurrentState == PlayerState.Attack || _fsm.CurrentState == PlayerState.Skill)
         {
-            Debug.Log("Cannot switch weapon while attacking!");
+            Debug.Log("Cannot switch weapon while attacking or during skill!");
             return;
         }
-        // --- 直接インベントリに命じる。装備・モデル同期はイベントで反映 ---
         if (!weaponInventory.TrySwitchRight(-1))
         {
             Debug.Log("No usable weapon for left hand.");
@@ -973,6 +970,36 @@ public class PlayerMovement : MonoBehaviour
         }
         dir = transform.forward;
         return false;
+    }
+
+
+    public void SetHandModelVisible(HandType hand, bool visible)
+    {
+        GameObject box = (hand == HandType.Main) ? weaponBoxR : weaponBoxL;
+        if (box == null) return;
+
+        // 子孫すべての Renderer を列挙して切替
+        var renderers = box.GetComponentsInChildren<Renderer>(includeInactive: true);
+        for (int i = 0; i < renderers.Length; ++i)
+        {
+            
+            renderers[i].enabled = visible;
+        }
+    }
+
+    /// <summary>
+    /// 右手（Main）の武器モデルを隠す/表示する簡易API
+    /// </summary>
+    public void HideMainHandModel() => SetHandModelVisible(HandType.Main, false);
+    public void ShowMainHandModel() => SetHandModelVisible(HandType.Main, true);
+
+    private bool CanEnterSkillNow()
+    {
+        var w = GetMainWeapon();
+        var list = w?.template?.finisherAttack;
+        var finisher = (list != null && list.Count > 0) ? list[0] : null;
+        if (finisher == null || finisher.animation == null) return false;
+        return w.currentDurability >= finisher.durabilityCost;
     }
 }
 

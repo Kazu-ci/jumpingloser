@@ -16,7 +16,7 @@ public class WeaponInstance
     public WeaponInstance(WeaponItem weapon)
     {
         template = weapon;
-        currentDurability = 1;
+        currentDurability = 5;
     }
 
     public bool Use(int cost)
@@ -29,7 +29,7 @@ public class WeaponInstance
         return true;
     }
 
-    public bool IsBroken => currentDurability <= 0;
+    public bool IsBroken => currentDurability < 0;
 }
 
 

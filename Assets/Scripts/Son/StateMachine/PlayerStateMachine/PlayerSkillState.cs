@@ -1,88 +1,315 @@
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.Playables;
+using UnityEngine.Animations;
+using static EventBus;
 
-// 日本語：スキル状態（単発版）。全身は主ミキサーのActionスロットで接管。
-//        攻撃と同様に子ミキサーを使うが、段は1つ想定で簡易実装。
 public class PlayerSkillState : IState
 {
     private PlayerMovement _player;
-    private AnimationMixerPlayable skillSubMixer;
-    private AnimationClipPlayable skillPlayable;
 
-    private ComboAction action;
-    private double duration;
-    private double elapsed;
+    // 子ミキサー（PlayerMovement 側の常駐インスタンスを「このステートが占有」する）
+    private AnimationMixerPlayable actionMixer;
+
+    // Skill は単発のため 1 枚だけ
+    private AnimationClipPlayable skillPlayable;
+    // もう一方のスロットは 0 重みのダミーで占位（未接続でも良いが見通しのため保持）
+    private AnimationClipPlayable dummyPlayable;
+
+    private ComboAction skillAction;
+    private double actionDuration;
+    private double elapsedTime;
+
+    private bool hasCheckedHit;
+    private bool hasSpawnedAttackVFX;
+    private bool hasSpawnedAttackPrefab;
+    private bool weaponHiddenForThisAction;
+    private bool lungeInvoked;
+
+    // 末尾の先行フェード開始済みか（空洞回避用：Main 層のアウト混合を早めに開始）
+    private bool mainExitStarted;
+
     private WeaponInstance weapon;
 
-    public PlayerSkillState(PlayerMovement p) { _player = p; }
+    private const float HIT_VFX_TOWARD_PLAYER = 1f;
+    private const float HIT_VFX_SEQUENCE_DELAY = 0.1f;
+    private DamageData damageData = new DamageData(1);
+
+    private static readonly Collider[] hitBuffer = new Collider[32];
+    private static readonly System.Collections.Generic.HashSet<Enemy> uniqueEnemyHits
+        = new System.Collections.Generic.HashSet<Enemy>();
+
+    private readonly AnimationCurve defaultLungeCurve = null;
+    private const float LUNGE_INPUT_MIN = 0.2f;
+
+    public PlayerSkillState(PlayerMovement player) { _player = player; }
 
     public void OnEnter()
     {
-        // 日本語：武器のスキルクリップを取得（なければフォールバック）
-        weapon = _player.GetMainWeapon() ?? _player.fist;
-        var list = weapon?.template?.finisherAttack;
-        if (list == null || list.Count == 0) list = weapon?.template?.mainWeaponCombo;
+        // === ① 前提チェック：ここでまだメイン層ブレンドは触らない ===
+        weapon = _player.GetMainWeapon();
+        if (weapon == null || weapon.template == null ||
+            weapon.template.finisherAttack == null || weapon.template.finisherAttack.Count == 0 ||
+            weapon.template.finisherAttack[0] == null || weapon.template.finisherAttack[0].animation == null)
+        {
+            // フィニッシャーが無い ⇒ 空洞を作らず即退避
+            _player.ToIdle();
+            return;
+        }
 
-        if (list == null || list.Count == 0 || list[0]?.animation == null)
+        skillAction = weapon.template.finisherAttack[0];
+
+        // 耐久チェック（未満なら入らない）
+        if (weapon.currentDurability < skillAction.durabilityCost)
         {
             _player.ToIdle();
             return;
         }
 
-        action = list[0];
-        duration = action.animation.length;
-        elapsed = 0.0;
+        // === ② 子ミキサーを「単発スキル用レイアウト」に初期化して占有 ===
+        actionMixer = _player.GetActionSubMixer();
+        TakeOverSubMixerForSingleShot(skillAction.animation, Mathf.Max(0.0001f, weapon.template.attackSpeed));
 
-        // 日本語：子ミキサー（1入力でも作っておくと拡張しやすい）
-        if (!skillSubMixer.IsValid())
-        {
-            skillSubMixer = AnimationMixerPlayable.Create(_player.playableGraph, 1);
-            skillSubMixer.SetInputCount(1);
-        }
-
-        if (skillPlayable.IsValid())
-        {
-            skillSubMixer.DisconnectInput(0);
-            skillPlayable.Destroy();
-        }
-
-        skillPlayable = AnimationClipPlayable.Create(_player.playableGraph, action.animation);
-        // 日本語：IKを無効化（骨盤リターン抑制）
-        skillPlayable.SetApplyFootIK(false);
-        skillPlayable.SetApplyPlayableIK(false);
+        // 初期姿勢を確定（0重みでの姿勢ジャンプ防止）
         skillPlayable.SetTime(0);
-        skillPlayable.SetSpeed(Mathf.Max(0.0001f, weapon.template.attackSpeed));
+        _player.EvaluateGraphOnce();
 
-        skillSubMixer.ConnectInput(0, skillPlayable, 0, 1f);
+        // ここで耐久を消費
+        if (!_player.weaponInventory.ConsumeDurability(HandType.Main, skillAction.durabilityCost))
+        {
+            _player.ToIdle();
+            return;
+        }
 
-        // 日本語：主ミキサーのActionスロットに差し替え
-        int actionSlot = (int)PlayerMovement.MainLayerSlot.Action;
-        _player.mixer.DisconnectInput(actionSlot);
-        _player.mixer.ConnectInput(actionSlot, skillSubMixer, 0, 1f);
-
-        // 日本語：全身接管（極短）
-        float enterDur = Mathf.Max(0.0f, _player.ResolveBlendDuration(PlayerState.Move, PlayerState.Skill));
-        if (enterDur > 0.06f) enterDur = 0.03f;
+        // === ③ ここで初めてメイン層を Action へ ===
+        float enterDur = _player.ResolveBlendDuration(_player.lastBlendState, PlayerState.Skill);
         _player.BlendToMainSlot(PlayerMovement.MainLayerSlot.Action, enterDur);
+
+        // フラグ初期化
+        actionDuration = skillAction.animation.length;
+        elapsedTime = 0.0;
+        hasCheckedHit = false;
+        hasSpawnedAttackVFX = false;
+        hasSpawnedAttackPrefab = false;
+        weaponHiddenForThisAction = false;
+        lungeInvoked = false;
+        mainExitStarted = false;
+
+        damageData = new DamageData(weapon.template.attackPower);
+
+        if (skillAction.swingSFX)
+            _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.RHand, skillAction.swingSFX);
     }
 
     public void OnExit()
     {
-        if (skillPlayable.IsValid()) skillPlayable.Destroy();
+        // ★ 子ミキサーを必ず 0 重み化（他ステート移行での空洞防止）
+        if (actionMixer.IsValid())
+        {
+            actionMixer.SetInputWeight(0, 0f);
+            actionMixer.SetInputWeight(1, 0f);
+        }
 
-        // 日本語：素早く撤退
-        float exitDur = Mathf.Max(0.0f, _player.ResolveBlendDuration(PlayerState.Skill, PlayerState.Idle));
-        if (exitDur > 0.06f) exitDur = 0.03f;
-        _player.BlendToMainSlot(PlayerMovement.MainLayerSlot.Idle, exitDur);
+        // 右手武器の表示を戻す
+        if (weaponHiddenForThisAction)
+        {
+            _player.ShowMainHandModel();
+            weaponHiddenForThisAction = false;
+        }
+
+        // Playable の破棄（次ステートが再構成する前提）
+        if (skillPlayable.IsValid()) { actionMixer.DisconnectInput(0); skillPlayable.Destroy(); }
+        if (dummyPlayable.IsValid()) { actionMixer.DisconnectInput(1); dummyPlayable.Destroy(); }
     }
 
-    public void OnUpdate(float dt)
+    public void OnUpdate(float deltaTime)
     {
-        elapsed += dt;
-        if (elapsed >= duration)
+        if (skillAction == null) return;
+
+        elapsedTime += deltaTime;
+
+        // --- 末尾事前ブレンド（空洞対策）：clipEnd - blendToNext からメイン層を抜け始める ---
+        double clipEndTime = actionDuration;
+        float remToClipEnd = Mathf.Max(0f, (float)(clipEndTime - elapsedTime));
+        float gate = Mathf.Max(0f, skillAction.blendToNext);
+        if (!mainExitStarted && remToClipEnd <= gate + 1e-4f)
+        {
+            var nextSlot = _player.HasMoveInput() ? PlayerMovement.MainLayerSlot.Move
+                                                  : PlayerMovement.MainLayerSlot.Idle;
+            float desired = _player.ResolveBlendDuration(PlayerState.Skill,
+                          _player.HasMoveInput() ? PlayerState.Move : PlayerState.Idle);
+            float exitDur = Mathf.Min(desired, remToClipEnd);
+            _player.BlendToMainSlot(nextSlot, exitDur);
+            mainExitStarted = true;
+        }
+
+        // --- 突進 ---
+        if (!lungeInvoked && elapsedTime >= skillAction.lungeTime)
+        {
+            DoLungeForAction();
+            lungeInvoked = true;
+        }
+
+        // --- VFX ---
+        if (!hasSpawnedAttackVFX && skillAction.attackVFXPrefab != null && elapsedTime >= skillAction.attackVFXTime)
+        {
+            SpawnAttackVFX();
+            hasSpawnedAttackVFX = true;
+        }
+
+        // --- ヒット判定/発射 ---
+        if (!hasCheckedHit && skillAction.hitCheckTime >= 0f && elapsedTime >= skillAction.hitCheckTime)
+        {
+            TrySpawnAttackPrefabNow();
+            DoAttackHitCheck();
+            hasCheckedHit = true;
+        }
+
+        // --- 終了 ---
+        if (elapsedTime >= actionDuration)
         {
             _player.ToIdle();
+        }
+    }
+
+    // ===== 子ミキサー接続（単発スキル用） =====
+    /// <summary>
+    /// 子ミキサーを「単発用」に構成:
+    /// 入力0=スキル, 入力1=ダミー(0重み)。ブレンドは不要、常に0:1=1:0。
+    /// </summary>
+    private void TakeOverSubMixerForSingleShot(AnimationClip clip, float speed)
+    {
+        // 既存入力をクリーンアップ
+        for (int i = 0; i < actionMixer.GetInputCount(); ++i)
+        {
+            var p = actionMixer.GetInput(i);
+            if (p.IsValid()) { actionMixer.DisconnectInput(i); p.Destroy(); }
+            actionMixer.SetInputWeight(i, 0f);
+        }
+
+        // 本体
+        skillPlayable = AnimationClipPlayable.Create(_player.playableGraph, clip);
+        skillPlayable.SetApplyFootIK(false);
+        skillPlayable.SetApplyPlayableIK(false);
+        skillPlayable.SetSpeed(speed);
+        actionMixer.ConnectInput(0, skillPlayable, 0, 1f);
+
+        // ダミー（保守目的。無くても動くが、意図が明確になる）
+        dummyPlayable = AnimationClipPlayable.Create(_player.playableGraph, new AnimationClip());
+        dummyPlayable.SetSpeed(0.0001f);
+        actionMixer.ConnectInput(1, dummyPlayable, 0, 0f);
+    }
+
+    // ===== 判定・演出 =====
+    private void DoAttackHitCheck()
+    {
+        Vector3 worldCenter = _player.transform.TransformPoint(skillAction.hitBoxCenter);
+        Vector3 halfExtents = skillAction.hitBoxSize * 0.5f;
+        Quaternion rot = _player.transform.rotation;
+
+        int count = Physics.OverlapBoxNonAlloc(worldCenter, halfExtents, hitBuffer, rot, ~0, QueryTriggerInteraction.Ignore);
+
+        if (_player.isHitboxVisible) ShowHitBox(worldCenter, skillAction.hitBoxSize, rot, 0.1f, Color.cyan);
+
+        uniqueEnemyHits.Clear();
+        var vfxPositions = new System.Collections.Generic.List<Vector3>(8);
+
+        for (int i = 0; i < count; ++i)
+        {
+            var col = hitBuffer[i];
+            if (col == null) continue;
+            var enemy = col.GetComponentInParent<Enemy>();
+            if (enemy == null) continue;
+            if (!uniqueEnemyHits.Add(enemy)) continue;
+
+            enemy.TakeDamage(damageData);
+
+            Vector3 enemyCenter = col.bounds.center;
+            Vector3 toPlayer = _player.transform.position - enemyCenter;
+            Vector3 fxPos = (toPlayer.sqrMagnitude > 1e-6f)
+                ? enemyCenter + toPlayer.normalized * HIT_VFX_TOWARD_PLAYER
+                : enemyCenter + Vector3.up * 0.1f;
+            vfxPositions.Add(fxPos);
+        }
+
+        if (vfxPositions.Count > 0)
+            _player.StartCoroutine(SpawnHitVFXSequence(vfxPositions, HIT_VFX_SEQUENCE_DELAY));
+
+        for (int i = 0; i < count; ++i) hitBuffer[i] = null;
+    }
+
+    // 攻撃Prefab生成（ヒットボックス中心）
+    private void TrySpawnAttackPrefabNow()
+    {
+        if (hasSpawnedAttackPrefab) return;
+        if (skillAction.attackPrefab == null) return;
+
+        Vector3 spawnPos = _player.transform.TransformPoint(skillAction.hitBoxCenter);
+        Quaternion spawnRot = _player.transform.rotation;
+
+        Object.Instantiate(skillAction.attackPrefab, spawnPos, spawnRot);
+        hasSpawnedAttackPrefab = true;
+
+        if (!weaponHiddenForThisAction)
+        {
+            _player.HideMainHandModel();
+            weaponHiddenForThisAction = true;
+        }
+    }
+
+    private void SpawnAttackVFX()
+    {
+        if (skillAction.attackVFXPrefab == null) return;
+        var go = Object.Instantiate(skillAction.attackVFXPrefab, _player.transform.position, _player.transform.rotation);
+        Object.Destroy(go, 3f);
+    }
+
+    private System.Collections.IEnumerator SpawnHitVFXSequence(System.Collections.Generic.List<Vector3> positions, float interval)
+    {
+        for (int i = 0; i < positions.Count; ++i)
+        {
+            SpawnHitVFXAt(positions[i]);
+            if (i < positions.Count - 1 && interval > 0f)
+                yield return new WaitForSeconds(interval);
+        }
+    }
+
+    private void SpawnHitVFXAt(Vector3 pos)
+    {
+        var prefab = weapon?.template?.hitVFXPrefab;
+        if (prefab == null) return;
+        Object.Instantiate(prefab, pos, Quaternion.identity);
+    }
+
+    private void ShowHitBox(Vector3 center, Vector3 size, Quaternion rot, float time, Color color)
+    {
+        var obj = new GameObject("SkillHitBoxVisualizer");
+        var vis = obj.AddComponent<AttackHitBoxVisualizer>();
+        vis.Init(center, size, rot, time, color);
+    }
+
+    // ==== 突進 ====
+    private void DoLungeForAction()
+    {
+        float distance = Mathf.Max(0f, skillAction.lungeDistance);
+        float speed = Mathf.Max(0.01f, skillAction.lungeSpeed);
+
+        Vector3 dir;
+        bool hasDirection = false;
+        if (_player.TryGetMoveDirectionWorld(LUNGE_INPUT_MIN * LUNGE_INPUT_MIN, out dir)) hasDirection = true;
+        else if (_player.TryGetLockOnHorizontalDirection(out dir)) hasDirection = true;
+
+        if (hasDirection) _player.RotateYawOverTime(dir, 0f);
+
+        if (distance > 0f)
+        {
+            EventBus.PlayerEvents.LungeByDistance?.Invoke(
+                hasDirection ? LungeManager.LungeAim.CustomDir : LungeManager.LungeAim.Forward,
+                Vector3.zero,
+                dir,
+                speed,
+                distance,
+                defaultLungeCurve
+            );
         }
     }
 }
