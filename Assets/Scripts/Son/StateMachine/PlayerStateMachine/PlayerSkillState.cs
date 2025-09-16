@@ -41,6 +41,9 @@ public class PlayerSkillState : IState
     private readonly AnimationCurve defaultLungeCurve = null;
     private const float LUNGE_INPUT_MIN = 0.2f;
 
+    private const float AUTO_LUNGE_FIND_RADIUS = 10f; // 索敵半径（必要なら Inspector 化）
+    private static readonly Collider[] sphereBuffer = new Collider[64];
+
     public PlayerSkillState(PlayerMovement player) { _player = player; }
 
     public void OnEnter()
@@ -295,21 +298,93 @@ public class PlayerSkillState : IState
 
         Vector3 dir;
         bool hasDirection = false;
-        if (_player.TryGetMoveDirectionWorld(LUNGE_INPUT_MIN * LUNGE_INPUT_MIN, out dir)) hasDirection = true;
-        else if (_player.TryGetLockOnHorizontalDirection(out dir)) hasDirection = true;
 
-        if (hasDirection) _player.RotateYawOverTime(dir, 0f);
+        // 1) 強い移動入力（最優先）
+        if (_player.TryGetMoveDirectionWorld(LUNGE_INPUT_MIN * LUNGE_INPUT_MIN, out dir))
+        {
+            hasDirection = true;
+        }
+        // 2) ロックオン対象（次点）
+        else if (_player.TryGetLockOnHorizontalDirection(out dir))
+        {
+            hasDirection = true;
+        }
+        // 3) 自動索敵：半径内の最近敵（最後のフォールバック）
+        else if (TryFindNearestEnemyDirXZ(AUTO_LUNGE_FIND_RADIUS, out dir))
+        {
+            hasDirection = true;
+        }
 
+        // --- 回頭（有効な方向が得られた場合のみ） ---
+        if (hasDirection)
+        {
+            // 即時スナップ回頭：スキル演出開始フレームで向きを合わせる
+            _player.RotateYawOverTime(dir, 0f);
+        }
+
+        // --- 突進の実行（距離 > 0 のときだけ） ---
         if (distance > 0f)
         {
             EventBus.PlayerEvents.LungeByDistance?.Invoke(
                 hasDirection ? LungeManager.LungeAim.CustomDir : LungeManager.LungeAim.Forward,
                 Vector3.zero,
-                dir,
+                hasDirection ? dir : Vector3.zero,
                 speed,
                 distance,
                 defaultLungeCurve
             );
         }
+    }
+    private bool TryFindNearestEnemyDirXZ(float radius, out Vector3 dirXZ)
+    {
+        dirXZ = Vector3.zero;
+
+        // --- 半径内の候補を取得 ---
+        int count = Physics.OverlapSphereNonAlloc(
+            _player.transform.position,
+            radius,
+            sphereBuffer,
+            ~0,
+            QueryTriggerInteraction.Ignore
+        );
+
+        float bestSqr = float.PositiveInfinity;
+        Enemy bestEnemy = null;
+
+        for (int i = 0; i < count; ++i)
+        {
+            var col = sphereBuffer[i];
+            if (!col) continue;
+
+            // 親階層も含めて Enemy を検索（Collider が子にある構成を想定）
+            var enemy = col.GetComponentInParent<Enemy>();
+            if (!enemy) continue;
+
+            // 水平化した距離（XZ）の二乗を採用
+            Vector3 v = enemy.transform.position - _player.transform.position;
+            v.y = 0f;
+            float d2 = v.sqrMagnitude;
+            if (d2 < 1e-6f) continue;
+
+            if (d2 < bestSqr)
+            {
+                bestSqr = d2;
+                bestEnemy = enemy;
+            }
+        }
+
+        // バッファのクリーンアップ
+        for (int i = 0; i < count; ++i) sphereBuffer[i] = null;
+
+        // 最寄りの敵が見つかったら正規化した XZ ベクトルを返す
+        if (bestEnemy != null)
+        {
+            dirXZ = bestEnemy.transform.position - _player.transform.position;
+            dirXZ.y = 0f;
+            if (dirXZ.sqrMagnitude < 1e-6f) return false;
+            dirXZ.Normalize();
+            return true;
+        }
+        return false;
     }
 }

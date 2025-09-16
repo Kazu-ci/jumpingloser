@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Teba
   modelPrefab: {fileID: 2342130772000090208, guid: 367b66993255d1546a0f9e8d206a50c7, type: 3}
-  icon: {fileID: 21300000, guid: e94d2fe3ec1db99438bff7a9997dd2fc, type: 3}
+  icon: {fileID: 21300000, guid: 5a6e52b622d74214f8f7a971f6de301c, type: 3}
   weaponType: 3
   mainWeaponCombo:
   - name: Attack1

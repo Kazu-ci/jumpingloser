@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponName: Buket
   modelPrefab: {fileID: 840819371027446578, guid: 1ec7646a5a0a00440ba5853c885e2350, type: 3}
-  icon: {fileID: 21300000, guid: 79b57e028d57bce49aba18fd0df4569d, type: 3}
+  icon: {fileID: 21300000, guid: c57702c5efe7f8945a20dde84722d470, type: 3}
   weaponType: 2
   mainWeaponCombo:
   - name: BuketAttack01
