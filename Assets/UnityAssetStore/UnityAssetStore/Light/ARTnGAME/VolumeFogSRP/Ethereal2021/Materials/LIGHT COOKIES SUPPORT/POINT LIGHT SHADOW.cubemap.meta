@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e68d83253798c3242a77da07e4cac821
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 8900000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2021/Materials/LIGHT COOKIES SUPPORT/POINT
+    LIGHT SHADOW.cubemap
+  uploadId: 750475

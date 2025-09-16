@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 9218a015c9daeb24ea897363473acac3
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 4890085278179872738
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 274279
+  packageName: Ethereal URP 2024 - Volumetric Lighting & Fog
+  packageVersion: 2.6.4
+  assetPath: Assets/ARTnGAME/VolumeFogSRP/Ethereal2021/Materials/LIGHT COOKIES SUPPORT/Light
+    Cookies ShowcaseSettings.lighting
+  uploadId: 750475
