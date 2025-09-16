@@ -2437,20 +2437,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponDrops: []
   textures: []
-  maxHp: 0
-  maxSpeed: 0
-  attackSpeed: 0
-  attackDamage: 0
-  attackRange: 0
-  lookPlayerDir: 0
-  angle: 0
+  maxHp: 50
+  maxSpeed: 2
+  attackSpeed: 1
+  attackDamage: 2
+  attackRange: 5
+  lookPlayerDir: 10
+  angle: 90
   playerPos: {fileID: 0}
-  enemyAnimation: {fileID: 0}
-  thisObject: {fileID: 0}
+  enemyAnimation: {fileID: 2838611724756070795}
+  thisObject: {fileID: 2838611724756070797}
   mobEnemy: []
   attackCollider: {fileID: 0}
-  rushSpeed: 0
-  stiffnessTime: 0
+  rushSpeed: 100
+  stiffnessTime: 3
 --- !u!195 &-2121282415513356036
 NavMeshAgent:
   m_ObjectHideFlags: 0

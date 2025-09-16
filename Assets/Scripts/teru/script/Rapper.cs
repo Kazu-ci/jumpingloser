@@ -12,4 +12,9 @@ public class Rapper: MonoBehaviour
     {
         parentController.OnAttackEnd();
     }
+    
+    public void OnSumon()
+    {
+        parentController.OnSumon();
+    }
 }

@@ -348,7 +348,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1715635400498001893, guid: cb79a6a32fcf74444bca039a3c36481a, type: 3}
       propertyPath: m_Radius
-      value: 1.7
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2133720353628147259, guid: cb79a6a32fcf74444bca039a3c36481a, type: 3}
       propertyPath: enemy
