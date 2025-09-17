@@ -10,10 +10,14 @@ public class BossEnemy : Enemy
 {
     EStateMachine<BossEnemy> stateMachine;
     [SerializeField] GameObject[] mobEnemy;
-    [SerializeField] List<Collider> attackColliders;
+    [SerializeField] private List<string> attackStates; 
+    [SerializeField] private List<GameObject> effects;  
+    [SerializeField] private List<Collider> attackColliders; 
     [SerializeField] float rushSpeed;
     [SerializeField] float stiffnessTime;
-    private Dictionary<string, Collider> stateToCollider;
+    private Dictionary<string, Collider> colliderDict;
+    private Dictionary<string, GameObject> effectDict;
+
     private enum EnemyState
     {
         Idle,
@@ -29,17 +33,17 @@ public class BossEnemy : Enemy
     }
     void Awake()
     {
-        // ステート名とコライダーを紐付け
-        stateToCollider = new Dictionary<string, Collider>
+        effectDict = new Dictionary<string, GameObject>();
+        colliderDict = new Dictionary<string, Collider>();
+        for (int i = 0; i < Mathf.Min(attackStates.Count, effects.Count); i++)
         {
-            { "Combo", attackColliders[0] },
-            { "Rotate", attackColliders[1] },
-            { "Rush", attackColliders[2] }
-        };
-        foreach (var c in attackColliders)
-        {
-            if (c != null) c.enabled = false;
+            effectDict[attackStates[i]] = effects[i];
+            effects[i].SetActive(false);
+            if (i < attackColliders.Count && attackColliders[i] != null)
+                colliderDict[attackStates[i]] = attackColliders[i];
         }
+
+        foreach (var c in attackColliders) c.enabled = false;
     }
     void Start()
     {
@@ -63,24 +67,32 @@ public class BossEnemy : Enemy
     protected override void Update()
     {
         base.Update();
+        OnEffects();
         if (nowHp <= 0) { stateMachine.ChangeState((int)EnemyState.Dead); }
         stateMachine.OnUpdate();
-        Debug.Log(stateMachine.CurrentState.ToString());
     }
     public override void OnAttackSet()
     {
         attackColliders.ForEach(c => c.enabled = false);
 
         var state = enemyAnimation.GetCurrentAnimatorStateInfo(0);
-        if (stateToCollider.TryGetValue(state.IsName("Combo") ? "Combo" :
-                                        state.IsName("Rotate") ? "Rotate" :
-                                        state.IsName("Rush") ? "Rush" : "",
-                                        out var col))
+        foreach (var kv in colliderDict)
         {
-            col.enabled = true;
+            if (state.IsName(kv.Key))
+            {
+                kv.Value.enabled = true;
+                break;
+            }
         }
     }
+
     public override void OnAttackEnd() => attackColliders.ForEach(c => c.enabled = false);
+    private void OnEffects()
+    {
+        var state = enemyAnimation.GetCurrentAnimatorStateInfo(0);
+        foreach (var kvp in effectDict)
+            kvp.Value.SetActive(state.IsName(kvp.Key) && state.normalizedTime < 1f);
+    }
     public override void OnSumon()
     {
         for (int i = 0; i < mobEnemy.Length; i++)
@@ -128,7 +140,6 @@ public class BossEnemy : Enemy
             navMeshAgent.SetDestination(playerPos);
             if (Owner.GetDistance() <= Owner.attackRange)
             {
-                Debug.Log("oppai");
                 navMeshAgent.isStopped = true;
                 if (Probability(70)) { StateMachine.ChangeState((int)EnemyState.Combo); }
                 if (Probability(30)) { StateMachine.ChangeState((int)EnemyState.Rotate); }
@@ -314,28 +325,28 @@ public class BossEnemy : Enemy
             Owner.navMeshAgent.isStopped = true;
 
             // プレイヤーの位置＋オフセットで目的地を設定
-            Vector3 direction = (Owner.playerPos.transform.position - Owner.transform.position).normalized;
-            targetPos = Owner.playerPos.transform.position + direction * overshootDistance;
+            //Vector3 direction = (Owner.playerPos.transform.position - Owner.transform.position).normalized;
+            //targetPos = Owner.playerPos.transform.position + direction * overshootDistance;
         }
 
         public override void OnUpdate()
         {
-            Owner.transform.position = Vector3.MoveTowards(
-                Owner.transform.position,
-                targetPos,
-                Owner.rushSpeed * Time.deltaTime
-            );
-            Ray ray = new Ray(Owner.transform.position + Vector3.up * 3f, Owner.transform.forward);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, rayDistance))
-            {
-                if (hit.collider.GetComponent<PlayerMovement>() == null &&
-                    hit.collider.GetComponent<Enemy>() == null)
-                {
-                    StateMachine.ChangeState((int)EnemyState.Stiffness);
-                    return;
-                }
-            }
+            //Owner.transform.position = Vector3.MoveTowards(
+            //    Owner.transform.position,
+            //    targetPos,
+            //    Owner.rushSpeed * Time.deltaTime
+            //);
+            //Ray ray = new Ray(Owner.transform.position + Vector3.up * 3f, Owner.transform.forward);
+            //RaycastHit hit;
+            //if (Physics.Raycast(ray, out hit, rayDistance))
+            //{
+            //    if (hit.collider.GetComponent<PlayerMovement>() == null &&
+            //        hit.collider.GetComponent<Enemy>() == null)
+            //    {
+            //        StateMachine.ChangeState((int)EnemyState.Stiffness);
+            //        return;
+            //    }
+            //}
             if (Owner.AnimationEnd("Rush"))
             {
                 if (Vector3.Distance(Owner.transform.position, targetPos) < 0.1f){StateMachine.ChangeState((int)EnemyState.Vigilance);}
