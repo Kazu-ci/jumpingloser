@@ -42,6 +42,7 @@ public class ComboAction
     public Vector3 hitBoxSize = new Vector3(1.0f, 1.0f, 1.0f);   // ヒットボックスのサイズ
     [Header("ヒット判定タイミング（秒）0未満なら手動")]
     public float hitCheckTime = 0.2f;
+    public List<float> hitTimeList = new List<float>();
     [Header("攻撃プレハブ")]
     public GameObject attackPrefab; // 攻撃判定用のプレハブ（nullならヒットボックスのみ）
 
