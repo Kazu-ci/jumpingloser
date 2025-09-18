@@ -26,6 +26,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene 1.unity
     guid: 246e17e9cdd35c748bbd6d68f45dc663
+  - enabled: 1
+    path: Assets/Scenes/GameoverTest.unity
+    guid: b1b000b5b8fa27b4a9e392cc115a9fd9
+  - enabled: 1
+    path: Assets/Scenes/TestClearScene.unity
+    guid: 0c791c8eabb0b9d428787a0ac42b625a
+  - enabled: 1
+    path: Assets/Scenes/TestGameoverScene.unity
+    guid: 267a2511d1622de4db4836bacef71134
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

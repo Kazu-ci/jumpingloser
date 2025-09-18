@@ -29,7 +29,17 @@ public enum GameTrigger
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
-
+    //--------------------------------倉岡追加部分-----------------------------
+    //現在のシーン名などの保持
+    public string CurrentStageSceneName { get; private set; }
+    public bool IsBossStage { get; private set; }
+    //呼び出しメソッド
+    public void SetStageInfo(string sceneName, bool isBossStage)
+    {
+        CurrentStageSceneName = sceneName;
+        IsBossStage = isBossStage;
+    }
+    //--------------------------------------------------------------------------
     /// <summary>メイン状態機</summary>
     private StateMachine<GameState, GameTrigger> _stateMachine;
 
