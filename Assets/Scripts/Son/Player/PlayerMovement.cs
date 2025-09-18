@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.Animations;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
+using System.Reflection;
 using static EventBus;
 
 public enum PlayerState
@@ -206,6 +207,8 @@ public class PlayerMovement : MonoBehaviour
     public GameObject GetLockOnTarget => lockOnTarget;
     private Coroutine rotateYawCo; // 現在進行中の水平回転コルーチン
 
+    private static FieldInfo _fiCurrentHealth;
+
     // ====== ライフサイクル ======
     private void Awake()
     {
@@ -285,6 +288,9 @@ public class PlayerMovement : MonoBehaviour
             lockOnTarget = newTarget;
         };
 
+        PlayerEvents.ApplyHP += HandleApplyHP;
+        PlayerEvents.ApplyLoadoutInstances += HandleApplyLoadoutInstances;
+
     }
 
     private void OnDisable()
@@ -299,7 +305,8 @@ public class PlayerMovement : MonoBehaviour
         {
             PlayerEvents.GetPlayerObject = null;
         }
-
+        PlayerEvents.ApplyHP -= HandleApplyHP;
+        PlayerEvents.ApplyLoadoutInstances -= HandleApplyLoadoutInstances;
 
     }
 
@@ -356,6 +363,7 @@ public class PlayerMovement : MonoBehaviour
         // --- ライフ初期化 ---
         currentHealth = maxHealth;
         UIEvents.OnPlayerHpChange?.Invoke((int)currentHealth, (int)maxHealth);
+        PlayerEvents.OnPlayerSpawned?.Invoke(this.gameObject);
     }
 
     private void OnDestroy()
@@ -1001,5 +1009,28 @@ public class PlayerMovement : MonoBehaviour
         if (finisher == null || finisher.animation == null) return false;
         return w.currentDurability >= finisher.durabilityCost;
     }
+
+    private void HandleApplyHP(int current, int max)
+    {
+        maxHealth = Mathf.Max(1, max);
+        if (_fiCurrentHealth == null)
+        {
+            _fiCurrentHealth = typeof(PlayerMovement)
+                .GetField("currentHealth", BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+        if (_fiCurrentHealth != null)
+        {
+            _fiCurrentHealth.SetValue(this, (float)Mathf.Clamp(current, 0, (int)maxHealth));
+        }
+
+        UIEvents.OnPlayerHpChange?.Invoke(Mathf.Clamp(current, 0, (int)maxHealth), (int)maxHealth);
+    }
+
+    private void HandleApplyLoadoutInstances(List<WeaponInstance> instances, int mainIndex)
+    {
+        if (weaponInventory == null) return;
+        weaponInventory.ApplyLoadoutInstances(instances, mainIndex);
+    }
+
 }
 

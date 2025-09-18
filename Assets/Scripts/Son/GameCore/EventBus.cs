@@ -43,6 +43,8 @@ public class EventBus
     }
     public static class PlayerEvents
     {
+
+        public static Action<GameObject> OnPlayerSpawned;
         public static Func<GameObject> GetPlayerObject;
         public static Action<PlayerAudioPart,AudioClip> PlayClipByPart;
 
@@ -50,5 +52,11 @@ public class EventBus
 
         public static System.Func<LungeAim, Vector3, Vector3, float, float, AnimationCurve,bool> LungeByDistance;
         public static System.Func<LungeAim, Vector3, Vector3, float, float, AnimationCurve,bool> LungeByTime;
+
+        public static Action<GameObject> OnEnemyDefeted;
+
+        // ÅöNEW: ï€ë∂/?ópí êMópéñåè
+        public static Action<int /*current*/, int /*max*/> ApplyHP;
+        public static Action<List<WeaponInstance> /*instances*/, int /*mainIndex*/> ApplyLoadoutInstances;
     }
 }

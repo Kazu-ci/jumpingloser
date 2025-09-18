@@ -29,6 +29,7 @@ MonoBehaviour:
     hitBoxCenter: {x: -1, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 3, z: 3}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 0
     lungeSpeed: 10
@@ -48,6 +49,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 3, z: 5}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 0
     lungeSpeed: 10
@@ -67,6 +69,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 3
     lungeSpeed: 30
@@ -86,6 +89,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 4, z: 5}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 0
     lungeSpeed: 10
@@ -105,6 +109,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 4, z: 4}
     hitCheckTime: 0.5
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 5
     lungeSpeed: 15
@@ -115,7 +120,7 @@ MonoBehaviour:
   subWeaponAttack: []
   finisherAttack:
   - name: CarrotFinisher
-    animation: {fileID: 5536427086270334551, guid: 44241c4aa8e50374e88d93d30a5c96a3, type: 3}
+    animation: {fileID: -7203629753534337509, guid: 50b0844a937eef345bf1c0346dbc1d63, type: 3}
     durabilityCost: 5
     actionType: 4
     swingSFX: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
@@ -124,12 +129,15 @@ MonoBehaviour:
     endNormalizedTime: 0.8
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: 0, z: 0.5}
-    hitBoxSize: {x: 0, y: 0, z: 0}
-    hitCheckTime: 0.2
-    attackPrefab: {fileID: 2169957460104662819, guid: f011a7db44d04224ba222fae2834e736, type: 3}
-    lungeDistance: 1.5
+    hitBoxSize: {x: 5, y: 5, z: 5}
+    hitCheckTime: 0.02
+    hitTimeList:
+    - 0.18
+    - 0.5
+    attackPrefab: {fileID: 0}
+    lungeDistance: 5
     lungeSpeed: 10
-    lungeTime: 0.05
+    lungeTime: 0
     animationSpeed: 0
     attackVFXPrefab: {fileID: 0}
     attackVFXTime: 0

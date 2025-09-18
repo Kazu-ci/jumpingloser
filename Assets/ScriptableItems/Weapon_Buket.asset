@@ -29,6 +29,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 6}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 2
     lungeSpeed: 10
@@ -48,6 +49,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: 1, z: 1}
     hitBoxSize: {x: 4, y: 6, z: 3.5}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 1
     lungeSpeed: 10
@@ -67,6 +69,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0.5, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 6}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 3
     lungeSpeed: 15
@@ -86,6 +89,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 1, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 3, z: 4}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 3
     lungeSpeed: 15
@@ -105,6 +109,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: -0.5, z: 0.5}
     hitBoxSize: {x: 5, y: 4, z: 6}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 0}
     lungeDistance: 0
     lungeSpeed: 10
@@ -126,6 +131,7 @@ MonoBehaviour:
     hitBoxCenter: {x: 0, y: 0, z: 0.5}
     hitBoxSize: {x: 0, y: 0, z: 0}
     hitCheckTime: 0.2
+    hitTimeList: []
     attackPrefab: {fileID: 2169957460104662819, guid: f011a7db44d04224ba222fae2834e736, type: 3}
     lungeDistance: 0
     lungeSpeed: 0

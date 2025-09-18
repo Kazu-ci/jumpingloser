@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
+using System.Collections.Generic;
 using static EventBus;
+using NUnit.Framework;
 
 public class PlayerSkillState : IState
 {
@@ -44,6 +46,8 @@ public class PlayerSkillState : IState
     private const float AUTO_LUNGE_FIND_RADIUS = 10f; // 索敵半径（必要なら Inspector 化）
     private static readonly Collider[] sphereBuffer = new Collider[64];
 
+    private List<bool> attackListBook = new List<bool>();
+
     public PlayerSkillState(PlayerMovement player) { _player = player; }
 
     public void OnEnter()
@@ -72,6 +76,15 @@ public class PlayerSkillState : IState
         actionMixer = _player.GetActionSubMixer();
         TakeOverSubMixerForSingleShot(skillAction.animation, Mathf.Max(0.0001f, weapon.template.attackSpeed));
 
+        if(skillAction.hitTimeList != null && skillAction.hitTimeList.Count > 0)
+        {
+            attackListBook.Clear();
+            for (int i = 0; i < skillAction.hitTimeList.Count; i++)
+            {
+                attackListBook.Add(false);
+            }
+        }
+
         // 初期姿勢を確定（0重みでの姿勢ジャンプ防止）
         skillPlayable.SetTime(0);
         _player.EvaluateGraphOnce();
@@ -97,7 +110,7 @@ public class PlayerSkillState : IState
         lungeInvoked = false;
         mainExitStarted = false;
 
-        damageData = new DamageData(weapon.template.attackPower);
+        damageData = new DamageData(weapon.template.attackPower + skillAction.actPowerModifier);
 
         if (skillAction.swingSFX)
             _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.RHand, skillAction.swingSFX);
@@ -165,6 +178,20 @@ public class PlayerSkillState : IState
             TrySpawnAttackPrefabNow();
             DoAttackHitCheck();
             hasCheckedHit = true;
+        }
+
+        // --- ヒット判定/発射(List) ---
+        if (skillAction.hitTimeList != null && skillAction.hitTimeList.Count > 0)
+        {
+            for (int i = 0; i < skillAction.hitTimeList.Count; i++)
+            {
+                if (!attackListBook[i] && elapsedTime >= skillAction.hitTimeList[i])
+                {
+                    TrySpawnAttackPrefabNow();
+                    DoAttackHitCheck();
+                    attackListBook[i] = true;
+                }
+            }
         }
 
         // --- 終了 ---

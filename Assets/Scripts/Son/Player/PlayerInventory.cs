@@ -18,6 +18,15 @@ public class WeaponInstance
         template = weapon;
         currentDurability = 5;
     }
+    public WeaponInstance(WeaponItem weapon, int durability)
+    {
+        template = weapon;
+        currentDurability = Mathf.Clamp(durability, 0, weapon != null ? weapon.maxDurability : durability);
+    }
+    public WeaponInstance Clone()
+    {
+        return new WeaponInstance(template, currentDurability);
+    }
 
     public bool Use(int cost)
     {
@@ -46,6 +55,38 @@ public class PlayerWeaponInventory
     public int subIndex = -1;
 
     private Dictionary<WeaponType,int> typeToIndex = new Dictionary<WeaponType, int>();
+
+    public void ApplyLoadoutInstances(List<WeaponInstance> instances, int mainIndexToEquip)
+    {
+        weapons.Clear();
+        typeToIndex.Clear();
+        mainIndex = -1;
+        subIndex = -1;
+
+        if (instances != null)
+        {
+            for (int i = 0; i < instances.Count; ++i)
+            {
+                var src = instances[i];
+                if (src == null || src.template == null) continue;
+
+                var clone = src.Clone();
+                clone.currentDurability = Mathf.Clamp(clone.currentDurability, 0, clone.template.maxDurability);
+
+                weapons.Add(clone);
+                typeToIndex[clone.template.weaponType] = weapons.Count - 1;
+            }
+        }
+
+        int prev = mainIndex;
+        int target = (mainIndexToEquip >= 0 && mainIndexToEquip < weapons.Count) ? mainIndexToEquip : -1;
+
+        if (prev != target)
+        {
+            UIEvents.OnRightWeaponSwitch?.Invoke(weapons, prev, target);
+        }
+        mainIndex = target;
+    }
 
     // ==== 内部ユーティリティ ====
     private bool IsUsableIndex(int idx)
