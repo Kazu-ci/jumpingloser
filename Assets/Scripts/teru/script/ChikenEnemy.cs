@@ -202,6 +202,7 @@ public class ChikenEnemy : Enemy
         public override void OnStart()
         {
             Owner.ChangeTexture(2);
+            Owner.enemyAnimation.SetTrigger("Dead");
             Debug.Log("Dead‚¾‚æ");
         }
         public override void OnUpdate()
