@@ -83,6 +83,7 @@ public class Enemy : MonoBehaviour
         if (_isDead) return;
         _isDead = true;
         DropWeapon();
+
         Destroy(gameObject);
     }
     protected float GetDistance()
@@ -100,7 +101,7 @@ public class Enemy : MonoBehaviour
         Instantiate(weaponDrops[index], transform.position, Quaternion.identity);
 
     }
-    protected bool AnimationEnd(string stateName)
+    public bool AnimationEnd(string stateName)
     {
         // 現在のステート情報を取得
         AnimatorStateInfo stateInfo = enemyAnimation.GetCurrentAnimatorStateInfo(0);
