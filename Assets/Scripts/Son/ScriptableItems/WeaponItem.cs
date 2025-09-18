@@ -20,6 +20,9 @@ public class ComboAction
 {
     public string name; // デバッグやUI表示用の名前
     public AnimationClip animation;
+
+    [Header("攻撃性能")]
+    public int actPowerModifier = 0;
     [Tooltip("耐久値消費量")]
     public int durabilityCost = 1; 
     [Tooltip("攻撃アクションの種類")]
