@@ -482,7 +482,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 661480442}
-  - component: {fileID: 661480441}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -490,20 +489,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &661480441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 661480440}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 114af2bee6c4d44419f48f85ab83de23, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CurrentState: 6
-  preGameState: 6
 --- !u!4 &661480442
 Transform:
   m_ObjectHideFlags: 0
@@ -1005,7 +990,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 961739752}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -1293,7 +1278,7 @@ RectTransform:
   m_GameObject: {fileID: 2123219674}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.63, y: 0.63, z: 1}
+  m_LocalScale: {x: 0.96, y: 0.96, z: 0.32}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1803012479}

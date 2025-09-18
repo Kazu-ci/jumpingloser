@@ -1,23 +1,22 @@
 using UnityEngine;
 using UnityEngine.Video;
 using UnityEngine.SceneManagement;
+using static EventBus;
 public class ClearMoviePlayer : MonoBehaviour
 {
-    public VideoPlayer videoPlayer;
-    public string nextSceneName = "TestTitleScene"; // 動画後に戻るシーン
+    [Header("ボスオブジェクトをここにアサイン")]
+    public GameObject boss;
 
-    void Start()
+    private bool triggered = false;
+
+    void Update()
     {
-        if (videoPlayer != null)
+        // まだ遷移していない && ボスが null または非アクティブなら
+        if (!triggered && (boss == null || !boss.activeInHierarchy))
         {
-            videoPlayer.loopPointReached += OnMovieFinished;
-            videoPlayer.Play();
+            triggered = true;
+            // GameManager経由でゲームオーバー／クリア状態に
+            GameManager.Instance.GameOver();
         }
-    }
-
-    void OnMovieFinished(VideoPlayer vp)
-    {
-        // 動画が終わったらタイトルへ
-        SceneManager.LoadScene(nextSceneName);
     }
 }

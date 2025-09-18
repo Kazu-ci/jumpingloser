@@ -59,15 +59,12 @@ public class ReturnToGame : MonoBehaviour
     // ボタンから呼ぶ
     public void OnClickReturnToGame()
     {
-        string targetScene = isBossStage ? bossSceneName : stageSceneName;
-
-        // シーンロード
+        string targetScene=isBossStage? bossSceneName:stageSceneName;
+        //シーンロード
         SceneManager.LoadScene(targetScene);
-
-        // GameManager 経由でステート遷移
-        if (GameManager.Instance != null)
+        if(GameManager.Instance!=null)
         {
-            GameManager.Instance.StartGame(); // Preloading → Playing へ
+            GameManager.Instance.StartGame();
         }
     }
 }
