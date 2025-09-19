@@ -3,7 +3,7 @@ using System.Collections;
 
 public class TempGameClear : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public float delayTime = 41f;
     void Start()
     {
         StartCoroutine(DelayCall());
@@ -11,7 +11,7 @@ public class TempGameClear : MonoBehaviour
 
     IEnumerator DelayCall()
     {
-        yield return new WaitForSeconds(45f);
+        yield return new WaitForSeconds(delayTime);
         MyMethod();
     }
 

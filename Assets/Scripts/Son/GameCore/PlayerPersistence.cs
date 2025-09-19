@@ -97,8 +97,7 @@ public class PlayerPersistence : MonoBehaviour
         data.dataVersion = 1;
 
         data.maxHp = Mathf.Max(1, defaultMaxHp);
-        data.currentHp = data.maxHp; // Ž©“®‰ñ•œ
-        //Mathf.Clamp(defaultCurrentHp, 1, data.maxHp);
+        data.currentHp = Mathf.Clamp(defaultCurrentHp, 1, data.maxHp);
 
         data.inventory.Clear();
         int n = defaultWeaponItems.Count;
@@ -131,7 +130,7 @@ public class PlayerPersistence : MonoBehaviour
         _current.dataVersion = 1;
 
         _current.maxHp = Mathf.RoundToInt(pm.maxHealth);
-        _current.currentHp = Mathf.Clamp(Mathf.RoundToInt(pm.CurrentHealth), 0, _current.maxHp);
+        _current.currentHp = _current.maxHp;// Mathf.Clamp(Mathf.RoundToInt(pm.CurrentHealth), 0, _current.maxHp);
 
         _current.inventory.Clear();
         var inv = pm.weaponInventory;
