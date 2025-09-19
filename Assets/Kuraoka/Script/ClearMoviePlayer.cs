@@ -15,8 +15,8 @@ public class ClearMoviePlayer : MonoBehaviour
         if (!triggered && (boss == null || !boss.activeInHierarchy))
         {
             triggered = true;
-            // GameManager経由でゲームオーバー／クリア状態に
-            GameManager.Instance.GameOver();
+            // GameManager経由でTitleへ戻る
+            GameManager.Instance?.ToTitle();
         }
     }
 }

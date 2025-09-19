@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifeTime: 1.5
-  pickSound: {fileID: 8300000, guid: a76b32836dc7cc44aa9a52f0694ee199, type: 3}
+  pickSound: {fileID: 8300000, guid: 96bbf34d7aee725449bb8a5f1a46bfbb, type: 3}
 --- !u!82 &5366129355161780448
 AudioSource:
   m_ObjectHideFlags: 0

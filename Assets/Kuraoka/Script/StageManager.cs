@@ -8,10 +8,7 @@ public class StageManager : MonoBehaviour
 
     void Start()
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.SetStageInfo(stageSceneName, isBossStage);
-        }
+        
     }
     // Update is called once per frame
     void Update()
