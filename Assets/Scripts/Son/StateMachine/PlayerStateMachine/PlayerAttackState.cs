@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
 using static EventBus;
+using System.Collections.Generic;
 
 public class PlayerAttackState : IState
 {
@@ -41,6 +42,8 @@ public class PlayerAttackState : IState
     private readonly AnimationCurve defaultLungeCurve = null; // 必要なら後で差し替え
     private const float AUTO_LUNGE_FIND_RADIUS = 10f;
     private static readonly Collider[] sphereBuffer = new Collider[64];
+
+    private List<bool> attackListBook = new List<bool>();
 
     private bool hasSpawnedAttackPrefab;
     private bool weaponHiddenForThisAction;
@@ -88,6 +91,15 @@ public class PlayerAttackState : IState
         hasSpawnedAttackVFX = false;
         hasSpawnedAttackPrefab = false;
         weaponHiddenForThisAction = false;
+
+        if (currentAction.hitTimeList != null && currentAction.hitTimeList.Count > 0)
+        {
+            attackListBook.Clear();
+            for (int i = 0; i < currentAction.hitTimeList.Count; i++)
+            {
+                attackListBook.Add(false);
+            }
+        }
 
         // メイン層を Action へフェード（攻撃は全身を占有）
         float enterDur = _player.ResolveBlendDuration(_player.lastBlendState, PlayerState.Attack);
@@ -195,6 +207,19 @@ public class PlayerAttackState : IState
             DoAttackHitCheck();
             hasCheckedHit = true;
         }
+        // --- ヒット判定/発射(List) ---
+        if (currentAction.hitTimeList != null && currentAction.hitTimeList.Count > 0)
+        {
+            for (int i = 0; i < currentAction.hitTimeList.Count; i++)
+            {
+                if (!attackListBook[i] && elapsedTime >= currentAction.hitTimeList[i])
+                {
+                    TrySpawnAttackPrefabNow();
+                    DoAttackHitCheck();
+                    attackListBook[i] = true;
+                }
+            }
+        }
 
 
         // 段間切替（連撃）：chainEndTime 到達で次段へ
@@ -256,6 +281,14 @@ public class PlayerAttackState : IState
             {
                 case ATKActType.BasicCombo: _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.RHand, currentAction.swingSFX); break;
                 case ATKActType.ComboEnd: _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.LHand, currentAction.swingSFX); break;
+            }
+        }
+        if (currentAction.hitTimeList != null && currentAction.hitTimeList.Count > 0)
+        {
+            attackListBook.Clear();
+            for (int i = 0; i < currentAction.hitTimeList.Count; i++)
+            {
+                attackListBook.Add(false);
             }
         }
     }
@@ -363,7 +396,9 @@ public class PlayerAttackState : IState
 
             try
             {
-                enemy.TakeDamage(damageData);
+                DamageData damage = new DamageData();
+                damage.damageAmount = damageData.damageAmount + currentAction.actPowerModifier;
+                enemy.TakeDamage(damage);
                 anyHit = true;
 
                 Vector3 enemyCenter = col.bounds.center;

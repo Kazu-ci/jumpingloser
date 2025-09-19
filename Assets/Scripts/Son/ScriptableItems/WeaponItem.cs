@@ -29,6 +29,9 @@ public class ComboAction
     public ATKActType actionType;
     [Tooltip("攻撃時のサウンドエフェクト")]
     public AudioClip swingSFX;
+    [Tooltip("攻撃のキャラーヴォイス")]
+    public AudioClip voiceSFX;
+
 
     [Header("入力受付ウィンドウ（0~1）")]
     [Range(0f, 1f)] public float inputWindowStart = 0.3f;

@@ -19,19 +19,21 @@ MonoBehaviour:
   mainWeaponCombo:
   - name: Attack1
     animation: {fileID: 6558176424447691871, guid: d51b57030ad431544ba4d22252f70716, type: 3}
+    actPowerModifier: -1
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 1215e8eab5a07fb46b37ea34440668a7, type: 3}
-    inputWindowStart: 0.2
-    inputWindowEnd: 0.6
-    endNormalizedTime: 0.8
+    voiceSFX: {fileID: 0}
+    inputWindowStart: 0.15
+    inputWindowEnd: 0.7
+    endNormalizedTime: 0.5
     blendToNext: 0.12
     hitBoxCenter: {x: -1, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 3, z: 3}
     hitCheckTime: 0.2
     hitTimeList: []
     attackPrefab: {fileID: 0}
-    lungeDistance: 0
+    lungeDistance: 1
     lungeSpeed: 10
     lungeTime: 0.02
     animationSpeed: 1
@@ -39,19 +41,21 @@ MonoBehaviour:
     attackVFXTime: 0.05
   - name: Attack2
     animation: {fileID: 3878471701507660605, guid: 8c8b08780b136fd46b62591e3a99a076, type: 3}
+    actPowerModifier: -1
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 65e17687c247246489282d63a5ef1d2f, type: 3}
-    inputWindowStart: 0.3
-    inputWindowEnd: 0.8
-    endNormalizedTime: 0.8
+    voiceSFX: {fileID: 0}
+    inputWindowStart: 0.12
+    inputWindowEnd: 0.7
+    endNormalizedTime: 0.5
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 3, z: 5}
     hitCheckTime: 0.2
     hitTimeList: []
     attackPrefab: {fileID: 0}
-    lungeDistance: 0
+    lungeDistance: 1
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -59,12 +63,14 @@ MonoBehaviour:
     attackVFXTime: 0.1
   - name: Attack3
     animation: {fileID: 8672263195707164059, guid: dc3608c8e5ee67b43beb18b0f490cd1f, type: 3}
+    actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 9cf6710d9ca8a3842ab66d59742e60ec, type: 3}
-    inputWindowStart: 0.3
-    inputWindowEnd: 0.8
-    endNormalizedTime: 0.8
+    voiceSFX: {fileID: 0}
+    inputWindowStart: 0.12
+    inputWindowEnd: 0.7
+    endNormalizedTime: 0.5
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 3}
@@ -79,12 +85,14 @@ MonoBehaviour:
     attackVFXTime: 0.1
   - name: Attack4
     animation: {fileID: 7969338187987883900, guid: 01cb076390f1e7543af18bcea9ecb93c, type: 3}
+    actPowerModifier: 2
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: f362c9918c3204841b15c740d6d698e6, type: 3}
-    inputWindowStart: 0.3
-    inputWindowEnd: 0.8
-    endNormalizedTime: 0.8
+    voiceSFX: {fileID: 0}
+    inputWindowStart: 0.1
+    inputWindowEnd: 0.7
+    endNormalizedTime: 0.6
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 4, y: 4, z: 5}
@@ -99,9 +107,11 @@ MonoBehaviour:
     attackVFXTime: 0.1
   - name: Attack5
     animation: {fileID: -904864237794195412, guid: cff2332bf6ef4cf4789f5b198a8b8507, type: 3}
+    actPowerModifier: 4
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 18a92cf2f0abd7d429e293a05c006c3d, type: 3}
+    voiceSFX: {fileID: 0}
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8
@@ -121,9 +131,11 @@ MonoBehaviour:
   finisherAttack:
   - name: CarrotFinisher
     animation: {fileID: -7203629753534337509, guid: 50b0844a937eef345bf1c0346dbc1d63, type: 3}
+    actPowerModifier: 0
     durabilityCost: 5
     actionType: 4
     swingSFX: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
+    voiceSFX: {fileID: 0}
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8
@@ -142,7 +154,7 @@ MonoBehaviour:
     attackVFXPrefab: {fileID: 0}
     attackVFXTime: 0
   maxDurability: 30
-  attackPower: 3
+  attackPower: 4
   attackRange: 2
   attackSpeed: 1
   addDurabilityOnPickup: 5

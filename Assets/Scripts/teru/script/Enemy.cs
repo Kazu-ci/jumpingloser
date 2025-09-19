@@ -83,6 +83,7 @@ public class Enemy : MonoBehaviour
         if (_isDead) return;
         _isDead = true;
         DropWeapon();
+
         Destroy(gameObject);
     }
     protected float GetDistance()

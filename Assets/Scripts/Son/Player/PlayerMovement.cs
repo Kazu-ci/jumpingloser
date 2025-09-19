@@ -442,10 +442,17 @@ public class PlayerMovement : MonoBehaviour
             if (!skillTriggered && held >= skillHoldTime)
             {
                 skillTriggered = true;
-                UIEvents.OnAttackHoldCommitted?.Invoke();
-                                                            // === スキル入力（状態遷移） ===
-                _fsm.ExecuteTrigger(PlayerTrigger.SkillInput);
-                UIEvents.OnAttackHoldUI?.Invoke(false);
+                // === スキル入力（状態遷移） ===
+                if (CanUseSkill())
+                {
+
+                    UIEvents.OnAttackHoldCommitted?.Invoke();
+                    _fsm.ExecuteTrigger(PlayerTrigger.SkillInput);
+                    UIEvents.OnAttackHoldUI?.Invoke(false);
+                }
+                else {
+                    UIEvents.OnAttackHoldDenied?.Invoke();
+                }
             }
         }
         // ステート更新
@@ -487,8 +494,8 @@ public class PlayerMovement : MonoBehaviour
         // Falling（Dead 以外 → Falling）
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Falling, PlayerTrigger.NoGround);
         _fsm.AddTransition(PlayerState.Move, PlayerState.Falling, PlayerTrigger.NoGround);
-        _fsm.AddTransition(PlayerState.Attack, PlayerState.Falling, PlayerTrigger.NoGround);
-        _fsm.AddTransition(PlayerState.Skill, PlayerState.Falling, PlayerTrigger.NoGround);
+        //_fsm.AddTransition(PlayerState.Attack, PlayerState.Falling, PlayerTrigger.NoGround);
+        //_fsm.AddTransition(PlayerState.Skill, PlayerState.Falling, PlayerTrigger.NoGround);
         _fsm.AddTransition(PlayerState.Hit, PlayerState.Falling, PlayerTrigger.NoGround);
 
         // Falling → Idle
@@ -1031,6 +1038,13 @@ public class PlayerMovement : MonoBehaviour
         if (weaponInventory == null) return;
         weaponInventory.ApplyLoadoutInstances(instances, mainIndex);
     }
-
+    private bool CanUseSkill()
+    {
+        var w = GetMainWeapon();
+        var list = w?.template?.finisherAttack;
+        var finisher = (list != null && list.Count > 0) ? list[0] : null;
+        if (finisher == null || finisher.animation == null) return false;
+        return w.currentDurability >= finisher.durabilityCost;
+    }
 }
 

@@ -11,6 +11,11 @@ public class TempUI_ResultSceneButton : MonoBehaviour
     {
         GameManager.Instance?.StartGame();
     }
+
+    public void OnRetryClick()
+    {
+        GameManager.Instance?.ReTry();
+    }
     public void OnTestMapClick() 
     {
         SceneManager.LoadScene("SampleScene 1");
