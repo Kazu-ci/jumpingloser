@@ -59,6 +59,8 @@ public class TempUI : MonoBehaviour
 
         UIEvents.OnAttackHoldProgress += OnAttacHolding;
         UIEvents.OnAttackHoldUI += OnAttackHoldChange;
+        UIEvents.OnAttackHoldDenied += OnAttackHoldDenied;
+
 
         if (inputActions == null)
         {
@@ -83,6 +85,7 @@ public class TempUI : MonoBehaviour
         UIEvents.OnPlayerHpChange -= SetHpBar;
         UIEvents.OnAttackHoldProgress -= OnAttacHolding;
         UIEvents.OnAttackHoldUI -= OnAttackHoldChange;
+        UIEvents.OnAttackHoldDenied -= OnAttackHoldDenied;
 
         if (inputActions != null)
         {
@@ -169,7 +172,30 @@ public class TempUI : MonoBehaviour
         if (!isHolding)
             weapon.skillImgObj.fillAmount = 0f;
     }
+    private void OnAttackHoldDenied()
+    {
+        var weapon = rightIconByIndex.TryGetValue(currentRightIndex, out var icon) ? icon : null;
+        if (weapon == null || weapon.skillImgObj == null) return;
+        Color ori = weapon.skillImgObj.color;
+        weapon.skillImgObj.color = Color.red;
+        StartCoroutine(ResetColor(weapon.skillImgObj, ori, 0.2f));
+    }
 
+    private IEnumerator ResetColor(Image img, Color to, float duration)
+    {
+        if (img == null) yield break;
+        Color from = img.color;
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(t / duration);
+            img.color = Color.Lerp(from, to, k);
+            yield return null;
+        }
+        img.color = to;
+        img.enabled = false;
+    }
     // ===== ‰Šú•\Ž¦i‘fŽè‚Ì‚Ýj=====
     private void TryRenderFistOnly()
     {

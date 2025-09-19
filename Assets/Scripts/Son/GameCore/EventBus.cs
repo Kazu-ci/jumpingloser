@@ -40,6 +40,7 @@ public class EventBus
         public static Action<bool> OnAttackHoldUI;         // true=表示 / false=非表示
         public static Action<float> OnAttackHoldProgress;  // 進捗表示
         public static Action OnAttackHoldCommitted;
+        public static Action OnAttackHoldDenied;
     }
     public static class PlayerEvents
     {
