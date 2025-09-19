@@ -178,7 +178,7 @@ public class TempUI : MonoBehaviour
         if (weapon == null || weapon.skillImgObj == null) return;
         Color ori = weapon.skillImgObj.color;
         weapon.skillImgObj.color = Color.red;
-        StartCoroutine(ResetColor(weapon.skillImgObj, ori, 0.2f));
+        StartCoroutine(ResetColor(weapon.skillImgObj, ori, 0.35f));
     }
 
     private IEnumerator ResetColor(Image img, Color to, float duration)
