@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.4339623, g: 0.38892847, b: 0.4286792, a: 1}
+  m_AmbientSkyColor: {r: 0.7283019, g: 0, b: 0.6049604, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
@@ -131,6 +131,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Boss 1
       objectReference: {fileID: 0}
+    - target: {fileID: 856533534031892496, guid: 7246074a369f5194b900ae777d28f6c2, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1818424334226350807, guid: 7246074a369f5194b900ae777d28f6c2, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -190,11 +194,6 @@ PrefabInstance:
       addedObject: {fileID: 1855096281}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7246074a369f5194b900ae777d28f6c2, type: 3}
---- !u!1 &1599787 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 856533534031892496, guid: 7246074a369f5194b900ae777d28f6c2, type: 3}
-  m_PrefabInstance: {fileID: 1599786}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &7908372
 GameObject:
   m_ObjectHideFlags: 0
@@ -634,13 +633,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.9676888, y: -0.24834594, z: 0.011095862, w: 0.042185336}
+  m_LocalRotation: {x: 0.90642476, y: -0.23253873, z: 0.087887086, w: 0.34146112}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 5, y: -180.03, z: -151.214}
+  m_LocalEulerAnglesHint: {x: 41.292, y: -180.04, z: -151.238}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3280,7 +3279,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemies:
-  - {fileID: 1599787}
+  - {fileID: 249251860}
 --- !u!4 &2014750573
 Transform:
   m_ObjectHideFlags: 0
