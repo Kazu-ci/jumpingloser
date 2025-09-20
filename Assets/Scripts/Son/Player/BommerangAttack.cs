@@ -26,6 +26,41 @@ public class BommerangAttack : MonoBehaviour
     // ---- ヒット履歴 ----
     private readonly Dictionary<Collider, double> _lastHitTimePerCollider = new Dictionary<Collider, double>(32);
 
+    // ----------------------------------------------------------------------
+    // ▼▼▼ ここから「地形追従（Yのみ補正）」の統合設定 ▼▼▼
+    // ----------------------------------------------------------------------
+    [Header("=== 地形追従（Y 補正） ===")]
+    [Tooltip("接地基準に使う子オブジェクト上の CapsuleCollider")]
+    [SerializeField] private CapsuleCollider sourceCapsule;
+
+    [Tooltip("地面からの目標オフセット")]
+    [SerializeField] private float hoverHeight = 0.02f;
+
+    [Tooltip("上向き開始オフセット")]
+    [SerializeField] private float upCastExtra = 0.2f;
+
+    [Tooltip("下向きのレイ長さ")]
+    [SerializeField] private float downCastExtra = 0.6f;
+
+    [Tooltip("補間のスムーズ時間")]
+    [SerializeField] private float smoothTime = 0.05f;
+
+    [Tooltip("地面レイヤー")]
+    [SerializeField] private LayerMask groundMask;
+
+    [Tooltip("デバッグ用の可視化（レイ表示など）")]
+    [SerializeField] private bool drawGizmos = false;
+
+    private float _yVelocity;
+
+    private void Awake()
+    {
+        if (sourceCapsule == null)
+        {
+            sourceCapsule = GetComponentInChildren<CapsuleCollider>();
+        }
+    }
+
     private void Start()
     {
         Destroy(gameObject, lifetime);
@@ -34,6 +69,12 @@ public class BommerangAttack : MonoBehaviour
     private void OnDisable()
     {
         _lastHitTimePerCollider.Clear();
+    }
+
+    private void LateUpdate()
+    {
+        // === 地形追従：Animator や移動で子が動いた「後」に Y を補正 ===
+        AdjustYByGround();
     }
 
     private void OnTriggerStay(Collider other)
@@ -99,8 +140,7 @@ public class BommerangAttack : MonoBehaviour
         }
 
         // 非負値：クールダウン方式
-        double last;
-        if (!_lastHitTimePerCollider.TryGetValue(col, out last))
+        if (!_lastHitTimePerCollider.TryGetValue(col, out double last))
             return true; // 初回
 
         return (now - last) >= hitInterval;
@@ -123,6 +163,84 @@ public class BommerangAttack : MonoBehaviour
         else rot = transform.rotation;
 
         var vfx = Instantiate(hitEffect, pos, rot);
+        // ここで必要なら自動破棄や親子付けなどを行う
+    }
 
+    // ----------------------------------------------------------------------
+    // 地形追従（Y 補正）本体
+    // ・子の CapsuleCollider の底球中心を基準に、地面との距離を計測し、
+    //   ルートオブジェクトの Y のみを補正する
+    // ----------------------------------------------------------------------
+    private void AdjustYByGround()
+    {
+        if (sourceCapsule == null) return;
+
+        // --- ワールドへ変換 ---
+        Vector3 worldCenter = sourceCapsule.transform.TransformPoint(sourceCapsule.center);
+
+        // 非一様スケール対応（半径は最大軸を採用）
+        float sx = Mathf.Abs(sourceCapsule.transform.lossyScale.x);
+        float sy = Mathf.Abs(sourceCapsule.transform.lossyScale.y);
+        float sz = Mathf.Abs(sourceCapsule.transform.lossyScale.z);
+        float worldRadius = sourceCapsule.radius * Mathf.Max(sx, sy, sz);
+        float worldHeight = Mathf.Max(sourceCapsule.height * sy, worldRadius * 2f);
+
+        // カプセルの“上方向”
+        Vector3 up = sourceCapsule.transform.TransformDirection(Vector3.up).normalized;
+
+        // 底球中心
+        float half = worldHeight * 0.5f;
+        Vector3 bottomSphereCenter = worldCenter - up * (half - worldRadius);
+
+        // レイの開始点（底球中心より少し上）
+        Vector3 rayStart = bottomSphereCenter + up * upCastExtra;
+        Vector3 rayDir = -up;
+        float rayLen = upCastExtra + downCastExtra + worldRadius + hoverHeight;
+
+        // 地面レイキャスト
+        if (Physics.Raycast(rayStart, rayDir, out RaycastHit hit, rayLen, groundMask, QueryTriggerInteraction.Ignore))
+        {
+            // 目標：底球中心が「地面 + hoverHeight」に来るようにする
+            Vector3 targetBottomCenter = hit.point + up * hoverHeight;
+
+            Vector3 pos = transform.position;
+            float deltaAlongUp = Vector3.Dot((targetBottomCenter - bottomSphereCenter), up);
+            float targetY = pos.y + deltaAlongUp;
+
+            // Y のみスムーズ補正
+            float newY = Mathf.SmoothDamp(pos.y, targetY, ref _yVelocity, smoothTime);
+            transform.position = new Vector3(pos.x, newY, pos.z);
+
+            if (drawGizmos)
+            {
+                Debug.DrawLine(rayStart, hit.point, Color.green);
+            }
+        }
+        else
+        {
+            // 地面が検出できない（空中など）。Yは保持
+            if (drawGizmos)
+            {
+                Debug.DrawLine(rayStart, rayStart + rayDir * rayLen, Color.yellow);
+            }
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!drawGizmos || sourceCapsule == null) return;
+
+        Vector3 worldCenter = sourceCapsule.transform.TransformPoint(sourceCapsule.center);
+        float sx = Mathf.Abs(sourceCapsule.transform.lossyScale.x);
+        float sy = Mathf.Abs(sourceCapsule.transform.lossyScale.y);
+        float sz = Mathf.Abs(sourceCapsule.transform.lossyScale.z);
+        float worldRadius = sourceCapsule.radius * Mathf.Max(sx, sy, sz);
+        float worldHeight = Mathf.Max(sourceCapsule.height * sy, worldRadius * 2f);
+        Vector3 up = sourceCapsule.transform.TransformDirection(Vector3.up).normalized;
+        float half = worldHeight * 0.5f;
+        Vector3 bottomSphereCenter = worldCenter - up * (half - worldRadius);
+
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(bottomSphereCenter, worldRadius * 0.2f);
     }
 }

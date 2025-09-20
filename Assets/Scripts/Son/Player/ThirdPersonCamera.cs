@@ -17,6 +17,16 @@ public class ThirdPersonCamera : MonoBehaviour
     public float minDistance = 1f;                          // 最小距離
     public LayerMask collisionMask;                         // カメラ衝突レイヤー
 
+    [Header("=== カメラボディ衝突 ===")]
+    [Tooltip("カメラ本体の半径")]
+    public float cameraBodyRadius = 0.25f;
+
+    [Tooltip("ヒット面からの余白")]
+    public float cameraBodyPadding = 0.05f;
+
+    [Tooltip("二分探索の反復回数")]
+    public int bodyResolveIterations = 6;
+
     [Header("=== デバイス別感度倍率 ===")]
     public float mouseSensitivityMultiplier = 0.3f;
     public float gamepadSensitivityMultiplier = 1.0f;
@@ -203,12 +213,26 @@ public class ThirdPersonCamera : MonoBehaviour
             transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
         }
 
-        // 簡易衝突縮距
-        float actualDistance = defaultDistance;
-        if (Physics.Raycast(followPivot, -transform.forward, out RaycastHit hit, defaultDistance, collisionMask))
+        // === 視線確保 ===
+
+        // 1) 視線を遮るものがあれば、その手前まで縮める
+        float losDistance = defaultDistance;
+        if (Physics.Raycast(followPivot, -transform.forward, out RaycastHit losHit, defaultDistance, collisionMask, QueryTriggerInteraction.Ignore))
         {
-            actualDistance = Mathf.Clamp(hit.distance - 0.25f, minDistance, defaultDistance);
+            // 衝突面から少し余白を取る
+            losDistance = Mathf.Clamp(losHit.distance - Mathf.Max(cameraBodyRadius, cameraBodyPadding), minDistance, defaultDistance);
         }
+
+        // 2) 相機ボディ（球）を最終位置で重ね合わせチェックし、重なっていれば「ターゲット側へ」縮めて回避
+        float actualDistance = ResolveCameraBodyDistanceBinary(
+            followPivot,
+            transform,      // リグの forward/up/right を使う
+            losDistance,    // まず視線考慮後の距離を希望値として渡す
+            minDistance,
+            cameraBodyRadius,
+            cameraBodyPadding,
+            collisionMask
+        );
 
         // カメラ位置更新 (切替時ブレンドを優先)
         float moveSpeed = isLocked ? smoothSpeed_Locked : smoothSpeed_Normal;
@@ -410,5 +434,56 @@ public class ThirdPersonCamera : MonoBehaviour
         var ap = t.GetComponentInChildren<AimPointMarker>();
         if (ap != null) return ap.transform;
         return t;
+    }
+
+    private float ResolveCameraBodyDistanceBinary(
+    Vector3 pivot,
+    Transform rig,
+    float desiredDistance,
+    float minDist,
+    float bodyRadius,
+    float padding,
+    LayerMask mask
+)
+    {
+        // 希望距離が最小より小さければそのまま
+        desiredDistance = Mathf.Max(minDist, desiredDistance);
+
+        // 指定距離が既に非重なりなら終了
+        if (!Physics.CheckSphere(pivot - rig.forward * desiredDistance, bodyRadius, mask, QueryTriggerInteraction.Ignore))
+            return desiredDistance;
+
+        // [lo .. hi] の範囲で「最大の非重なり距離」を探索する
+        float lo = minDist;           // 常に“非重なり”側へ寄せていく（ゴール）
+        float hi = desiredDistance;   // 今は“重なり”であることが分かっている上端
+
+        // lo が重なっている可能性は低いが、保険として確認し重なっていたら更に詰める
+        if (Physics.CheckSphere(pivot - rig.forward * lo, bodyRadius, mask, QueryTriggerInteraction.Ignore))
+        {
+            // ほんの少し手前へ（万一の極端ケース）
+            lo = minDist;
+        }
+
+        for (int i = 0; i < Mathf.Max(1, bodyResolveIterations); i++)
+        {
+            float mid = (lo + hi) * 0.5f;
+            Vector3 midPos = pivot - rig.forward * mid;
+            bool overlap = Physics.CheckSphere(midPos, bodyRadius, mask, QueryTriggerInteraction.Ignore);
+
+            if (overlap)
+            {
+                // まだ重なっている → さらに内側へ（距離を縮める）
+                hi = mid;
+            }
+            else
+            {
+                // 非重なり → もう少し外へ試す（最大の非重なり距離を探す）
+                lo = mid;
+            }
+        }
+
+        // 面から少し余白を見て返す（ブレや角の段差に強くする）
+        float solved = Mathf.Max(minDist, lo - padding);
+        return solved;
     }
 }

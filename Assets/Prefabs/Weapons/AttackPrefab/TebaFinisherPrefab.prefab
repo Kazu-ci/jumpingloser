@@ -258,7 +258,16 @@ MonoBehaviour:
     m_Bits: 4096
   hitEffect: {fileID: 6181311215603778640, guid: daf45bafe2359a64e9273318d037ecea, type: 3}
   lifetime: 3
-  hitInterval: 0.5
+  hitInterval: 0.3
+  sourceCapsule: {fileID: 0}
+  hoverHeight: 0.02
+  upCastExtra: 0.2
+  downCastExtra: 0.6
+  smoothTime: 0.05
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 0
+  drawGizmos: 0
 --- !u!1001 &2780109674764376657
 PrefabInstance:
   m_ObjectHideFlags: 0

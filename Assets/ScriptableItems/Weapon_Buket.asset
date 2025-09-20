@@ -26,7 +26,7 @@ MonoBehaviour:
     voiceSFX: {fileID: 0}
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
-    endNormalizedTime: 0.4
+    endNormalizedTime: 0.35
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 6}
@@ -48,7 +48,7 @@ MonoBehaviour:
     voiceSFX: {fileID: 0}
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
-    endNormalizedTime: 0.4
+    endNormalizedTime: 0.35
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: 1, z: 1}
     hitBoxSize: {x: 4, y: 6, z: 3.5}
@@ -70,7 +70,7 @@ MonoBehaviour:
     voiceSFX: {fileID: 0}
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
-    endNormalizedTime: 0.4
+    endNormalizedTime: 0.35
     blendToNext: 0.12
     hitBoxCenter: {x: 0.5, y: -0.5, z: 1}
     hitBoxSize: {x: 3, y: 3, z: 6}

@@ -145,10 +145,11 @@ MonoBehaviour:
     hitCheckTime: 0.02
     hitTimeList:
     - 0.18
+    - 0.3
     - 0.5
     attackPrefab: {fileID: 0}
-    lungeDistance: 5
-    lungeSpeed: 10
+    lungeDistance: 10
+    lungeSpeed: 20
     lungeTime: 0
     animationSpeed: 0
     attackVFXPrefab: {fileID: 0}

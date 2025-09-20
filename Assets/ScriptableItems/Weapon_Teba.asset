@@ -23,6 +23,7 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 2e8b8a5fe9ce2904595a059107b24a44, type: 3}
+    voiceSFX: {fileID: 0}
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
@@ -44,6 +45,7 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: ad1fd69220efc9c4f91fd32c87a5be2d, type: 3}
+    voiceSFX: {fileID: 0}
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
@@ -52,7 +54,7 @@ MonoBehaviour:
     hitBoxSize: {x: 0, y: 0, z: 0}
     hitCheckTime: 0.2
     hitTimeList: []
-    attackPrefab: {fileID: 2169957460104662819, guid: 714739e9d8efecd459e5a917980794ca, type: 3}
+    attackPrefab: {fileID: 2169957460104662819, guid: d032766544dcb134d84e0172ede73197, type: 3}
     lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
@@ -65,6 +67,7 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 22e459df665cf9d42bf9fb40d139d5e8, type: 3}
+    voiceSFX: {fileID: 0}
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
@@ -73,7 +76,7 @@ MonoBehaviour:
     hitBoxSize: {x: 0, y: 0, z: 0}
     hitCheckTime: 0.2
     hitTimeList: []
-    attackPrefab: {fileID: 2169957460104662819, guid: 714739e9d8efecd459e5a917980794ca, type: 3}
+    attackPrefab: {fileID: 2169957460104662819, guid: 4e42092948615d24fa03da29fe35c641, type: 3}
     lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
@@ -86,6 +89,7 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: b6f35e12764d7f64188fe475be275233, type: 3}
+    voiceSFX: {fileID: 0}
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
@@ -94,8 +98,8 @@ MonoBehaviour:
     hitBoxSize: {x: 0, y: 0, z: 0}
     hitCheckTime: 0.2
     hitTimeList: []
-    attackPrefab: {fileID: 2169957460104662819, guid: 714739e9d8efecd459e5a917980794ca, type: 3}
-    lungeDistance: 0
+    attackPrefab: {fileID: 2169957460104662819, guid: 65e0c23955ac5d44f8773cf9295e6f4c, type: 3}
+    lungeDistance: 1
     lungeSpeed: 10
     lungeTime: 0.1
     animationSpeed: 1
@@ -107,6 +111,7 @@ MonoBehaviour:
     durabilityCost: 0
     actionType: 0
     swingSFX: {fileID: 8300000, guid: 9715264c622e55a41a4b7dcdd0b25d63, type: 3}
+    voiceSFX: {fileID: 0}
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8
@@ -115,7 +120,7 @@ MonoBehaviour:
     hitBoxSize: {x: 0, y: 0, z: 0}
     hitCheckTime: 0.2
     hitTimeList: []
-    attackPrefab: {fileID: 2169957460104662819, guid: 714739e9d8efecd459e5a917980794ca, type: 3}
+    attackPrefab: {fileID: 2169957460104662819, guid: 388c7f5f03114bf4c9af0a8a2cabd36a, type: 3}
     lungeDistance: 0
     lungeSpeed: 10
     lungeTime: 0.1
@@ -130,6 +135,7 @@ MonoBehaviour:
     durabilityCost: 5
     actionType: 4
     swingSFX: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
+    voiceSFX: {fileID: 0}
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8
