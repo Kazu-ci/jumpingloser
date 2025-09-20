@@ -186,7 +186,7 @@ public class PlayerAttackState : IState
             mainExitStarted = true;
         }
 
-        // ==== ★ 突進のトリガ（1回だけ / 時刻到達で実行） ====
+        // ==== ★ 突進のトリガ（ ====
         if (!lungeInvoked && elapsedTime >= currentAction.lungeTime)
         {
             DoLungeForCurrentAction();
@@ -214,7 +214,6 @@ public class PlayerAttackState : IState
             {
                 if (!attackListBook[i] && elapsedTime >= currentAction.hitTimeList[i])
                 {
-                    TrySpawnAttackPrefabNow();
                     DoAttackHitCheck();
                     attackListBook[i] = true;
                 }
