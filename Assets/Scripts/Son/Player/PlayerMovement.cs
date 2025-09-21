@@ -95,9 +95,8 @@ public class PlayerMovement : MonoBehaviour
     private float hitTimer = 0f;         // 被弾無敵時間管理用タイマー
     public bool IsHitInvincible => hitTimer > 0f;
     public bool IsInvincible => IsDashInvincible || IsHitInvincible;
-
     public GameObject hitEffectPrefab; // 被弾エフェクト
-
+    public AudioClip hitSound;
 
     // ====== 接地判定 ======
     [Header("接地判定")]
@@ -489,7 +488,6 @@ public class PlayerMovement : MonoBehaviour
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Skill, PlayerTrigger.SkillInput);
         _fsm.AddTransition(PlayerState.Skill, PlayerState.Idle, PlayerTrigger.MoveStop);
         _fsm.AddTransition(PlayerState.Skill, PlayerState.Move, PlayerTrigger.MoveStart);
-        _fsm.AddTransition(PlayerState.Skill, PlayerState.Attack, PlayerTrigger.AttackInput);
 
         // Falling（Dead 以外 → Falling）
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Falling, PlayerTrigger.NoGround);
@@ -505,7 +503,7 @@ public class PlayerMovement : MonoBehaviour
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Hit, PlayerTrigger.GetHit);
         _fsm.AddTransition(PlayerState.Move, PlayerState.Hit, PlayerTrigger.GetHit);
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Hit, PlayerTrigger.GetHit);
-        _fsm.AddTransition(PlayerState.Skill, PlayerState.Hit, PlayerTrigger.GetHit);
+        //_fsm.AddTransition(PlayerState.Skill, PlayerState.Hit, PlayerTrigger.GetHit);
         _fsm.AddTransition(PlayerState.Falling, PlayerState.Hit, PlayerTrigger.GetHit);
         _fsm.AddTransition(PlayerState.Dash, PlayerState.Hit, PlayerTrigger.GetHit);
         _fsm.AddTransition(PlayerState.Hit, PlayerState.Idle, PlayerTrigger.MoveStop);
@@ -515,7 +513,7 @@ public class PlayerMovement : MonoBehaviour
         _fsm.AddTransition(PlayerState.Idle, PlayerState.Dash, PlayerTrigger.DashInput);
         _fsm.AddTransition(PlayerState.Move, PlayerState.Dash, PlayerTrigger.DashInput);
         _fsm.AddTransition(PlayerState.Attack, PlayerState.Dash, PlayerTrigger.DashInput);
-        _fsm.AddTransition(PlayerState.Skill, PlayerState.Dash, PlayerTrigger.DashInput);
+        //_fsm.AddTransition(PlayerState.Skill, PlayerState.Dash, PlayerTrigger.DashInput);
         _fsm.AddTransition(PlayerState.Dash, PlayerState.Idle, PlayerTrigger.MoveStop);
         _fsm.AddTransition(PlayerState.Dash, PlayerState.Move, PlayerTrigger.MoveStart);
 
@@ -668,6 +666,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (damage.damageAmount <= 0) return;
         if (_fsm.CurrentState == PlayerState.Dead) return; // 死亡後は無視
+        if (_fsm.CurrentState == PlayerState.Skill) return;
 
         // 無敵中は被弾を無効化
         if (IsInvincible) return;
@@ -685,6 +684,7 @@ public class PlayerMovement : MonoBehaviour
             if (hitEffectPrefab != null)
             {
                 Instantiate(hitEffectPrefab, transform.position + Vector3.up * 0.2f, Quaternion.identity);
+                PlayerEvents.PlayClipByPart(PlayerAudioPart.Mouth, hitSound,1f,1f,0f);
             }
         }
     }

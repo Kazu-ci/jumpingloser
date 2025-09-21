@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8032186193825045787}
   - component: {fileID: 7625497492185756336}
   - component: {fileID: 1855122455867488722}
-  - component: {fileID: 2362857417083910545}
   m_Layer: 0
   m_Name: BuketAttactEffect4
   m_TagString: Untagged
@@ -146,20 +145,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &2362857417083910545
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6750709850005052051}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a75d65c496c79354490a7a76b6729571, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lifeTime: 1
-  pickSound: {fileID: 0}
 --- !u!1001 &8501293986531204898
 PrefabInstance:
   m_ObjectHideFlags: 0

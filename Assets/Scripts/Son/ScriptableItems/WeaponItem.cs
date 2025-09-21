@@ -1,3 +1,5 @@
+using JetBrains.Annotations;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 public enum ATKActType
@@ -15,6 +17,15 @@ public enum WeaponType
     Spear,
     Boomerang
 }
+[Serializable]
+public struct SFXInfo
+{
+    public AudioClip clip;
+    public float volume;
+    public float pitch;
+    public float delay;
+}
+
 [System.Serializable]
 public class ComboAction
 {
@@ -28,9 +39,9 @@ public class ComboAction
     [Tooltip("攻撃アクションの種類")]
     public ATKActType actionType;
     [Tooltip("攻撃時のサウンドエフェクト")]
-    public AudioClip swingSFX;
+    public SFXInfo swingSFXInfo;
     [Tooltip("攻撃のキャラーヴォイス")]
-    public AudioClip voiceSFX;
+    public SFXInfo voiceSFXInfo;
 
 
     [Header("入力受付ウィンドウ（0~1）")]

@@ -4914,7 +4914,6 @@ GameObject:
   - component: {fileID: 6475552913683887592}
   - component: {fileID: 6878951875492682307}
   - component: {fileID: 3394447287969534241}
-  - component: {fileID: 1616591694823444834}
   m_Layer: 0
   m_Name: CarrotAttactEffect1
   m_TagString: Untagged
@@ -5049,20 +5048,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &1616591694823444834
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7713136804960580192}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a75d65c496c79354490a7a76b6729571, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lifeTime: 1
-  pickSound: {fileID: 0}
 --- !u!1 &8533115924325638438
 GameObject:
   m_ObjectHideFlags: 0

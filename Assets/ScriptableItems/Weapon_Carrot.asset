@@ -22,8 +22,16 @@ MonoBehaviour:
     actPowerModifier: -1
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 1215e8eab5a07fb46b37ea34440668a7, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: d8ad80746cc038e458c515e2b1c3fb42, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: ee4ac5d13c693d1408ba72c1ddc86465, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
     endNormalizedTime: 0.5
@@ -44,8 +52,16 @@ MonoBehaviour:
     actPowerModifier: -1
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 65e17687c247246489282d63a5ef1d2f, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 158967bb93b1c5b40ae76c2930336c81, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: f36efc12f3e73c44ca216909366ad0a9, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
     endNormalizedTime: 0.5
@@ -66,8 +82,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 9cf6710d9ca8a3842ab66d59742e60ec, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 2be69f72846d8dc4abaa1e87bfc96630, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 7af999757d02fce468f1aa22268d3b21, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
     endNormalizedTime: 0.5
@@ -88,8 +112,16 @@ MonoBehaviour:
     actPowerModifier: 2
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: f362c9918c3204841b15c740d6d698e6, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 296966058a2527c45ae788a0c724d366, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 7a02f2585486c644bb68e01322955a1d, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
     endNormalizedTime: 0.6
@@ -110,8 +142,16 @@ MonoBehaviour:
     actPowerModifier: 4
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 18a92cf2f0abd7d429e293a05c006c3d, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: f064fb75306d6fa408581dc458da977e, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0.25
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: b0d159b26c7032f4ab76b2149ccb7b8d, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8
@@ -125,8 +165,8 @@ MonoBehaviour:
     lungeSpeed: 15
     lungeTime: 0.1
     animationSpeed: 1
-    attackVFXPrefab: {fileID: 0}
-    attackVFXTime: 0.2
+    attackVFXPrefab: {fileID: 7434391359695116191, guid: bf91094a79647ed4e914560cfd26d069, type: 3}
+    attackVFXTime: 0.51
   subWeaponAttack: []
   finisherAttack:
   - name: CarrotFinisher
@@ -134,8 +174,16 @@ MonoBehaviour:
     actPowerModifier: 2
     durabilityCost: 5
     actionType: 4
-    swingSFX: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: dab3f8917a58c0749a54feed1046722d, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8

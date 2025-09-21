@@ -69,7 +69,7 @@ public class PlayerDashState : IState
         UIEvents.OnDashUIChange?.Invoke(false);
         if(_player.dashSound != null)
         {
-            _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.feet, _player.dashSound);
+            PlayerEvents.PlayClipByPart?.Invoke(PlayerAudioPart.feet, _player.dashSound,1f,1f,0f);
         }
     }
 

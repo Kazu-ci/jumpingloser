@@ -48,6 +48,9 @@ public class PlayerAttackState : IState
     private bool hasSpawnedAttackPrefab;
     private bool weaponHiddenForThisAction;
 
+    private bool SwingSFXPlayedThisAction;
+    private bool VoiceSFXPlayedThisAction;
+
     private WeaponInstance weapon;
 
     public PlayerAttackState(PlayerMovement player) { _player = player; }
@@ -91,6 +94,8 @@ public class PlayerAttackState : IState
         hasSpawnedAttackVFX = false;
         hasSpawnedAttackPrefab = false;
         weaponHiddenForThisAction = false;
+        SwingSFXPlayedThisAction = false;
+        VoiceSFXPlayedThisAction = false;
 
         if (currentAction.hitTimeList != null && currentAction.hitTimeList.Count > 0)
         {
@@ -105,7 +110,8 @@ public class PlayerAttackState : IState
         float enterDur = _player.ResolveBlendDuration(_player.lastBlendState, PlayerState.Attack);
         _player.BlendToMainSlot(PlayerMovement.MainLayerSlot.Action, enterDur);
 
-        if (currentAction.swingSFX) _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.RHand, currentAction.swingSFX);
+        if (currentAction.swingSFXInfo.clip) PlayerEvents.PlayClipByPart(PlayerAudioPart.RHand, currentAction.swingSFXInfo.clip, currentAction.swingSFXInfo.volume, currentAction.swingSFXInfo.pitch, currentAction.swingSFXInfo.delay);
+        if (currentAction.voiceSFXInfo.clip) PlayerEvents.PlayClipByPart(PlayerAudioPart.Mouth, currentAction.voiceSFXInfo.clip, currentAction.voiceSFXInfo.volume, currentAction.voiceSFXInfo.pitch, currentAction.voiceSFXInfo.delay);
         lungeInvoked = false;
     }
 
@@ -266,6 +272,9 @@ public class PlayerAttackState : IState
         lungeInvoked = false;
         hasSpawnedAttackVFX = false;
         hasSpawnedAttackPrefab = false;
+        SwingSFXPlayedThisAction = false;
+        VoiceSFXPlayedThisAction = false;
+
         activeSlot = nextSlot;
 
         if (weaponHiddenForThisAction)
@@ -274,14 +283,15 @@ public class PlayerAttackState : IState
             weaponHiddenForThisAction = false;
         }
 
-        if (currentAction.swingSFX)
+        if (currentAction.swingSFXInfo.clip)
         {
             switch (currentAction.actionType)
             {
-                case ATKActType.BasicCombo: _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.RHand, currentAction.swingSFX); break;
-                case ATKActType.ComboEnd: _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.LHand, currentAction.swingSFX); break;
+                case ATKActType.BasicCombo: PlayerEvents.PlayClipByPart(PlayerAudioPart.RHand, currentAction.swingSFXInfo.clip, currentAction.swingSFXInfo.volume, currentAction.swingSFXInfo.pitch, currentAction.swingSFXInfo.delay); break;
+                case ATKActType.ComboEnd: PlayerEvents.PlayClipByPart(PlayerAudioPart.LHand, currentAction.swingSFXInfo.clip, currentAction.swingSFXInfo.volume, currentAction.swingSFXInfo.pitch, currentAction.swingSFXInfo.delay); break;
             }
         }
+        if (currentAction.voiceSFXInfo.clip) PlayerEvents.PlayClipByPart(PlayerAudioPart.Mouth, currentAction.voiceSFXInfo.clip, currentAction.voiceSFXInfo.volume, currentAction.voiceSFXInfo.pitch, currentAction.voiceSFXInfo.delay);
         if (currentAction.hitTimeList != null && currentAction.hitTimeList.Count > 0)
         {
             attackListBook.Clear();
