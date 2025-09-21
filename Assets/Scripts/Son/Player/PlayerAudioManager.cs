@@ -48,7 +48,16 @@ public class PlayerAudioManager : MonoBehaviour
 
     }
 
-    public bool PlayClipOnAudioPart(PlayerAudioPart part, AudioClip clip,float volume = 1.0f,float speed = 1.0f)
+    private void OnEnable()
+    {
+        EventBus.PlayerEvents.PlayClipByPart += PlayClipOnAudioPart;
+    }
+    private void OnDisable()
+    {
+        EventBus.PlayerEvents.PlayClipByPart -= PlayClipOnAudioPart;
+    }
+
+    private bool PlayClipOnAudioPart(PlayerAudioPart part, AudioClip clip,float volume = 1.0f,float speed = 1.0f,float delay = 0f)
     {
         if (clip == null) return false;
 
@@ -61,7 +70,24 @@ public class PlayerAudioManager : MonoBehaviour
         if (source.isPlaying) source.Stop();
         source.clip = clip;
         source.volume = Mathf.Clamp01(volume);
-        source.Play();
+        if (delay > 0f)
+        {
+            double startTime = AudioSettings.dspTime + delay;
+            source.PlayScheduled(startTime);
+        }
+        else
+        {
+            source.Play();
+        }
+        return true;
+    }
+    public bool StopClipOnAudioPart(PlayerAudioPart part)
+    {
+        if (!audioDictionary.TryGetValue(part, out var source) || source == null)
+        {
+            return false;
+        }
+        if (source.isPlaying) source.Stop();
         return true;
     }
 }

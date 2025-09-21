@@ -47,7 +47,7 @@ public class EventBus
 
         public static Action<GameObject> OnPlayerSpawned;
         public static Func<GameObject> GetPlayerObject;
-        public static Action<PlayerAudioPart,AudioClip> PlayClipByPart;
+        public static System.Func<PlayerAudioPart,AudioClip,float,float,float,bool> PlayClipByPart;
 
         public static Action<GameObject> OnAimTargetChanged;
 
@@ -56,7 +56,6 @@ public class EventBus
 
         public static Action<GameObject> OnEnemyDefeted;
 
-        // ÅöNEW: ï€ë∂/?ópí êMópéñåè
         public static Action<int /*current*/, int /*max*/> ApplyHP;
         public static Action<List<WeaponInstance> /*instances*/, int /*mainIndex*/> ApplyLoadoutInstances;
     }

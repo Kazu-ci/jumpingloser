@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 1462600113372877338}
   - component: {fileID: 1362066577560272305}
   - component: {fileID: 7100634890070177491}
-  - component: {fileID: 6628933106598065808}
   m_Layer: 0
   m_Name: BuketAttactEffect5
   m_TagString: Untagged
@@ -48,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a75d65c496c79354490a7a76b6729571, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifeTime: 1.5
+  lifeTime: 5
   pickSound: {fileID: 0}
 --- !u!82 &7100634890070177491
 AudioSource:
@@ -147,20 +146,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &6628933106598065808
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2781934927501612434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a75d65c496c79354490a7a76b6729571, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  lifeTime: 1
-  pickSound: {fileID: 0}
 --- !u!1001 &3753984895834920063
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -175,7 +160,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4358798915980750777, guid: 7f19edefb703e124db88361e14f00745, type: 3}
       propertyPath: lengthInSec
-      value: 1.5
+      value: 4.2
       objectReference: {fileID: 0}
     - target: {fileID: 4358798915980750777, guid: 7f19edefb703e124db88361e14f00745, type: 3}
       propertyPath: startDelay.scalar
@@ -225,6 +210,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Slash_fx
       objectReference: {fileID: 0}
+    - target: {fileID: 5828567753376268501, guid: 7f19edefb703e124db88361e14f00745, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -249,7 +238,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4358798915980750777, guid: 7f19edefb703e124db88361e14f00745, type: 3}
       propertyPath: lengthInSec
-      value: 1.5
+      value: 4.2
       objectReference: {fileID: 0}
     - target: {fileID: 4358798915980750778, guid: 7f19edefb703e124db88361e14f00745, type: 3}
       propertyPath: m_LocalPosition.x
@@ -294,6 +283,10 @@ PrefabInstance:
     - target: {fileID: 4358798915980750783, guid: 7f19edefb703e124db88361e14f00745, type: 3}
       propertyPath: m_Name
       value: Slash_fx
+      objectReference: {fileID: 0}
+    - target: {fileID: 5828567753376268501, guid: 7f19edefb703e124db88361e14f00745, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

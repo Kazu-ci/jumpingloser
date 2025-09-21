@@ -22,8 +22,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 2e8b8a5fe9ce2904595a059107b24a44, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 2e8b8a5fe9ce2904595a059107b24a44, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: ee4ac5d13c693d1408ba72c1ddc86465, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
@@ -44,8 +52,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: ad1fd69220efc9c4f91fd32c87a5be2d, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: ad1fd69220efc9c4f91fd32c87a5be2d, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 522df589d45acac4a89c69a731d10370, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
@@ -66,8 +82,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 22e459df665cf9d42bf9fb40d139d5e8, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 22e459df665cf9d42bf9fb40d139d5e8, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 770fdac1a5ebc9a47acf6b44b785ac27, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
@@ -88,8 +112,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: b6f35e12764d7f64188fe475be275233, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: b6f35e12764d7f64188fe475be275233, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 7af999757d02fce468f1aa22268d3b21, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.3
     inputWindowEnd: 0.8
     endNormalizedTime: 0.8
@@ -110,8 +142,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 9715264c622e55a41a4b7dcdd0b25d63, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 9715264c622e55a41a4b7dcdd0b25d63, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 1e497eb4b33b66b47896fec67f55080b, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8
@@ -134,8 +174,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 5
     actionType: 4
-    swingSFX: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 96503994f10c6e54189348d024e2ec6f, type: 3}
+      volume: 0.8
+      pitch: 1
+      delay: 0
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8

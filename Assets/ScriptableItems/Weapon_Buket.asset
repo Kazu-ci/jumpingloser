@@ -22,8 +22,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 7e44dddba4947d24cb6b4f09277aa273, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 7e44dddba4947d24cb6b4f09277aa273, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 522df589d45acac4a89c69a731d10370, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
     endNormalizedTime: 0.35
@@ -44,8 +52,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: adfc66decb7e78148a1e864183039cf7, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: adfc66decb7e78148a1e864183039cf7, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: ee4ac5d13c693d1408ba72c1ddc86465, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
     endNormalizedTime: 0.35
@@ -66,8 +82,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 5f5c54e139ff57d4a8362e6e1afb87a7, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 5f5c54e139ff57d4a8362e6e1afb87a7, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 770fdac1a5ebc9a47acf6b44b785ac27, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
     endNormalizedTime: 0.35
@@ -88,8 +112,16 @@ MonoBehaviour:
     actPowerModifier: 0
     durabilityCost: 0
     actionType: 0
-    swingSFX: {fileID: 8300000, guid: 5f5c54e139ff57d4a8362e6e1afb87a7, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 5f5c54e139ff57d4a8362e6e1afb87a7, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: f36efc12f3e73c44ca216909366ad0a9, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0.2
     inputWindowEnd: 0.7
     endNormalizedTime: 0.4
@@ -110,8 +142,16 @@ MonoBehaviour:
     actPowerModifier: -1
     durabilityCost: 0
     actionType: 2
-    swingSFX: {fileID: 8300000, guid: 3d4fe76e9c3d78b41a1dabc864b88f78, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 3d4fe76e9c3d78b41a1dabc864b88f78, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 11e5c11ba690d9148b444a69f70bb783, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8
@@ -131,24 +171,37 @@ MonoBehaviour:
   subWeaponAttack: []
   finisherAttack:
   - name: BuketSkill
-    animation: {fileID: 5536427086270334551, guid: 44241c4aa8e50374e88d93d30a5c96a3, type: 3}
-    actPowerModifier: 0
-    durabilityCost: 5
+    animation: {fileID: 1827226128182048838, guid: 74aa8a01719b12f48ae87c2dbecfc4bf, type: 3}
+    actPowerModifier: -1
+    durabilityCost: 0
     actionType: 4
-    swingSFX: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
-    voiceSFX: {fileID: 0}
+    swingSFXInfo:
+      clip: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0
+    voiceSFXInfo:
+      clip: {fileID: 8300000, guid: 96503994f10c6e54189348d024e2ec6f, type: 3}
+      volume: 1
+      pitch: 1
+      delay: 0.5
     inputWindowStart: 0
     inputWindowEnd: 0
     endNormalizedTime: 0.8
     blendToNext: 0.12
-    hitBoxCenter: {x: 0, y: 0, z: 0.5}
-    hitBoxSize: {x: 0, y: 0, z: 0}
-    hitCheckTime: 0.2
-    hitTimeList: []
-    attackPrefab: {fileID: 2169957460104662819, guid: f011a7db44d04224ba222fae2834e736, type: 3}
-    lungeDistance: 0
-    lungeSpeed: 0
-    lungeTime: 0
+    hitBoxCenter: {x: 0, y: 0, z: 0}
+    hitBoxSize: {x: 5, y: 5, z: 5}
+    hitCheckTime: 0
+    hitTimeList:
+    - 1.7
+    - 1.9
+    - 2.1
+    - 2.3
+    - 4.1
+    attackPrefab: {fileID: 1577154191912072107, guid: c358fd55e9d6e0b4c91ff37ae49a9137, type: 3}
+    lungeDistance: 2
+    lungeSpeed: 10
+    lungeTime: 3.85
     animationSpeed: 0
     attackVFXPrefab: {fileID: 0}
     attackVFXTime: 0

@@ -112,8 +112,10 @@ public class PlayerSkillState : IState
 
         damageData = new DamageData(weapon.template.attackPower + skillAction.actPowerModifier);
 
-        if (skillAction.swingSFX)
-            _player.audioManager?.PlayClipOnAudioPart(PlayerAudioPart.RHand, skillAction.swingSFX);
+        if (skillAction.swingSFXInfo.clip)
+            PlayerEvents.PlayClipByPart(PlayerAudioPart.RHand, skillAction.swingSFXInfo.clip, skillAction.swingSFXInfo.volume, skillAction.swingSFXInfo.pitch, skillAction.swingSFXInfo.delay);
+        if (skillAction.voiceSFXInfo.clip)
+            PlayerEvents.PlayClipByPart(PlayerAudioPart.Mouth, skillAction.voiceSFXInfo.clip, skillAction.voiceSFXInfo.volume, skillAction.voiceSFXInfo.pitch, skillAction.voiceSFXInfo.delay);
     }
 
     public void OnExit()

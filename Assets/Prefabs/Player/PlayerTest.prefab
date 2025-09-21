@@ -1179,6 +1179,9 @@ MonoBehaviour:
   collisionMask:
     serializedVersion: 2
     m_Bits: 2049
+  cameraBodyRadius: 0.25
+  cameraBodyPadding: 0.05
+  bodyResolveIterations: 6
   mouseSensitivityMultiplier: 0.3
   gamepadSensitivityMultiplier: 1
   enemyLayer:
@@ -1337,6 +1340,7 @@ MonoBehaviour:
   dashSound: {fileID: 8300000, guid: 8cd77d8e525a27946b8126846b32757b, type: 3}
   hitInvincibilityTime: 0.8
   hitEffectPrefab: {fileID: 483269617434788623, guid: 5de658852142b3a41b0ca90f373a7501, type: 3}
+  hitSound: {fileID: 8300000, guid: f5d165f392aac3b418a0b403cc4bb14f, type: 3}
   groundCheck: {fileID: 8799999724265508820}
   groundDistance: 0.5
   groundMask:
