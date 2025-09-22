@@ -63,6 +63,7 @@ MonoBehaviour:
   playerPos: {fileID: 0}
   enemyAnimation: {fileID: 3237451156964686837}
   thisObject: {fileID: 4594599290553420448}
+  deathEffect: {fileID: 1349552968121332, guid: 90ec228d92b148249bb4d5ce37d3111d, type: 3}
   mobEnemy:
   - {fileID: 5752020580799897232, guid: babe9a7fd70c3ab4ea76749024a6379e, type: 3}
   - {fileID: 43632156735945321, guid: 4be90a0fd478d2848b01512686e7eca0, type: 3}
