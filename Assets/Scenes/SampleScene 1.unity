@@ -179,6 +179,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5904659339972231070, guid: 7246074a369f5194b900ae777d28f6c2, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9090935444794707098, guid: 7246074a369f5194b900ae777d28f6c2, type: 3}
       propertyPath: maxHp
       value: 1
@@ -3280,6 +3284,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemies:
   - {fileID: 2063262477}
+  Delay: 2
 --- !u!4 &2014750573
 Transform:
   m_ObjectHideFlags: 0
@@ -3493,6 +3498,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Boss 2
       objectReference: {fileID: 0}
+    - target: {fileID: 856533534031892496, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5111039699296457266, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.44409752
@@ -3532,6 +3541,34 @@ PrefabInstance:
     - target: {fileID: 5111039699296457266, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8546915267704564121, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.b
+      value: 0.3301887
+      objectReference: {fileID: 0}
+    - target: {fileID: 8546915267704564121, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.010902463
+      objectReference: {fileID: 0}
+    - target: {fileID: 8546915267704564121, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 0.19737859
+      objectReference: {fileID: 0}
+    - target: {fileID: 8546915267704564121, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
+      propertyPath: InitialModule.startColor.minColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8546915267704564121, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
+      propertyPath: InitialModule.startColor.minColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8546915267704564121, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
+      propertyPath: InitialModule.startColor.minColor.r
+      value: 0.254717
+      objectReference: {fileID: 0}
+    - target: {fileID: 9090935444794707098, guid: ff6fdd089de9f1347801c169c50ab2a4, type: 3}
+      propertyPath: maxHp
+      value: 100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

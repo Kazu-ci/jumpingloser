@@ -152,10 +152,10 @@ public class PanEnemy : Enemy
         {
             Owner.ChangeTexture(1);
             Owner.enemyAnimation.SetTrigger("Attack");
+            Owner.transform.LookAt(Owner.playerPos.transform.position);
         }
         public override void OnUpdate()
         {
-            Owner.transform.LookAt(Owner.playerPos.transform.position);
             if (Owner.AnimationEnd("Attack")) { StateMachine.ChangeState((int)EnemyState.AttackInterbal); }
         }
         public override void OnEnd()
