@@ -190,9 +190,10 @@ MonoBehaviour:
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: 0, z: 0.5}
     hitBoxSize: {x: 5, y: 5, z: 5}
-    hitCheckTime: 0.02
+    hitCheckTime: 0
     hitTimeList:
-    - 0.18
+    - 0.1
+    - 0.2
     - 0.3
     - 0.5
     attackPrefab: {fileID: 0}
@@ -200,7 +201,7 @@ MonoBehaviour:
     lungeSpeed: 20
     lungeTime: 0
     animationSpeed: 0
-    attackVFXPrefab: {fileID: 0}
+    attackVFXPrefab: {fileID: 5053222768019704512, guid: 932cfb62dea27bf4f9cdb40379d66ff5, type: 3}
     attackVFXTime: 0
   maxDurability: 30
   attackPower: 4
@@ -208,4 +209,4 @@ MonoBehaviour:
   attackSpeed: 1
   addDurabilityOnPickup: 5
   hitSFX: {fileID: 0}
-  hitVFXPrefab: {fileID: 8778328243042707411, guid: 374aa05c79e9e4d4f8b03441dc2cc978, type: 3}
+  hitVFXPrefab: {fileID: 8778328243042707411, guid: 23b5c2d9f2bd90f44accb56923799530, type: 3}

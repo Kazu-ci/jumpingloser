@@ -154,13 +154,16 @@ public class BommerangAttack : MonoBehaviour
         // 当たり位置の推定
         var myPos = transform.position;
         var closest = other.ClosestPoint(myPos);
-        var pos = closest;
+        
+
+        var pos = other.transform.position;
 
         // 向きは攻撃の進行方向
-        Quaternion rot;
+        /*Quaternion rot;
         var dir = (closest - myPos);
         if (dir.sqrMagnitude > 1e-6f) rot = Quaternion.LookRotation(dir);
-        else rot = transform.rotation;
+        else rot = transform.rotation;*/
+        var rot = transform.rotation;
 
         var vfx = Instantiate(hitEffect, pos, rot);
         // ここで必要なら自動破棄や親子付けなどを行う
