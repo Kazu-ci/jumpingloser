@@ -1519,7 +1519,7 @@ MonoBehaviour:
     volume: 0
   - name: GameOver
     audioClip: {fileID: 8300000, guid: f9ea75221219d07439515eaea0d1be13, type: 3}
-    volume: 0.5
+    volume: 1
   audioSource: {fileID: 742371435}
   bgmMappings:
   - state: 1
