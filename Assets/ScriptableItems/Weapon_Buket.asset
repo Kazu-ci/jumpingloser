@@ -173,7 +173,7 @@ MonoBehaviour:
   - name: BuketSkill
     animation: {fileID: 1827226128182048838, guid: 74aa8a01719b12f48ae87c2dbecfc4bf, type: 3}
     actPowerModifier: -1
-    durabilityCost: 0
+    durabilityCost: 5
     actionType: 4
     swingSFXInfo:
       clip: {fileID: 8300000, guid: 3b12d919634e7f4498e86f648674ba05, type: 3}
@@ -181,7 +181,7 @@ MonoBehaviour:
       pitch: 1
       delay: 0
     voiceSFXInfo:
-      clip: {fileID: 8300000, guid: 96503994f10c6e54189348d024e2ec6f, type: 3}
+      clip: {fileID: 8300000, guid: 598c0f5a5f33cc8458635ed58924fa31, type: 3}
       volume: 1
       pitch: 1
       delay: 0.5
@@ -190,7 +190,7 @@ MonoBehaviour:
     endNormalizedTime: 0.8
     blendToNext: 0.12
     hitBoxCenter: {x: 0, y: 0, z: 0}
-    hitBoxSize: {x: 5, y: 5, z: 5}
+    hitBoxSize: {x: 6, y: 6, z: 8}
     hitCheckTime: 0
     hitTimeList:
     - 1.7
@@ -198,7 +198,8 @@ MonoBehaviour:
     - 2.1
     - 2.3
     - 4.1
-    attackPrefab: {fileID: 1577154191912072107, guid: c358fd55e9d6e0b4c91ff37ae49a9137, type: 3}
+    - 6.4
+    attackPrefab: {fileID: 469793921264655483, guid: c358fd55e9d6e0b4c91ff37ae49a9137, type: 3}
     lungeDistance: 2
     lungeSpeed: 10
     lungeTime: 3.85
@@ -211,4 +212,4 @@ MonoBehaviour:
   attackSpeed: 1
   addDurabilityOnPickup: 5
   hitSFX: {fileID: 0}
-  hitVFXPrefab: {fileID: 8778328243042707411, guid: 374aa05c79e9e4d4f8b03441dc2cc978, type: 3}
+  hitVFXPrefab: {fileID: 8778328243042707411, guid: 0dd8a8e0963d4c341942abbb320103f4, type: 3}
