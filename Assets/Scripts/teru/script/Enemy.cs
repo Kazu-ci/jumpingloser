@@ -27,6 +27,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] protected GameObject playerPos;
     [SerializeField] protected Animator enemyAnimation;
     [SerializeField] protected GameObject thisObject;
+    [SerializeField] protected GameObject deathEffect;
     protected float nowHp;
     protected float nowSpeed;
     protected float distance;
@@ -83,7 +84,7 @@ public class Enemy : MonoBehaviour
         if (_isDead) return;
         _isDead = true;
         DropWeapon();
-
+        Instantiate(deathEffect, this.gameObject.transform.position, Quaternion.identity);
         Destroy(gameObject);
     }
     protected float GetDistance()
