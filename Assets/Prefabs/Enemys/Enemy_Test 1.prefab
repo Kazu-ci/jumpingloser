@@ -119,6 +119,7 @@ MonoBehaviour:
   playerPos: {fileID: 0}
   enemyAnimation: {fileID: 7827355150409150296}
   thisObject: {fileID: 8518525473970316195}
+  deathEffect: {fileID: 1349552968121332, guid: 90ec228d92b148249bb4d5ce37d3111d, type: 3}
   efe: {fileID: 6986804393615109387, guid: 0d88c0975e7668b439a2844f09267bbb, type: 3}
   attackCollider: {fileID: 1435209530496902121}
 --- !u!195 &5921120466548304363
