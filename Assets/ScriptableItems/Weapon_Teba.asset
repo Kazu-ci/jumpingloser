@@ -140,7 +140,7 @@ MonoBehaviour:
   - name: Attack5
     animation: {fileID: 1216864209599048995, guid: 184c63456d7f13744aedc79e2b73ca54, type: 3}
     actPowerModifier: 0
-    durabilityCost: 0
+    durabilityCost: -1
     actionType: 0
     swingSFXInfo:
       clip: {fileID: 8300000, guid: 9715264c622e55a41a4b7dcdd0b25d63, type: 3}

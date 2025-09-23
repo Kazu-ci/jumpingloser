@@ -133,7 +133,7 @@ MonoBehaviour:
   - {fileID: 2800000, guid: 083a27ef11fde4944a7f209cd9cdd449, type: 3}
   - {fileID: 2800000, guid: 6e6cd8e030100c441ac0a604124682c7, type: 3}
   - {fileID: 2800000, guid: 68daaf8abf9d11c4eb268fd0293aee87, type: 3}
-  maxHp: 10
+  maxHp: 20
   maxSpeed: 1.8
   attackSpeed: 2.5
   attackDamage: 1

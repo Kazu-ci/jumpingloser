@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 9090935444794707098}
   - component: {fileID: 3520585640598820951}
   m_Layer: 12
-  m_Name: Boss 2
+  m_Name: Boss 3
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -66,7 +66,7 @@ MonoBehaviour:
   deathEffect: {fileID: 1349552968121332, guid: 90ec228d92b148249bb4d5ce37d3111d, type: 3}
   mobEnemy:
   - {fileID: 5752020580799897232, guid: babe9a7fd70c3ab4ea76749024a6379e, type: 3}
-  - {fileID: 43632156735945321, guid: 4be90a0fd478d2848b01512686e7eca0, type: 3}
+  - {fileID: 43632156735945321, guid: 363ec29c13ed070489055e81fe48a220, type: 3}
   - {fileID: 2402817335972150530, guid: 157c893ce09364d449d20620bd6eb7ee, type: 3}
   attackStates:
   - Combo

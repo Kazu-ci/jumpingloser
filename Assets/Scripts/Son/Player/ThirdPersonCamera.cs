@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using System.Collections.Generic;
 using System.Linq;
 using static EventBus;
+using UnityEngine.InputSystem.LowLevel;
 
 public class ThirdPersonCamera : MonoBehaviour
 {
@@ -111,12 +112,16 @@ public class ThirdPersonCamera : MonoBehaviour
             }
         }
     }
+    private void OnEnable()
+    {
+        PlayerEvents.ChangeCameraTarget += StartOrbitAround;
+    }
+
 
     private void OnDisable()
     {
         if (inputActions != null) inputActions.Disable();
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        PlayerEvents.ChangeCameraTarget -= StartOrbitAround;
     }
 
     void LateUpdate()
@@ -485,5 +490,52 @@ public class ThirdPersonCamera : MonoBehaviour
         // 面から少し余白を見て返す（ブレや角の段差に強くする）
         float solved = Mathf.Max(minDist, lo - padding);
         return solved;
+    }
+
+    private void StartOrbitAround(Transform focus, float durationSec, float rotateSpeed)
+    {
+        if (focus == null) return;
+        StopAllCoroutines();
+        StartCoroutine(CoOrbitAround(focus, durationSec, rotateSpeed));
+    }
+
+    private System.Collections.IEnumerator CoOrbitAround(Transform focus, float durationSec, float rotateSpeed)
+    {
+        // --- 入力を無効化 ---
+        if (inputActions != null) inputActions.Disable();
+
+        Transform originalTarget = target;
+        target = focus;
+
+        float timer = 0f;
+
+        while (timer < durationSec)
+        {
+            timer += Time.deltaTime;
+
+            // 「右入力」を模擬 → yaw が右方向に進む
+            lookInput = new Vector2(+1f, 0f) * rotateSpeed;
+
+            // 高さは水平に固定したい場合は pitch を 0 に近づける
+            pitch = Mathf.Lerp(pitch, 0f, Time.deltaTime * 2f);
+
+            yield return null;
+        }
+
+        // --- 元の target に戻す ---
+        target = originalTarget;
+
+        // 追従を自然に戻すために 0.5秒くらい入力ゼロで待つ
+        float backTime = 0.5f;
+        float elapsed = 0f;
+        while (elapsed < backTime)
+        {
+            elapsed += Time.deltaTime;
+            lookInput = Vector2.zero; // 入力無しにして追従だけ働かせる
+            yield return null;
+        }
+
+        // --- 入力を再開 ---
+        if (inputActions != null) inputActions.Enable();
     }
 }

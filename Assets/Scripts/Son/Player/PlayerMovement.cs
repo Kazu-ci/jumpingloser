@@ -1046,5 +1046,21 @@ public class PlayerMovement : MonoBehaviour
         if (finisher == null || finisher.animation == null) return false;
         return w.currentDurability >= finisher.durabilityCost;
     }
+
+    public void DisablePlayerInput()
+    {
+        if (inputActions != null)
+        {
+            inputActions.Disable(); // ‚·‚×‚Ä‚Ì“ü—Í‚ğ’â~
+        }
+    }
+
+    public void EnablePlayerInput()
+    {
+        if (inputActions != null)
+        {
+            inputActions.Enable(); // “ü—Í‚ğÄŠJ
+        }
+    }
 }
 

@@ -140,7 +140,7 @@ MonoBehaviour:
   - name: BuketAttack05
     animation: {fileID: -7262094285337094028, guid: 2712dd956b0bfd341b888154e1b5eaca, type: 3}
     actPowerModifier: -1
-    durabilityCost: 0
+    durabilityCost: -1
     actionType: 2
     swingSFXInfo:
       clip: {fileID: 8300000, guid: 3d4fe76e9c3d78b41a1dabc864b88f78, type: 3}
