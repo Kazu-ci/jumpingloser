@@ -1577,13 +1577,16 @@ MonoBehaviour:
     volume: 0.2
   - name: Boss
     audioClip: {fileID: 8300000, guid: ead8f1c0cf4384e409be8a27f44882e3, type: 3}
-    volume: 0.5
+    volume: 0.3
   - name: Clear
     audioClip: {fileID: 8300000, guid: aad48ef62325aae499734cf01760fdc7, type: 3}
     volume: 0
   - name: GameOver
     audioClip: {fileID: 8300000, guid: f9ea75221219d07439515eaea0d1be13, type: 3}
     volume: 1
+  - name: Intro
+    audioClip: {fileID: 8300000, guid: f9ea75221219d07439515eaea0d1be13, type: 3}
+    volume: 0
   audioSource: {fileID: 742371435}
   bgmMappings:
   - state: 1
@@ -1596,6 +1599,8 @@ MonoBehaviour:
     bgmName: Clear
   - state: 7
     bgmName: GameOver
+  - state: 8
+    bgmName: Intro
   fadeDuration: 1
 --- !u!4 &742371437
 Transform:
@@ -2481,6 +2486,8 @@ MonoBehaviour:
     name: BossStage
   - state: 7
     name: GameoverScene
+  - state: 8
+    name: Intro
 --- !u!224 &1758271272
 RectTransform:
   m_ObjectHideFlags: 0

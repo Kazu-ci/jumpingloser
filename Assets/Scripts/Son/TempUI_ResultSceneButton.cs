@@ -9,7 +9,7 @@ public class TempUI_ResultSceneButton : MonoBehaviour
     }
     public void OnStartClick()
     {
-        GameManager.Instance?.StartGame();
+        GameManager.Instance?.ToIntro();
     }
     public void OnContinueClick()
     {
