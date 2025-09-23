@@ -850,7 +850,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6ebdee453d3d9724da9af5081bd0c891, type: 2}
+  - {fileID: 2100000, guid: c9514526bb4fe9a428aa2248f0aa2f57, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2447,8 +2447,11 @@ MonoBehaviour:
   playerPos: {fileID: 0}
   enemyAnimation: {fileID: 2838611724756070795}
   thisObject: {fileID: 2838611724756070797}
+  deathEffect: {fileID: 0}
   mobEnemy: []
-  attackCollider: {fileID: 0}
+  attackStates: []
+  effects: []
+  attackColliders: []
   rushSpeed: 100
   stiffnessTime: 3
 --- !u!195 &-2121282415513356036

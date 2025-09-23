@@ -58,5 +58,7 @@ public class EventBus
 
         public static Action<int /*current*/, int /*max*/> ApplyHP;
         public static Action<List<WeaponInstance> /*instances*/, int /*mainIndex*/> ApplyLoadoutInstances;
+
+        public static Action<Transform, float, float> ChangeCameraTarget;
     }
 }

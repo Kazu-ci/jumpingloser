@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using static EventBus;
 using TMPro;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 public class TempUI : MonoBehaviour
 {
@@ -32,6 +33,9 @@ public class TempUI : MonoBehaviour
     public GameObject mapObj;
     public GameObject tutorial;
     private bool isMenuOpen = false;
+
+    [Header("èâä˙ï\é¶óp")]
+    public GameObject firsSelectbutton;
 
     public InputSystem_Actions inputActions;
 
@@ -112,21 +116,29 @@ public class TempUI : MonoBehaviour
         }
     }
 
-    private void SwitchMenu()
+    public void SwitchMenu()
     {
         if (!isMenuOpen)
         {
             if (mapObj != null) mapObj.SetActive(true);
             if (tutorial != null) tutorial.SetActive(true);
             isMenuOpen = true;
-            SystemEvents.OnGamePause?.Invoke();
+            if (firsSelectbutton != null) EventSystem.current.SetSelectedGameObject(firsSelectbutton);
+            GameObject player = PlayerEvents.GetPlayerObject();
+            player.GetComponent<PlayerMovement>().DisablePlayerInput();
+            GameManager.Instance?.PauseGame();
+            
         }
         else
         {
             if (mapObj != null) mapObj.SetActive(false);
             if (tutorial != null) tutorial.SetActive(false);
             isMenuOpen = false;
+            GameManager.Instance?.ResumeGame();
             SystemEvents.OnGameResume?.Invoke();
+
+            GameObject player = PlayerEvents.GetPlayerObject();
+            player.GetComponent<PlayerMovement>().EnablePlayerInput();
         }
     }
 

@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damageData:
-    damageAmount: 10
+    damageAmount: 25
   isDestroyedOnHit: 0
   hitLayer:
     serializedVersion: 2
