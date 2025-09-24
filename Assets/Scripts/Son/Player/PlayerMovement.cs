@@ -207,6 +207,7 @@ public class PlayerMovement : MonoBehaviour
     private Coroutine rotateYawCo; // 現在進行中の水平回転コルーチン
 
     private static FieldInfo _fiCurrentHealth;
+    private Coroutine _rumbleCo;
 
     // ====== ライフサイクル ======
     private void Awake()
@@ -290,6 +291,10 @@ public class PlayerMovement : MonoBehaviour
         PlayerEvents.ApplyHP += HandleApplyHP;
         PlayerEvents.ApplyLoadoutInstances += HandleApplyLoadoutInstances;
 
+        PlayerEvents.OnGamepadShake += GamepadRumbleOnce;
+        PlayerEvents.OnGamepadShakeCurve += GamepadRumble;
+
+
     }
 
     private void OnDisable()
@@ -306,6 +311,9 @@ public class PlayerMovement : MonoBehaviour
         }
         PlayerEvents.ApplyHP -= HandleApplyHP;
         PlayerEvents.ApplyLoadoutInstances -= HandleApplyLoadoutInstances;
+
+        PlayerEvents.OnGamepadShake -= GamepadRumbleOnce;
+        PlayerEvents.OnGamepadShakeCurve -= GamepadRumble;
 
     }
 
@@ -666,10 +674,13 @@ public class PlayerMovement : MonoBehaviour
     {
         if (damage.damageAmount <= 0) return;
         if (_fsm.CurrentState == PlayerState.Dead) return; // 死亡後は無視
-        if (_fsm.CurrentState == PlayerState.Skill) return;
 
-        // 無敵中は被弾を無効化
-        if (IsInvincible) return;
+        if (_fsm.CurrentState == PlayerState.Skill || IsInvincible) // 無敵時間中は無視
+        {
+            GamepadRumbleOnce(0.3f, 0.2f);
+            return;
+        }
+
 
         currentHealth = Mathf.Max(0, currentHealth - damage.damageAmount);
         Debug.Log($"Player took {damage.damageAmount} damage. Current HP: {currentHealth}/{maxHealth}");
@@ -686,6 +697,7 @@ public class PlayerMovement : MonoBehaviour
                 Instantiate(hitEffectPrefab, transform.position + Vector3.up * 0.2f, Quaternion.identity);
                 PlayerEvents.PlayClipByPart(PlayerAudioPart.Mouth, hitSound,1f,1f,0f);
             }
+            GamepadRumbleOnce(0.8f, 0.35f);
         }
     }
 
@@ -1061,6 +1073,76 @@ public class PlayerMovement : MonoBehaviour
         {
             inputActions.Enable(); // 入力を再開
         }
+    }
+    // ====== ゲームパッド振動 ======
+    private void GamepadRumbleOnce(float intensity, float durationSec)
+    {
+        GamepadRumble(intensity, intensity, durationSec);
+    }
+
+    /// <summary>
+    /// 現在のパッド振動を即時停止
+    /// </summary>
+    private void CancelGamepadRumble(Gamepad pad = null)
+    {
+        pad ??= Gamepad.current;
+        if (_rumbleCo != null)
+        {
+            StopCoroutine(_rumbleCo);
+            _rumbleCo = null;
+        }
+        if (pad != null)
+        {
+            // 日本語：すべてのモーターを停止
+            pad.SetMotorSpeeds(0f, 0f);
+            pad.PauseHaptics();   // 念のため
+            pad.ResetHaptics();   // デバイス状態を初期化
+        }
+    }
+    public void GamepadRumble(float low, float high, float durationSec)
+    {
+        bool unscaled = true;
+        Gamepad pad = null;
+        // デバイス取得（未接続なら無視）
+        pad ??= Gamepad.current;
+        if (pad == null) return;
+
+        // 強度のクランプ
+        low = Mathf.Clamp01(low);
+        high = Mathf.Clamp01(high);
+        durationSec = Mathf.Max(0f, durationSec);
+
+        // 既存の振動を中断（上書き開始）
+        if (_rumbleCo != null)
+        {
+            StopCoroutine(_rumbleCo);
+            _rumbleCo = null;
+        }
+
+        // コルーチン開始
+        _rumbleCo = StartCoroutine(CoRumble(pad, low, high, durationSec, unscaled));
+    }
+
+    // --- 振動処理 ---
+    private System.Collections.IEnumerator CoRumble(Gamepad pad, float low, float high, float durationSec, bool unscaled)
+    {
+        // 開始時に設定
+        pad.SetMotorSpeeds(low, high);
+
+        if (durationSec > 0f)
+        {
+            if (unscaled)
+                yield return new WaitForSecondsRealtime(durationSec); // 時間停止中もカウント
+            else
+                yield return new WaitForSeconds(durationSec);
+        }
+
+        // 終了時に停止（上書きが来た場合は StopCoroutine でここに来ない）
+        pad.SetMotorSpeeds(0f, 0f);
+        pad.PauseHaptics();
+        pad.ResetHaptics();
+
+        _rumbleCo = null;
     }
 }
 

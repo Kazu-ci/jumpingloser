@@ -116,6 +116,8 @@ public class PlayerSkillState : IState
             PlayerEvents.PlayClipByPart(PlayerAudioPart.RHand, skillAction.swingSFXInfo.clip, skillAction.swingSFXInfo.volume, skillAction.swingSFXInfo.pitch, skillAction.swingSFXInfo.delay);
         if (skillAction.voiceSFXInfo.clip)
             PlayerEvents.PlayClipByPart(PlayerAudioPart.Mouth, skillAction.voiceSFXInfo.clip, skillAction.voiceSFXInfo.volume, skillAction.voiceSFXInfo.pitch, skillAction.voiceSFXInfo.delay);
+    
+        PlayerEvents.OnWeaponSkillUsed?.Invoke(weapon.template.weaponType);
     }
 
     public void OnExit()
@@ -300,6 +302,7 @@ public class PlayerSkillState : IState
         for (int i = 0; i < positions.Count; ++i)
         {
             SpawnHitVFXAt(positions[i]);
+            PlayerEvents.OnGamepadShakeCurve?.Invoke(0.6f, 1f, 0.1f);
             if (i < positions.Count - 1 && interval > 0f)
                 yield return new WaitForSeconds(interval);
         }

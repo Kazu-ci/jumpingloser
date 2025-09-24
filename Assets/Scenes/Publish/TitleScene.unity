@@ -1205,7 +1205,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loadingUI: {fileID: 970101309}
-  loadingStates: 02000000
+  loadingStates: 020000000300000004000000
   Loadings:
   - {fileID: 924249719}
   - {fileID: 1350578460}
@@ -1587,6 +1587,9 @@ MonoBehaviour:
   - name: Intro
     audioClip: {fileID: 8300000, guid: f9ea75221219d07439515eaea0d1be13, type: 3}
     volume: 0
+  - name: ResultData
+    audioClip: {fileID: 8300000, guid: aad48ef62325aae499734cf01760fdc7, type: 3}
+    volume: 0.65
   audioSource: {fileID: 742371435}
   bgmMappings:
   - state: 1
@@ -1595,12 +1598,14 @@ MonoBehaviour:
     bgmName: Normal
   - state: 3
     bgmName: Boss
-  - state: 6
-    bgmName: Clear
   - state: 7
-    bgmName: GameOver
+    bgmName: Clear
   - state: 8
+    bgmName: GameOver
+  - state: 9
     bgmName: Intro
+  - state: 10
+    bgmName: ResultData
   fadeDuration: 1
 --- !u!4 &742371437
 Transform:
@@ -2351,7 +2356,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b611bf77121604e419dce1ab503c8921, type: 2}
   defaultDurabilities: 05000000
   defaultMainIndex: 0
-  saveOnStates: 03000000
+  saveOnStates: 0300000004000000
 --- !u!1 &1579484294
 GameObject:
   m_ObjectHideFlags: 0
@@ -2480,14 +2485,16 @@ MonoBehaviour:
     name: TitleScene
   - state: 2
     name: NormalStage1_Forest
-  - state: 6
-    name: ResultScene
   - state: 3
     name: BossStage
-  - state: 7
-    name: GameoverScene
+  - state: 4
+    name: PlayDataResult
   - state: 8
+    name: GameoverScene
+  - state: 9
     name: Intro
+  - state: 7
+    name: ResultScene
 --- !u!224 &1758271272
 RectTransform:
   m_ObjectHideFlags: 0

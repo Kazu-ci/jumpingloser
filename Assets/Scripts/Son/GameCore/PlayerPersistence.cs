@@ -27,8 +27,15 @@ public class PlayerPersistence : MonoBehaviour
 
     // === ランタイム ===
     private PlayerSaveData _current;
+    public PlayerSaveData Current => _current;
     private double _runStartTimeSec = 0.0;
     private HashSet<GameState> _saveStateSet;
+    private bool _isCounting = false;
+    private double _sessionResumeAt = 0.0;
+    private double _currentSessionTime= 0.0;
+
+    private int currentKillCount = 0;
+    private int currentSkillUseCount = 0;
 
     private void Awake()
     {
@@ -40,17 +47,24 @@ public class PlayerPersistence : MonoBehaviour
 
         SystemEvents.OnGameStateChange += HandleGameStateChange;
         PlayerEvents.OnPlayerSpawned += HandlePlayerSpawned;
+        PlayerEvents.OnWeaponSkillUsed += HandleWeaponSkillUse;
+        EnemyEvents.OnEnemyDeath += HandleEnemyDefeated;
+        PlayerEvents.OnPlayerDead += HandlePlayerDied;
+
     }
 
     private void OnDestroy()
     {
         SystemEvents.OnGameStateChange -= HandleGameStateChange;
         PlayerEvents.OnPlayerSpawned -= HandlePlayerSpawned;
+        PlayerEvents.OnWeaponSkillUsed -= HandleWeaponSkillUse;
+        EnemyEvents.OnEnemyDeath -= HandleEnemyDefeated;
+        PlayerEvents.OnPlayerDead -= HandlePlayerDied;
     }
 
     private void HandleGameStateChange(GameState next)
     {
-        if (IsTitle(next))
+        if (next == GameState.Title)
         {
             CreateNewGameData();
             return;
@@ -60,12 +74,40 @@ public class PlayerPersistence : MonoBehaviour
         {
             SnapshotSaveFromCurrentPlayer();
         }
+
+        if (next != GameState.Playing)
+        {
+            StopSessionCounterAndAccumulate(); 
+        }
+        else
+        {
+            StartSessionCounter();
+        }
     }
 
-    private bool IsTitle(GameState s)
+    private void StartSessionCounter()
     {
-        return s.ToString().Equals("Title", StringComparison.OrdinalIgnoreCase)
-            || s.ToString().Equals("TitleState", StringComparison.OrdinalIgnoreCase);
+        // すでにカウント中なら何もしない
+        if (_isCounting) return;
+
+        // 現在のリアルタイム秒
+        _sessionResumeAt = Time.realtimeSinceStartupAsDouble;
+        _isCounting = true;
+    }
+
+    /// <summary>
+    /// 計測終了して差分を current に加算
+    /// </summary>
+    private void StopSessionCounterAndAccumulate()
+    {
+        if (!_isCounting) return;
+
+        double now = Time.realtimeSinceStartupAsDouble;
+        double delta = Math.Max(0.0, now - _sessionResumeAt);
+
+        _currentSessionTime += delta;
+
+        _isCounting = false;
     }
 
     private void HandlePlayerSpawned(GameObject playerObj)
@@ -86,6 +128,10 @@ public class PlayerPersistence : MonoBehaviour
             payload.Add(src != null ? src.Clone() : null);
         }
         PlayerEvents.ApplyLoadoutInstances?.Invoke(payload, _current.mainIndex);
+
+        _currentSessionTime = 0.0;
+        currentKillCount = 0;
+        currentSkillUseCount = 0;
     }
 
     // === Title で初期データ生成 ===
@@ -143,10 +189,13 @@ public class PlayerPersistence : MonoBehaviour
 
         _current.mainIndex = inv.mainIndex;
 
-        _current.elapsedGameTimeSec = Math.Max(
-            _current.elapsedGameTimeSec,
-            Time.realtimeSinceStartupAsDouble - _runStartTimeSec
-        );
+        StopSessionCounterAndAccumulate();
+        _current.elapsedGameTimeSec += _currentSessionTime;
+        _currentSessionTime = 0.0;
+        _current.skillUseCount += currentSkillUseCount;
+        _current.enemyDefeatCount += currentKillCount;
+        currentSkillUseCount = 0;
+        currentKillCount = 0;
     }
 
     public void ReapplyNow()
@@ -165,5 +214,27 @@ public class PlayerPersistence : MonoBehaviour
             payload.Add(src != null ? src.Clone() : null);
         }
         PlayerEvents.ApplyLoadoutInstances?.Invoke(payload, _current.mainIndex);
+    }
+
+    private void HandleWeaponSkillUse(WeaponType type)
+    {
+        if (_current == null) return;
+        currentSkillUseCount++;
+    }
+    private void HandleEnemyDefeated(GameObject enemy)
+    {
+        if (_current == null) return;
+        currentKillCount++;
+    }
+    private void HandlePlayerDied()
+    {
+        StopSessionCounterAndAccumulate();
+
+        _currentSessionTime = 0.0;
+        currentKillCount = 0;
+        currentSkillUseCount = 0;
+
+        _isCounting = false;
+        _sessionResumeAt = Time.realtimeSinceStartupAsDouble;
     }
 }

@@ -85,6 +85,7 @@ public class Enemy : MonoBehaviour
         _isDead = true;
         DropWeapon();
         Instantiate(deathEffect, this.gameObject.transform.position, Quaternion.identity);
+        EventBus.EnemyEvents.OnEnemyDeath?.Invoke(this.gameObject);
         Destroy(gameObject);
     }
     protected float GetDistance()

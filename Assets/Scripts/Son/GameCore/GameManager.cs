@@ -8,11 +8,13 @@ public enum GameState
     Title,       // タイトル画面
     Preloading,  // ゲームプレイ用アセット読み込み
     Preloading2, // ゲームプレイ用アセット読み込み2
+    Preloading3, // ゲームプレイ用アセット読み込み3
     Playing,     // プレイ中（サブ状態機が動く）
     Paused,      // ポーズ（HUD 非表示 + 操作停止）
     Result,      // リザルト画面
     GameOver,     // ゲームオーバー画面
-    Intro
+    Intro,       // オープニング
+    PlayDataResult // プレイデータリザルト
 }
 
 /// <summary>
@@ -28,7 +30,8 @@ public enum GameTrigger
     Resume,
     GameOver,
     GameClear,
-    ToIntro
+    ToIntro,
+    ToResultData
 }
 public class GameManager : MonoBehaviour
 {
@@ -133,6 +136,13 @@ public class GameManager : MonoBehaviour
             );
 
         _stateMachine.SetupState(
+            GameState.Preloading3,
+            onEnter: null,
+            onExit: () => { preGameState = GameState.Preloading3; PreSceneTrigger = GameTrigger.EnterStage2; },
+            enterRoutine: EnterPreloadingRoutine
+            );
+
+        _stateMachine.SetupState(
             GameState.Playing,
             onEnter: () => {
                 CurrentState = getCurrentState;
@@ -185,6 +195,15 @@ public class GameManager : MonoBehaviour
             },
             onExit: () => { preGameState = GameState.Intro; }
         );
+        _stateMachine.SetupState(
+            GameState.PlayDataResult,
+            onEnter: () =>
+            {
+                CurrentState = getCurrentState;
+                SystemEvents.OnGameStateChange?.Invoke(GameState.PlayDataResult);
+            },
+            onExit: () => { preGameState = GameState.PlayDataResult;}
+        );
 
 
 
@@ -203,9 +222,12 @@ public class GameManager : MonoBehaviour
         // Preloading2
         _stateMachine.AddTransition(GameState.Preloading2, GameState.Playing, GameTrigger.FinishLoading);
 
+        // Preloading3
+        _stateMachine.AddTransition(GameState.Preloading3, GameState.PlayDataResult, GameTrigger.FinishLoading);
+
         // Playing
         _stateMachine.AddTransition(GameState.Playing, GameState.Paused, GameTrigger.Pause);
-        _stateMachine.AddTransition(GameState.Playing, GameState.Result, GameTrigger.GameClear);
+        _stateMachine.AddTransition(GameState.Playing, GameState.Preloading3, GameTrigger.ToResultData);
         _stateMachine.AddTransition(GameState.Playing, GameState.Preloading2, GameTrigger.EnterStage2);
         _stateMachine.AddTransition(GameState.Playing, GameState.GameOver, GameTrigger.GameOver);
         _stateMachine.AddTransition(GameState.Playing, GameState.Title, GameTrigger.ToTitle);
@@ -216,6 +238,9 @@ public class GameManager : MonoBehaviour
 
         // Result
         _stateMachine.AddTransition(GameState.Result, GameState.Title, GameTrigger.ToTitle);
+
+        // PlayDataResult
+        _stateMachine.AddTransition(GameState.PlayDataResult, GameState.Result, GameTrigger.GameClear);
 
         // GameOver
         _stateMachine.AddTransition(GameState.GameOver, GameState.Title, GameTrigger.ToTitle);
@@ -263,6 +288,7 @@ public class GameManager : MonoBehaviour
     public void ResumeGame() => _stateMachine.ExecuteTrigger(GameTrigger.Resume);
     public void GameOver() => _stateMachine.ExecuteTrigger(GameTrigger.GameOver);
     public void ReTry()=> _stateMachine.ExecuteTrigger(PreSceneTrigger);
-    public void GameClear() => _stateMachine.ExecuteTrigger(GameTrigger.GameClear);
+    public void GameClear() => _stateMachine.ExecuteTrigger(GameTrigger.ToResultData);
     public void ToTitle() => _stateMachine.ExecuteTrigger(GameTrigger.ToTitle);
+    public void ToEndRoll() => _stateMachine.ExecuteTrigger(GameTrigger.GameClear);
 }

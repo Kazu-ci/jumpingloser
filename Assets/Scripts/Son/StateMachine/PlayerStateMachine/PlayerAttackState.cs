@@ -447,6 +447,7 @@ public class PlayerAttackState : IState
     {
         for (int i = 0; i < positions.Count; ++i)
         {
+            PlayerEvents.OnGamepadShakeCurve?.Invoke(0.5f,0.7f,0.1f);
             SpawnHitVFXAt(positions[i]);
             if (i < positions.Count - 1 && interval > 0f)
                 yield return new WaitForSeconds(interval);
