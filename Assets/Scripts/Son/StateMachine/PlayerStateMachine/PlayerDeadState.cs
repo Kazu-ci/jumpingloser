@@ -14,13 +14,13 @@ public class PlayerDeadState : IState
 
     public void OnEnter()
     {
-        // 日本語：死亡レイヤーへブレンド
+        // 死亡レイヤーへブレンド
         _player.BlendToState(PlayerState.Dead);
 
-        // 日本語：必ず 0 秒から再生して、長い死亡モーションの冒頭から見せる
+        // 必ず 0 秒から再生して、長い死亡モーションの冒頭から見せる
         _player.ResetDeadClipPlayable();
 
-        // 日本語：必要なら当たり判定や操作を無効化（例）
+        // 必要なら当たり判定や操作を無効化（例）
         // _player.enabled = false; など
         _timer = 0f;
     }
@@ -31,7 +31,7 @@ public class PlayerDeadState : IState
         _timer += dt;
         if (_timer >= _deadDuration)
         {
-            // 日本語：死亡モーションが終わったら何かする（例：リスポーン処理を呼ぶなど）
+            // 死亡モーションが終わったら何かする
             GameManager.Instance?.GameOver();
             _timer = -10000f;
         }

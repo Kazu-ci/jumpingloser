@@ -51,12 +51,13 @@ public class PlayerHitState : IState
         {
             if (_player.CurrentHealth <= 0f)
             {
-                // “ú–{ŒêFŽ€–S‚Í”í’e‚©‚ç‚Ì‚Ý
+                // Ž€–S‚Í”í’e‚©‚ç‚Ì‚Ý
+                EventBus.PlayerEvents.OnPlayerDead?.Invoke();
                 _player.ExecuteTriggerExternal(PlayerTrigger.Die);
                 return;
             }
 
-            // “ú–{ŒêF“ü—Í‚Ì—L–³‚Å–ß‚èæ‚ðŒˆ’è
+            // “ü—Í‚Ì—L–³‚Å–ß‚èæ‚ðŒˆ’è
             if (_player.HasMoveInput())
                 _player.ExecuteTriggerExternal(PlayerTrigger.MoveStart); // Move ‚Ö
             else

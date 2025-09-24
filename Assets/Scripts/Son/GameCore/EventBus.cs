@@ -44,8 +44,8 @@ public class EventBus
     }
     public static class PlayerEvents
     {
-
         public static Action<GameObject> OnPlayerSpawned;
+        public static Action OnPlayerDead;
         public static Func<GameObject> GetPlayerObject;
         public static System.Func<PlayerAudioPart,AudioClip,float,float,float,bool> PlayClipByPart;
 
@@ -54,11 +54,18 @@ public class EventBus
         public static System.Func<LungeAim, Vector3, Vector3, float, float, AnimationCurve,bool> LungeByDistance;
         public static System.Func<LungeAim, Vector3, Vector3, float, float, AnimationCurve,bool> LungeByTime;
 
-        public static Action<GameObject> OnEnemyDefeted;
-
         public static Action<int /*current*/, int /*max*/> ApplyHP;
         public static Action<List<WeaponInstance> /*instances*/, int /*mainIndex*/> ApplyLoadoutInstances;
 
         public static Action<Transform, float, float> ChangeCameraTarget;
+
+        public static Action<float, float> OnGamepadShake;
+        public static Action<float,float,float> OnGamepadShakeCurve;
+
+        public static Action<WeaponType> OnWeaponSkillUsed;
+    }
+    public static class EnemyEvents
+    {
+        public static Action<GameObject> OnEnemyDeath;
     }
 }

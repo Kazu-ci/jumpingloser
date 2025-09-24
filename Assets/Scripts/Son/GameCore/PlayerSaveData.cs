@@ -15,6 +15,8 @@ public class PlayerSaveData
     public int mainIndex = -1;
 
     public double elapsedGameTimeSec = 0.0;
+    public int skillUseCount = 0;
+    public int enemyDefeatCount = 0;
 
     public PlayerSaveData CloneShallow()
     {
@@ -24,6 +26,8 @@ public class PlayerSaveData
         c.currentHp = currentHp;
         c.mainIndex = mainIndex;
         c.elapsedGameTimeSec = elapsedGameTimeSec;
+        c.skillUseCount = skillUseCount;
+        c.enemyDefeatCount = enemyDefeatCount;
         c.inventory = new List<WeaponInstance>(inventory.Count);
         for (int i = 0; i < inventory.Count; ++i)
         {

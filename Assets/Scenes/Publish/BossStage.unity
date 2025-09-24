@@ -466,7 +466,7 @@ MonoBehaviour:
   m_IsGlobal: 1
   priority: 0
   blendDistance: 0
-  weight: 0.5
+  weight: 0.65
   sharedProfile: {fileID: 11400000, guid: 2f86a8f614dd7564f9dbc0709b6cb09f, type: 2}
 --- !u!4 &564518368
 Transform:
