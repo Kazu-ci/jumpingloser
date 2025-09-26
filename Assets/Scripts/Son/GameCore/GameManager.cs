@@ -1,6 +1,7 @@
 using UnityEngine;
 using static EventBus;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 public enum GameState
 {
@@ -14,7 +15,8 @@ public enum GameState
     Result,      // リザルト画面
     GameOver,     // ゲームオーバー画面
     Intro,       // オープニング
-    PlayDataResult // プレイデータリザルト
+    PlayDataResult, // プレイデータリザルト
+    PV
 }
 
 /// <summary>
@@ -31,7 +33,8 @@ public enum GameTrigger
     GameOver,
     GameClear,
     ToIntro,
-    ToResultData
+    ToResultData,
+    ToPV
 }
 public class GameManager : MonoBehaviour
 {
@@ -59,6 +62,11 @@ public class GameManager : MonoBehaviour
     public GameState preGameState = GameState.Startup;
 
     private GameTrigger PreSceneTrigger = GameTrigger.ToTitle;
+
+    public float titleIdleToPVSeconds = 15f;
+    private double _lastActivityTimeUnscaled = 0.0;
+    public float PVIdleToTitleSeconds = 60f;
+
     private void Awake()
     {
         // シングルトン保証
@@ -82,6 +90,7 @@ public class GameManager : MonoBehaviour
         SystemEvents.OnGameResume += SetScaleTimeTo1;
         SystemEvents.OnGameExit += HandleGameExit;
         SystemEvents.OnSceneLoadComplete += HandleSceneLoaded;
+        SystemEvents.OnChangeTimeScaleForSeconds += SetTimeScaleAndRecoverAfterSec;
     }
     private void OnDisable()
     {
@@ -89,6 +98,7 @@ public class GameManager : MonoBehaviour
         SystemEvents.OnGameResume -= SetScaleTimeTo1;
         SystemEvents.OnGameExit -= HandleGameExit;
         SystemEvents.OnSceneLoadComplete -= HandleSceneLoaded;
+        SystemEvents.OnChangeTimeScaleForSeconds -= SetTimeScaleAndRecoverAfterSec;
     }
     private void Update()
     {
@@ -113,15 +123,32 @@ public class GameManager : MonoBehaviour
                 );
 
         _stateMachine.SetupState(
-            GameState.Title,
-            onEnter: () => {
+                GameState.Title,
+            onEnter: () =>
+            {
 
                 CurrentState = getCurrentState;
-                SystemEvents.OnGameStateChange?.Invoke(GameState.Title); 
+                SystemEvents.OnGameStateChange?.Invoke(GameState.Title);
                 SetScaleTimeTo1();
+                _lastActivityTimeUnscaled = Time.unscaledTimeAsDouble;
             },
-            onExit: () => { preGameState = GameState.Title; PreSceneTrigger = GameTrigger.ToTitle; }
-        );
+            onExit: () => { preGameState = GameState.Title; PreSceneTrigger = GameTrigger.ToTitle; },
+            onUpdate: (dt) =>
+             {
+                 // 日本語：毎フレーム、入力があれば時刻を更新
+                 if (HasAnyUserActivityThisFrame())
+                 {
+                     _lastActivityTimeUnscaled = Time.unscaledTimeAsDouble;
+                 }
+
+                 // 日本語：無操作の経過時間が閾値を超えたらPVへ
+                 if (Time.unscaledTimeAsDouble - _lastActivityTimeUnscaled >= titleIdleToPVSeconds)
+                 {
+                     _stateMachine.ExecuteTrigger(GameTrigger.ToPV);
+                 }
+             }
+
+            );
         _stateMachine.SetupState(
             GameState.Preloading,
             onEnter: null,
@@ -144,17 +171,21 @@ public class GameManager : MonoBehaviour
 
         _stateMachine.SetupState(
             GameState.Playing,
-            onEnter: () => {
+            onEnter: () =>
+            {
                 CurrentState = getCurrentState;
-                SystemEvents.OnGameStateChange?.Invoke(GameState.Playing); },
+                SystemEvents.OnGameStateChange?.Invoke(GameState.Playing);
+            },
             onExit: () => { preGameState = GameState.Playing; },
             onUpdate: null
             );
         _stateMachine.SetupState(
             GameState.Result,
-            onEnter: () => {
+            onEnter: () =>
+            {
                 CurrentState = getCurrentState;
-                SystemEvents.OnGameStateChange?.Invoke(GameState.Result); },
+                SystemEvents.OnGameStateChange?.Invoke(GameState.Result);
+            },
             onExit: () => { preGameState = GameState.Result; }
         );
 
@@ -202,7 +233,28 @@ public class GameManager : MonoBehaviour
                 CurrentState = getCurrentState;
                 SystemEvents.OnGameStateChange?.Invoke(GameState.PlayDataResult);
             },
-            onExit: () => { preGameState = GameState.PlayDataResult;}
+            onExit: () => { preGameState = GameState.PlayDataResult; }
+        );
+        _stateMachine.SetupState(
+            GameState.PV,
+            onEnter: () =>
+            {
+                CurrentState = getCurrentState;
+                SystemEvents.OnGameStateChange?.Invoke(GameState.PV);
+                _lastActivityTimeUnscaled = Time.unscaledTimeAsDouble;
+            },
+            onExit: () => { preGameState = GameState.PV; },
+            onUpdate: (dt) =>
+            {
+                if (HasAnyUserActivityThisFrame())
+                {
+                    _stateMachine.ExecuteTrigger(GameTrigger.ToTitle);
+                }
+                if (Time.unscaledTimeAsDouble - _lastActivityTimeUnscaled >= PVIdleToTitleSeconds)
+                {
+                    _stateMachine.ExecuteTrigger(GameTrigger.ToTitle);
+                }
+            }
         );
 
 
@@ -212,6 +264,10 @@ public class GameManager : MonoBehaviour
 
         // Title
         _stateMachine.AddTransition(GameState.Title, GameState.Intro, GameTrigger.ToIntro);
+        _stateMachine.AddTransition(GameState.Title, GameState.PV, GameTrigger.ToPV);
+
+        // PV
+        _stateMachine.AddTransition(GameState.PV, GameState.Title, GameTrigger.ToTitle);
 
         // Intro
         _stateMachine.AddTransition(GameState.Intro, GameState.Preloading, GameTrigger.StartGame);
@@ -271,12 +327,70 @@ public class GameManager : MonoBehaviour
     }
     private void SetScaleTimeTo0() { Time.timeScale = 0; }
     private void SetScaleTimeTo1() { Time.timeScale = 1; }
+
+    private void SetTimeScaleAndRecoverAfterSec(float scale,float time)
+    {
+        Time.timeScale = scale;
+        Invoke(nameof(SetScaleTimeTo1), time);
+    }
     private void HandleGameExit(){ Application.Quit(); }
     private void HandleSceneLoaded()
     {
         _sceneLoadedFlag = true;
     }
+    private bool HasAnyUserActivityThisFrame()
+    {
+        // キーボード：何かキーが押された
+        if (Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame)
+            return true;
 
+        // マウス：クリック or 移動/スクロール
+        if (Mouse.current != null)
+        {
+            if (Mouse.current.leftButton.wasPressedThisFrame ||
+                Mouse.current.rightButton.wasPressedThisFrame ||
+                Mouse.current.middleButton.wasPressedThisFrame)
+                return true;
+
+            // 日本語：わずかな移動も検知（UI操作で止まるのを避けたいなら閾値を上げる）
+            if (Mouse.current.delta.ReadValue().sqrMagnitude > 0f)
+                return true;
+
+            if (Mouse.current.scroll.ReadValue().sqrMagnitude > 0f)
+                return true;
+        }
+
+        // ゲームパッド：ボタン or スティック/トリガーの入力
+        var gp = Gamepad.current;
+        if (gp != null)
+        {
+
+            if (gp.startButton.wasPressedThisFrame || gp.selectButton.wasPressedThisFrame)
+                return true;
+
+            if (gp.buttonSouth.wasPressedThisFrame || gp.buttonEast.wasPressedThisFrame ||
+                gp.buttonWest.wasPressedThisFrame || gp.buttonNorth.wasPressedThisFrame)
+                return true;
+
+            if (gp.leftShoulder.wasPressedThisFrame || gp.rightShoulder.wasPressedThisFrame ||
+                gp.leftTrigger.wasPressedThisFrame || gp.rightTrigger.wasPressedThisFrame)
+                return true;
+
+            // スティック/トリガー微動も操作とみなす
+            const float axisThreshold = 0.5f;
+            if (gp.leftStick.ReadValue().sqrMagnitude > axisThreshold * axisThreshold) return true;
+            if (gp.rightStick.ReadValue().sqrMagnitude > axisThreshold * axisThreshold) return true;
+            if (gp.leftTrigger.ReadValue() > axisThreshold) return true;
+            if (gp.rightTrigger.ReadValue() > axisThreshold) return true;
+            if (Mathf.Abs(gp.dpad.ReadValue().x) > axisThreshold || Mathf.Abs(gp.dpad.ReadValue().y) > axisThreshold) return true;
+        }
+
+        
+        // 旧APIのフォールバック：キーダウン
+        if (Input.anyKeyDown) return true;
+
+        return false;
+    }
     /// <summary>
     /// タイトル画面のスタートボタンから呼ばれる。
     /// </summary>

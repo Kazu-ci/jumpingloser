@@ -27,9 +27,6 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene 1.unity
     guid: 246e17e9cdd35c748bbd6d68f45dc663
   - enabled: 0
-    path: Assets/Scenes/GameoverTest.unity
-    guid: b1b000b5b8fa27b4a9e392cc115a9fd9
-  - enabled: 0
     path: Assets/Scenes/TestClearScene.unity
     guid: 0c791c8eabb0b9d428787a0ac42b625a
   - enabled: 0
@@ -47,6 +44,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Publish/PlayDataResult.unity
     guid: 116445a0561b2494196e87ff82bb4f2e
+  - enabled: 1
+    path: Assets/Scenes/Publish/PV.unity
+    guid: d811f799a2428b044a0095d2bae6adda
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
