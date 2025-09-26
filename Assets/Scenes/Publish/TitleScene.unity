@@ -2129,6 +2129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CurrentState: 0
   preGameState: 0
+  titleIdleToPVSeconds: 15
 --- !u!4 &1293206751
 Transform:
   m_ObjectHideFlags: 0
@@ -2495,6 +2496,8 @@ MonoBehaviour:
     name: Intro
   - state: 7
     name: ResultScene
+  - state: 11
+    name: PV
 --- !u!224 &1758271272
 RectTransform:
   m_ObjectHideFlags: 0

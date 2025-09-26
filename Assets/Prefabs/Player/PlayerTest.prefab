@@ -100,7 +100,7 @@ MonoBehaviour:
   rotationLerpFactor: 0.15
   snapDistance: 6
   maxPositionSpeed: 0
-  usePrediction: 0
+  usePrediction: 1
   predictionTime: 0.06
   velocitySmoothing: 0.2
 --- !u!1 &512652815897833126

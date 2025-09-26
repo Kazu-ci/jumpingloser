@@ -15,6 +15,8 @@ public class EventBus
         public static Action OnGameResume;
         public static Action OnGameExit;
         public static Action OnSceneLoadComplete;
+
+        public static Action<float, float> OnChangeTimeScaleForSeconds;
     }
     public static class UIEvents
     {

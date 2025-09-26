@@ -418,5 +418,17 @@ public class BossEnemy : Enemy
             Owner.enemyAnimation.ResetTrigger("Dead");
         }
     }
-    
+
+    public override int TakeDamage(DamageData dmg) 
+    {
+        int damageTaken = base.TakeDamage(dmg);
+
+        if (nowHp <= 0)
+        {
+            EventBus.SystemEvents.OnChangeTimeScaleForSeconds?.Invoke(0.3f, 3f);
+        }
+       
+        return damageTaken;
+    }
+
 }

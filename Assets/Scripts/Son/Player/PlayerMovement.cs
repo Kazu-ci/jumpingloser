@@ -323,6 +323,7 @@ public class PlayerMovement : MonoBehaviour
 
         // --- PlayableGraph 初期化 ---
         playableGraph = PlayableGraph.Create("PlayerGraph");
+        playableGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
 
         // 日本語：ルートモーションは制御コード側で扱うため無効化
         playerAnimator.applyRootMotion = false;
