@@ -31,26 +31,11 @@ public class MouseManager : MonoBehaviour
 
     private void OnEnable()
     {
-        EventBus.SystemEvents.OnGameStateChange += state =>
-        {
-            gameState = state;
-
-            if(gameState == GameState.Playing)
-            {
-                HideMouse();
-            }
-        };
+        EventBus.SystemEvents.OnGameStateChange += CheckState;
     }
     private void OnDisable()
     {
-        EventBus.SystemEvents.OnGameStateChange -= state =>
-        {
-            gameState = state;
-            if (gameState == GameState.Playing)
-            {
-                HideMouse();
-            }
-        };
+        EventBus.SystemEvents.OnGameStateChange -= CheckState;
     }
 
     void Update()
@@ -76,6 +61,14 @@ public class MouseManager : MonoBehaviour
         }
     }
 
+    private void CheckState(GameState state)
+    {
+        gameState = state;
+        if (gameState == GameState.Playing)
+        {
+            HideMouse();
+        }
+    }
     private void ShowMouse()
     {
         if (!isVisible)

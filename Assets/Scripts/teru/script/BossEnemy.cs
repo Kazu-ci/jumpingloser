@@ -427,7 +427,6 @@ public class BossEnemy : Enemy
         {
             EventBus.SystemEvents.OnChangeTimeScaleForSeconds?.Invoke(0.3f, 3f);
         }
-       
         return damageTaken;
     }
 
