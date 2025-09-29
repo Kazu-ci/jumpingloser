@@ -209,6 +209,7 @@ public class PlayerAttackState : IState
         // ヒット判定（時刻指定）
         if (!hasCheckedHit && currentAction.hitCheckTime >= 0f && elapsedTime >= currentAction.hitCheckTime)
         {
+            //TryRotatePlayerToTarget();
             TrySpawnAttackPrefabNow();
             DoAttackHitCheck();
             hasCheckedHit = true;
@@ -463,24 +464,6 @@ public class PlayerAttackState : IState
         Object.Destroy(go, 3f);
     }
 
-    public void AnimEvent_DoHitCheck()
-    {
-        if (!hasCheckedHit)
-        {
-            DoAttackHitCheck();
-            hasCheckedHit = true;
-        }
-    }
-
-    public void AnimEvent_SpawnAttackVFX()
-    {
-        if (!hasSpawnedAttackVFX)
-        {
-            SpawnAttackVFX();
-            hasSpawnedAttackVFX = true;
-        }
-    }
-
     // 攻撃Prefabを生成（ヒットボックス中心）
     private void TrySpawnAttackPrefabNow()
     {
@@ -521,32 +504,10 @@ public class PlayerAttackState : IState
         float speed = Mathf.Max(0.01f, currentAction.lungeSpeed);
         AnimationCurve curve = defaultLungeCurve; // 段ごとに持たせるなら currentAction.lungeCurve
 
-        // --- 目標方向の決定（回頭だけでも行う） ---
-        Vector3 dir;
-        bool hasDirection = false;
+        // --- 目標方向の決定 ---
+        Vector3 dir = TryRotatePlayerToTarget();
+        bool hasDirection = (dir.sqrMagnitude > 1e-6f);
 
-        // 1) 強い移動入力
-        if (_player.TryGetMoveDirectionWorld(LUNGE_INPUT_MIN * LUNGE_INPUT_MIN, out dir))
-        {
-            hasDirection = true;
-        }
-        // 2) ロックオン対象
-        else if (_player.TryGetLockOnHorizontalDirection(out dir))
-        {
-            hasDirection = true;
-        }
-        // 3) 自動索敵：半径内の最近敵
-        else if (TryFindNearestEnemyDirXZ(AUTO_LUNGE_FIND_RADIUS, out dir))
-        {
-            hasDirection = true;
-        }
-
-        // --- 回頭（方向が得られた場合のみ） ---
-        if (hasDirection)
-        {
-            // 即時スナップ回頭：演出上、突進開始フレームで向きを合わせる
-            _player.RotateYawOverTime(dir, 0f);
-        }
 
         // --- 突進の実行（距離>0 のときだけ） ---
         if (distance > 0f)
@@ -576,6 +537,36 @@ public class PlayerAttackState : IState
                 );
             }
         }
+    }
+
+    private Vector3 TryRotatePlayerToTarget()
+    {
+        Vector3 dir = Vector3.zero;
+        bool hasDirection = false;
+
+        // 1) 強い移動入力
+        if (_player.TryGetMoveDirectionWorld(LUNGE_INPUT_MIN * LUNGE_INPUT_MIN, out dir))
+        {
+            hasDirection = true;
+        }
+        // 2) ロックオン対象
+        else if (_player.TryGetLockOnHorizontalDirection(out dir))
+        {
+            hasDirection = true;
+        }
+        // 3) 自動索敵：半径内の最近敵
+        else if (TryFindNearestEnemyDirXZ(AUTO_LUNGE_FIND_RADIUS, out dir))
+        {
+            hasDirection = true;
+        }
+
+        // --- 回頭（方向が得られた場合のみ） ---
+        if (hasDirection)
+        {
+            // 即時スナップ回頭：演出上、突進開始フレームで向きを合わせる
+            _player.RotateYawOverTime(dir, 0f);
+        }
+        return dir;
     }
 
     private bool TryFindNearestEnemyDirXZ(float radius, out Vector3 dirXZ)

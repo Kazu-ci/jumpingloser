@@ -1326,8 +1326,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackHeld: 0
   attackPressedThisFrame: 0
-  shortPressMax: 0.4
-  skillHoldTime: 1
+  shortPressMax: 0.3
+  skillHoldTime: 0.8
   maxHealth: 50
   moveSpeed: 8
   gravity: -9.81
