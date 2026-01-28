@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 97418b722c99ef44db28215697b1727c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 232525
+  packageName: AA Map and Minimap System
+  packageVersion: 1.4.0
+  assetPath: Assets/AA Map and Minimap System/SampleScene/Sample Scene Collection/SampleSceneMaterial.mat
+  uploadId: 673832
